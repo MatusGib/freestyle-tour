@@ -1,0 +1,5 @@
+# Original game snapshot: downloaded locally, never committed
+vendor/
+# Local fake-server data (rider profile, heats, leaderboard)
+data/
+node_modules/
