@@ -69,9 +69,11 @@ Found in the 2026-10-24 snapshot:
   every frame once it has been shown, solo heats included, and smoothly blends
   between the poses it receives. A pose is built from a state by a function in the
   game's pose module.
-- **Pausing and camera.** While `game.paused` is true, the game stops stepping
-  physics but keeps drawing `game.state`, and the camera follows it. The camera's
-  offset comes from `game.cameraView` (distance, azimuth, elevation).
+- **Drawing outside a session.** When no session is running, the game doesn't
+  step physics but still draws `game.state` every frame, with the rider at the
+  state's position once its clock is past 0. `game.paused` would also freeze the
+  water animation, so the viewer doesn't use it. The camera's offset comes from
+  `game.cameraView` (distance 0.45–2.2, azimuth, elevation −0.18–0.8).
 - **Video.** The original's trick-video feature already records a canvas with
   `captureStream` and `MediaRecorder`.
 
@@ -80,9 +82,9 @@ Found in the 2026-10-24 snapshot:
 **Ghosts:** a second copy of the game state replays the stored heat, one step for
 every step you sail, and its pose goes to the opponent display.
 
-**Replay viewer:** the viewer pauses the game, puts a replayed state in
-`game.state`, and steps it at the chosen speed. The game draws it with its own
-graphics and camera.
+**Replay viewer:** the viewer opens from the menu, when the game isn't stepping
+physics, puts a replayed state in `game.state` and steps it at the chosen speed.
+The game draws it with its own graphics and camera.
 
 We considered playing replays as the opponent rider while your own rider idles
 (simpler, but the camera follows the wrong rider), and adapting the original's
@@ -141,13 +143,14 @@ the tests.
 
 ### Replay viewer mod (`mods/replay-viewer/`)
 
-- **Entry:** a "Replays" button in the mod overlay, shown in the menu. It opens a
-  list of stored heats, newest first: date, rider, score, wind, and whether a
-  recording exists.
-- **Watching:** picking a heat fetches it, creates a runner, hides the game's menu,
-  pauses the game (`game.paused = true`) and puts the runner's state in
-  `game.state` every frame. Closing the viewer puts the previous state back,
-  restores `paused` and shows the menu again.
+- **Entry:** a "Replays" button in the mod overlay, shown only while no session is
+  running. It opens a list of stored heats, newest first: date, rider, score, wind,
+  and whether a recording exists.
+- **Watching:** picking a heat fetches it and replays it to the end once, to check
+  it matches the saved score (a full heat takes about 50 ms). Then it creates a
+  runner for playback, hides the game's menu (`.menu-layer`) and puts the runner's
+  state in `game.state` every frame. Closing the viewer puts the previous state
+  back, resets the camera and shows the menu again.
 - **Controls:**
   - play and pause; a timeline from 0 to the heat's length that seeks when dragged
   - speeds 0.25×, 0.5×, 1×, 2× and 4× (steps per frame = speed × frame time × 120)
@@ -157,8 +160,9 @@ the tests.
     to 2 seconds before it started
   - the running heat total and, as each move lands, its label and score
 - **Seeking** clears the game's wake trail so it doesn't streak across the jump.
-- **Save clip:** mark a start and an end on the timeline (by default, the selected
-  move from 2 seconds before to 2 seconds after), up to 60 seconds. The viewer
+- **Save clip:** mark a start and an end on the timeline, up to 60 seconds. By
+  default it runs from 2 seconds before the selected move starts to 8 seconds
+  after, because attempts store only their start time. The viewer
   plays that stretch at the chosen speed while recording the game canvas with
   `captureStream(30)` and `MediaRecorder`, using the first format the browser
   supports (MP4, then WebM). It then downloads the file as
@@ -175,6 +179,15 @@ the tests.
   |---|---|
   | `GET /api/local/heats?week=<ms>&version=<n>` | Finished heats (all weeks if `week` is missing; all versions if `version` is missing), newest first: `heatId`, `nickname`, `appearance`, `score`, `weekStart`, `finishedAt`, `conditions`, `scoringVersion`, `hasReplay` |
   | `GET /api/local/heats/<heatId>` | One heat: the fields above plus `attempts`, `tricks` and `replay`; `404` if unknown |
+
+### Demo heat (`tools/demo-heat.mjs`)
+
+`node tools/demo-heat.mjs` records a short scripted heat (20 seconds, landing
+moves) with the snapshot's engine and controls, for the current week's wind. It
+stores the heat under a "Demo rider" in `data/db.json`. Replays and ghosts can
+then be shown without playing a heat first, and the browser check can use a heat
+with real moves. The recording script lives in `sim/record.mjs` and is shared
+with the tests.
 
 ## Errors
 
@@ -216,9 +229,8 @@ the tests.
 ## Risks
 
 - **Swapping `game.state` may confuse parts of the game that keep their own
-  history,** such as the wake trail and the HUD. The viewer clears the wake on
-  seek and hides the game's menu and HUD while open; the browser check covers
-  the rest.
+  history,** such as the wake trail. The viewer clears the wake on seek and hides
+  the game's menu while open; the browser check covers the rest.
 - **The opponent display blends poses with a small delay** (it buffers at least
   100 ms), so the ghost appears slightly behind its true position. This is
   acceptable for a visual comparison.
