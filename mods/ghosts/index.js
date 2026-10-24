@@ -71,7 +71,7 @@ export default {
       const appearance = Object.keys(heat.appearance).length ? heat.appearance : undefined;
       game.showOpponent(ghostLabel(heat), () => Date.now(), appearance);
       ghost = runner;
-      status.textContent = ` · ${ghostLabel(heat)}`;
+      status.textContent = ` · ${heat.nickname} · ${heat.score.toFixed(2)}`;
       log(`racing ${ghostLabel(heat)}`);
     }
 
