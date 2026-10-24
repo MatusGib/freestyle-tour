@@ -14,7 +14,8 @@
     "name": "Adam Sims",
     "pseudonym": "Adan Syms",
     "sailNumbers": [
-      "K-72"
+      "K-72",
+      "K-669"
     ]
   },
   {
@@ -234,6 +235,15 @@
     ]
   },
   {
+    "id": "m:bastien-rama",
+    "division": "men",
+    "name": "Bastien Rama",
+    "pseudonym": "Bastiem Rema",
+    "sailNumbers": [
+      "F-109"
+    ]
+  },
+  {
     "id": "m:berend-pronk",
     "division": "men",
     "name": "Berend Pronk",
@@ -369,6 +379,15 @@
     ]
   },
   {
+    "id": "m:daniel-hasulyo",
+    "division": "men",
+    "name": "Daniel Hasulyo",
+    "pseudonym": "Danier Hesulyo",
+    "sailNumbers": [
+      "HUN-91"
+    ]
+  },
+  {
     "id": "m:daniel-schenk",
     "division": "men",
     "name": "Daniel Schenk",
@@ -428,6 +447,7 @@
     "name": "Dennis Müller",
     "pseudonym": "Denniz Möller",
     "sailNumbers": [
+      "GER-289",
       "GER-89"
     ]
   },
@@ -563,6 +583,7 @@
     "name": "Eric Sanllehy",
     "pseudonym": "Erik Senllehy",
     "sailNumbers": [
+      "CAT-1111",
       "CAT-111"
     ]
   },
@@ -923,7 +944,8 @@
     "name": "Jose \"Gollito\" Estredo",
     "pseudonym": "Josa Astredo",
     "sailNumbers": [
-      "V-10"
+      "V-10",
+      "V-01"
     ]
   },
   {
@@ -941,7 +963,8 @@
     "name": "Julien Mas",
     "pseudonym": "Juliem Mes",
     "sailNumbers": [
-      "FRA-07"
+      "FRA-07",
+      "F-7"
     ]
   },
   {
@@ -996,6 +1019,15 @@
     "pseudonym": "Kauly Saadi",
     "sailNumbers": [
       "BRA-253"
+    ]
+  },
+  {
+    "id": "m:kenichi-suzuki",
+    "division": "men",
+    "name": "Kenichi Suzuki",
+    "pseudonym": "Kenichy Sozuki",
+    "sailNumbers": [
+      "J-82"
     ]
   },
   {
@@ -1125,6 +1157,15 @@
     ]
   },
   {
+    "id": "m:luigi-madeddu",
+    "division": "men",
+    "name": "Luigi Madeddu",
+    "pseudonym": "Luigy Mededdu",
+    "sailNumbers": [
+      "SAR-3"
+    ]
+  },
+  {
     "id": "m:luka-stomp",
     "division": "men",
     "name": "Luka Stomp",
@@ -1167,6 +1208,15 @@
     "pseudonym": "Manoliz Chrisopoulos",
     "sailNumbers": [
       "GRE-374"
+    ]
+  },
+  {
+    "id": "m:manuel-grafenauer",
+    "division": "men",
+    "name": "Manuel Grafenauer",
+    "pseudonym": "Manuer Grefenauer",
+    "sailNumbers": [
+      "AUT-259"
     ]
   },
   {
@@ -1221,6 +1271,15 @@
     "pseudonym": "Marina Gil Gharardi",
     "sailNumbers": [
       "E-959"
+    ]
+  },
+  {
+    "id": "m:markus-schranz",
+    "division": "men",
+    "name": "Markus Schranz",
+    "pseudonym": "Markuz Schrenz",
+    "sailNumbers": [
+      "AUT-100"
     ]
   },
   {
@@ -1301,7 +1360,8 @@
     "name": "Max Matissek",
     "pseudonym": "Mas Metissek",
     "sailNumbers": [
-      "OE-9"
+      "OE-9",
+      "AUT-97"
     ]
   },
   {
@@ -1310,7 +1370,8 @@
     "name": "Max Rowe",
     "pseudonym": "Mas Ruwe",
     "sailNumbers": [
-      "K-20"
+      "K-20",
+      "K-448"
     ]
   },
   {
@@ -1320,6 +1381,15 @@
     "pseudonym": "Mas Schenda",
     "sailNumbers": [
       "AUT-235"
+    ]
+  },
+  {
+    "id": "m:maxime-gaubert",
+    "division": "men",
+    "name": "Maxime Gaubert",
+    "pseudonym": "Maxima Geubert",
+    "sailNumbers": [
+      "F-499"
     ]
   },
   {
@@ -1575,6 +1645,15 @@
     ]
   },
   {
+    "id": "m:philip-koster",
+    "division": "men",
+    "name": "Philip Köster",
+    "pseudonym": "Philib Küster",
+    "sailNumbers": [
+      "G-44"
+    ]
+  },
+  {
     "id": "m:philip-soltysiak",
     "division": "men",
     "name": "Philip Soltysiak",
@@ -1670,7 +1749,8 @@
     "name": "Remko de Zeeuw",
     "pseudonym": "Remka de Zaeuw",
     "sailNumbers": [
-      "NED-444"
+      "NED-444",
+      "H-444"
     ]
   },
   {
@@ -1809,6 +1889,24 @@
     ]
   },
   {
+    "id": "m:stam-promponas",
+    "division": "men",
+    "name": "Stam Promponas",
+    "pseudonym": "Stan Prumponas",
+    "sailNumbers": [
+      "GRE-393"
+    ]
+  },
+  {
+    "id": "m:stefan-gobisch",
+    "division": "men",
+    "name": "Stefan Gobisch",
+    "pseudonym": "Stefam Gubisch",
+    "sailNumbers": [
+      "G-3"
+    ]
+  },
+  {
     "id": "m:stefan-kruse",
     "division": "men",
     "name": "Stefan Kruse",
@@ -1905,6 +2003,15 @@
     "pseudonym": "Thomaz Treversa",
     "sailNumbers": [
       "F-3"
+    ]
+  },
+  {
+    "id": "m:thomas-wessel-svensson",
+    "division": "men",
+    "name": "Thomas Wessel Svensson",
+    "pseudonym": "Thomaz Wessel Svansson",
+    "sailNumbers": [
+      "N-14"
     ]
   },
   {

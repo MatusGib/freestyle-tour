@@ -171,6 +171,350 @@
       }
     },
     {
+      "id": 175,
+      "slug": "2011-podersdorf-austria",
+      "name": "2011 Podersdorf Austria",
+      "start": "2011-04-29",
+      "end": "2011-05-04",
+      "location": "Neusiedler See, Podersdorf, Austria",
+      "divisions": {
+        "men": {
+          "entries": [
+            {
+              "rider": "m:steven-van-broeckhoven",
+              "name": "Steven Van Broeckhoven",
+              "sailNumber": "B-72",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "m:kiri-thode",
+              "name": "Kiri Thode",
+              "sailNumber": "NB-61",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "m:davy-scheffers",
+              "name": "Davy Scheffers",
+              "sailNumber": "H-311",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "m:jose-estredo",
+              "name": "Jose \"Gollito\" Estredo",
+              "sailNumber": "V-01",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "m:elton-frans",
+              "name": "Elton (Taty) Frans",
+              "sailNumber": "NB-9",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "m:philip-soltysiak",
+              "name": "Philip Soltysiak",
+              "sailNumber": "CAN-9",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "m:antony-ruenes",
+              "name": "Anthony Ruenes",
+              "sailNumber": "F-85",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "m:everon-frans",
+              "name": "Everon (Tonky) Frans",
+              "sailNumber": "NB-7",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "m:dieter-van-der-eyken",
+              "name": "Dieter Van der Eyken",
+              "sailNumber": "B-35",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:max-rowe",
+              "name": "Max Rowe",
+              "sailNumber": "K-448",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:nicolas-akgazciyan",
+              "name": "Nicolas Akgazciyan",
+              "sailNumber": "F-400",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:yegor-popretinskiy",
+              "name": "Yegor Popretinskiy",
+              "sailNumber": "RUS-11",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:edvan-souza",
+              "name": "Edvan Souza",
+              "sailNumber": "BRA-250",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:ian-mouro-lemos",
+              "name": "Ian Mouro Lemos",
+              "sailNumber": "BRA-85",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:tilo-eber",
+              "name": "Tilo Eber",
+              "sailNumber": "G-414",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:yarden-meir",
+              "name": "Yarden Meir",
+              "sailNumber": "ISR-91",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:andraz-zan",
+              "name": "Andraž Žan",
+              "sailNumber": "SLO-49",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:andy-bubble-chambers",
+              "name": "Andy Bubble Chambers",
+              "sailNumber": "K-540",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:bjorn-saragoza",
+              "name": "Björn Saragoza",
+              "sailNumber": "NB-11",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:bryan-metcalf-perez",
+              "name": "Bryan Metcalf-Perez",
+              "sailNumber": "US-505",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:deivis-paternina-teran",
+              "name": "Deivis Parternina Teran",
+              "sailNumber": "V-04",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:julien-mas",
+              "name": "Julien Mas",
+              "sailNumber": "F-7",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:mattia-fabrizi",
+              "name": "Mattia Fabrizi",
+              "sailNumber": "ITA-991",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:michael-rossmeier",
+              "name": "Michael Roßmeier",
+              "sailNumber": "AUT-256",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:adam-sims",
+              "name": "Adam Sims",
+              "sailNumber": "K-72",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:adrian-beholz",
+              "name": "Adrian Beholz",
+              "sailNumber": "G-888",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:arthur-pollet",
+              "name": "Arthur Pollet",
+              "sailNumber": "F-00",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:christofer-kalk",
+              "name": "Christofer Kalk",
+              "sailNumber": "EST-141",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:danilo-menezes-da-silva",
+              "name": "Danilo Menezes da Silva",
+              "sailNumber": "BRA-83",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:manuel-grafenauer",
+              "name": "Manuel Grafenauer",
+              "sailNumber": "AUT-259",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:remko-de-zeeuw",
+              "name": "Remko de Zeeuw",
+              "sailNumber": "H-444",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:rick-jendrusch",
+              "name": "Rick Jendrusch (Y)",
+              "sailNumber": "H-120",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:alexander-seyss",
+              "name": "Alexander Seyss",
+              "sailNumber": "AUT-61",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:bastien-rama",
+              "name": "Bastien Rama",
+              "sailNumber": "F-109",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:jamie-drummond",
+              "name": "Jamie Drummond",
+              "sailNumber": "K-787",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:lorenz-forstenlechner",
+              "name": "Lorenz Forstenlechner",
+              "sailNumber": "AUT-7",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:luigi-madeddu",
+              "name": "Luigi Madeddu",
+              "sailNumber": "SAR-3",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:markus-schranz",
+              "name": "Markus Schranz",
+              "sailNumber": "AUT-100",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:mattia-pedrani",
+              "name": "Mattia Pedrani",
+              "sailNumber": "I-00",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:mauricio-alvarez",
+              "name": "Mauricio Alvarez",
+              "sailNumber": "AUT-86",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:max-matissek",
+              "name": "Max Matissek",
+              "sailNumber": "AUT-97",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:paul-boef",
+              "name": "Paul Boef",
+              "sailNumber": "NED-720",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:paul-zeper",
+              "name": "Paul Zeper",
+              "sailNumber": "H-115",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:raimondo-gasperini",
+              "name": "Raimondo Gasperini",
+              "sailNumber": "I-157",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:thijs-westbroek",
+              "name": "Thijs Westbroek",
+              "sailNumber": "H-666",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:tom-foda",
+              "name": "Tom Föda",
+              "sailNumber": "AUT-29",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:vladimir-yakovlev",
+              "name": "Vladimir Yakovlev",
+              "sailNumber": "RUS-99",
+              "place": 33,
+              "points": 0
+            }
+          ],
+          "ladders": []
+        }
+      }
+    },
+    {
       "id": 178,
       "slug": "2011-bonaire",
       "name": "2011 Bonaire",
