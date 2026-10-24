@@ -33,6 +33,12 @@ test("parseLadder reads a 2014 ladder, which has no discipline and ranks sailors
   assert.deepEqual(ladder.rounds[0][0].sailors, [{ surname: "Böckler", sailNumber: "G-315", place: 2 }, { surname: "Mas", sailNumber: "F-07", place: 1 }]);
 });
 
+test("parseLadder gives sex null when the XML has none, as in the slalom ladder behind a 2015 freestyle link", () => {
+  const ladder = parseLadder(page("ladder-2015-fuerteventura-wrong.html"));
+  assert.deepEqual([ladder.title, ladder.sex, ladder.discipline, ladder.rounds[0][0].sailors.length], ["2015 Sylt Elimination 1", null, null, 7]);
+  assert.throws(() => parseLadder("ladderXml = `<iScoreData><sex>male</sex></iScoreData>`;"), /the ladder XML has no name/);
+});
+
 test("parseLadder keeps only sailed heats and spots double elimination", () => {
   const ladder = parseLadder(page("ladder-2025-fuerteventura-women-double.html"));
   assert.deepEqual([ladder.sex, ladder.double], ["female", true]);

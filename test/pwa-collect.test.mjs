@@ -98,6 +98,13 @@ test("an HTTP error on a results page skips the event with a note", async () => 
   assert.deepEqual(notes, [`${BASE}/events/results/results/375?type=24 answered 500, skipped`]);
 });
 
+test("a freestyle ladder link that serves another kind of ladder is skipped with a note", async () => {
+  const site = { ...SITE, [ladder(1014, "27965ba0f08c1d11168455ca255b6a41")]: page("ladder-2015-fuerteventura-wrong.html") };
+  const { events, notes } = await collect(fakeCrawler(site), { seasons: [2025] });
+  assert.deepEqual(events[0].divisions.men.ladders, []);
+  assert.ok(notes.includes('2025 Fuerteventura Grand Slam ******: the link "Mens 2025 Fuerteventura Grand Slam Mens Freestyle elimination" gave the ladder "2015 Sylt Elimination 1", skipped'), notes.join("\n"));
+});
+
 test("an index without links gives the ladder it holds itself", async () => {
   const site = { ...SITE, [`${BASE}/events/elimination-ladder/elimination-ladders/375?type=25`]: page("ladder-2025-fuerteventura-men.html") };
   const { events } = await collect(fakeCrawler(site), { seasons: [2025] });
