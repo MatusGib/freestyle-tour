@@ -1,0 +1,160 @@
+{
+  "season": 2006,
+  "events": [
+    {
+      "id": 111,
+      "slug": "pozo-gran-canaria-2",
+      "name": "Pozo, Gran Canaria",
+      "start": "2006-07-07",
+      "end": "2006-07-17",
+      "location": "Pozo Izquierdo, Gran Canaria",
+      "divisions": {
+        "women": {
+          "entries": [
+            {
+              "rider": "w:daida-ruano-moreno",
+              "name": "Daida Ruano Moreno",
+              "sailNumber": "E-64",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "w:karin-jaggi",
+              "name": "Karin Jaggi",
+              "sailNumber": "SUI-14",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "w:laure-treboux",
+              "name": "Laure Treboux",
+              "sailNumber": "SUI-4",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "w:iballa-ruano-moreno",
+              "name": "Iballa Ruano Moreno",
+              "sailNumber": "E-63",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "w:sarah-quita-offringa",
+              "name": "Sarah-Quita Offringa",
+              "sailNumber": "ARU-91",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "w:silvia-alba-orozco",
+              "name": "Silvia Alba Orozco",
+              "sailNumber": "E-67",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "w:yolanda-freites-de-brendt",
+              "name": "Yolanda Freites de Brendt",
+              "sailNumber": "V-26",
+              "place": 7,
+              "points": 1902
+            },
+            {
+              "rider": "w:junko-nagoshi",
+              "name": "Junko Nagoshi",
+              "sailNumber": "J-11",
+              "place": 8,
+              "points": 1869
+            },
+            {
+              "rider": "w:evi-tsape",
+              "name": "Evi Tsape",
+              "sailNumber": "GR-2",
+              "place": 9,
+              "points": 1820
+            },
+            {
+              "rider": "w:nina-tjernberg",
+              "name": "Nina Tjernberg",
+              "sailNumber": "S-165",
+              "place": 9,
+              "points": 1820
+            },
+            {
+              "rider": "w:nayra-alonso",
+              "name": "Nayra Alonso",
+              "sailNumber": "E-4",
+              "place": 11,
+              "points": 1770
+            },
+            {
+              "rider": "w:astrid-muldoon",
+              "name": "Astrid Muldoon",
+              "sailNumber": "F-002",
+              "place": 12,
+              "points": 1704
+            },
+            {
+              "rider": "w:marie-tjernberg",
+              "name": "Marie Tjernberg",
+              "sailNumber": "S-6",
+              "place": 12,
+              "points": 1704
+            },
+            {
+              "rider": "w:ulrike-holzl",
+              "name": "Ulrike Hölzl",
+              "sailNumber": "AT-123",
+              "place": 12,
+              "points": 1704
+            },
+            {
+              "rider": "w:anna-jonsson",
+              "name": "Anna Jönsson",
+              "sailNumber": "S-78",
+              "place": 15,
+              "points": 1622
+            },
+            {
+              "rider": "w:britta-kuhn",
+              "name": "Britta Kühn",
+              "sailNumber": "G-506",
+              "place": 15,
+              "points": 1622
+            },
+            {
+              "rider": "w:emma-johansson",
+              "name": "Emma Johansson",
+              "sailNumber": "S-37",
+              "place": 17,
+              "points": 1523
+            },
+            {
+              "rider": "w:olga-malysheva",
+              "name": "Olga Malysheva",
+              "sailNumber": "RUS-1",
+              "place": 17,
+              "points": 1523
+            },
+            {
+              "rider": "w:steffi-wahl",
+              "name": "Steffi Wahl",
+              "sailNumber": "G-303",
+              "place": 17,
+              "points": 1523
+            },
+            {
+              "rider": "w:waka-nishida",
+              "name": "Waka Nishida",
+              "sailNumber": "J-700",
+              "place": 17,
+              "points": 1523
+            }
+          ],
+          "ladders": []
+        }
+      }
+    }
+  ]
+}

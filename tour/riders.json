@@ -1,0 +1,2775 @@
+[
+  {
+    "id": "m:adam-gavriel",
+    "division": "men",
+    "name": "Adam Gavriel",
+    "pseudonym": "Adan Gevriel",
+    "sailNumbers": [
+      "ISR-111"
+    ]
+  },
+  {
+    "id": "m:adam-sims",
+    "division": "men",
+    "name": "Adam Sims",
+    "pseudonym": "Adan Syms",
+    "sailNumbers": [
+      "K-72"
+    ]
+  },
+  {
+    "id": "m:adam-warchol",
+    "division": "men",
+    "name": "Adam Warchol",
+    "pseudonym": "Adan Werchol",
+    "sailNumbers": [
+      "POL-111"
+    ]
+  },
+  {
+    "id": "m:adrian-beholz",
+    "division": "men",
+    "name": "Adrian Beholz",
+    "pseudonym": "Adriam Baholz",
+    "sailNumbers": [
+      "G-888"
+    ]
+  },
+  {
+    "id": "m:adrien-bosson",
+    "division": "men",
+    "name": "Adrien Bosson",
+    "pseudonym": "Adriem Busson",
+    "sailNumbers": [
+      "F-296"
+    ]
+  },
+  {
+    "id": "m:aleix-sanllehy",
+    "division": "men",
+    "name": "Aleix Sanllehy",
+    "pseudonym": "Aleis Senllehy",
+    "sailNumbers": [
+      "CAT-555"
+    ]
+  },
+  {
+    "id": "m:alexander-seyss",
+    "division": "men",
+    "name": "Alexander Seyss",
+    "pseudonym": "Alexandel Sayss",
+    "sailNumbers": [
+      "AUT-61"
+    ]
+  },
+  {
+    "id": "m:amado-vrieswijk",
+    "division": "men",
+    "name": "Amado Vrieswijk",
+    "pseudonym": "Amada Vryeswijk",
+    "sailNumbers": [
+      "NB-20"
+    ]
+  },
+  {
+    "id": "m:andraz-zan",
+    "division": "men",
+    "name": "Andraž Žan",
+    "pseudonym": "Androž Žen",
+    "sailNumbers": [
+      "SLO-49"
+    ]
+  },
+  {
+    "id": "m:andre-paskowski",
+    "division": "men",
+    "name": "Andre Paskowski",
+    "pseudonym": "Andra Peskowski",
+    "sailNumbers": [
+      "G-2"
+    ]
+  },
+  {
+    "id": "m:andrea-rosati",
+    "division": "men",
+    "name": "Andrea Rosati",
+    "pseudonym": "Andreo Rusati",
+    "sailNumbers": [
+      "ITA-0"
+    ]
+  },
+  {
+    "id": "m:andreas-lachauer",
+    "division": "men",
+    "name": "Andreas Lachauer",
+    "pseudonym": "Andreaz Lechauer",
+    "sailNumbers": [
+      "G-171"
+    ]
+  },
+  {
+    "id": "m:andreas-olandersson",
+    "division": "men",
+    "name": "Andreas Olandersson",
+    "pseudonym": "Andreaz Ulandersson",
+    "sailNumbers": [
+      "S-66"
+    ]
+  },
+  {
+    "id": "m:andy-bubble-chambers",
+    "division": "men",
+    "name": "Andy 'Bubble' Chambers",
+    "pseudonym": "Andi 'Bubble' Chembers",
+    "sailNumbers": [
+      "K-540"
+    ]
+  },
+  {
+    "id": "m:antoine-albert",
+    "division": "men",
+    "name": "Antoine Albert",
+    "pseudonym": "Antoina Elbert",
+    "sailNumbers": [
+      "NC-21"
+    ]
+  },
+  {
+    "id": "m:antoine-martin",
+    "division": "men",
+    "name": "Antoine Martin",
+    "pseudonym": "Antoina Mertin",
+    "sailNumbers": [
+      "F-193"
+    ]
+  },
+  {
+    "id": "m:antonio-silvestri",
+    "division": "men",
+    "name": "Antonio Silvestri",
+    "pseudonym": "Antonia Sylvestri",
+    "sailNumbers": [
+      "ITA-168"
+    ]
+  },
+  {
+    "id": "m:antony-ruenes",
+    "division": "men",
+    "name": "Antony Ruenes",
+    "pseudonym": "Antoni Roenes",
+    "sailNumbers": [
+      "F-85"
+    ]
+  },
+  {
+    "id": "m:antxon-otaegui",
+    "division": "men",
+    "name": "Antxon Otaegui",
+    "pseudonym": "Antxom Utaegui",
+    "sailNumbers": [
+      "E-169"
+    ]
+  },
+  {
+    "id": "m:aron-etmon",
+    "division": "men",
+    "name": "Aron Etmon",
+    "pseudonym": "Arom Atmon",
+    "sailNumbers": [
+      "CUR-2"
+    ]
+  },
+  {
+    "id": "m:arthur-pollet",
+    "division": "men",
+    "name": "Arthur Pollet",
+    "pseudonym": "Arthul Pullet",
+    "sailNumbers": [
+      "F-00"
+    ]
+  },
+  {
+    "id": "m:balz-muller",
+    "division": "men",
+    "name": "Balz Müller",
+    "pseudonym": "Balt Möller",
+    "sailNumbers": [
+      "SUI-21"
+    ]
+  },
+  {
+    "id": "m:baptiste-beer",
+    "division": "men",
+    "name": "Baptiste Beer",
+    "pseudonym": "Baptista Baer",
+    "sailNumbers": [
+      "SUI-166"
+    ]
+  },
+  {
+    "id": "m:bart-kole",
+    "division": "men",
+    "name": "Bart Kole",
+    "pseudonym": "Bard Kule",
+    "sailNumbers": [
+      "ARU-52"
+    ]
+  },
+  {
+    "id": "m:basile-jacquin",
+    "division": "men",
+    "name": "Basile Jacquin",
+    "pseudonym": "Basila Jecquin",
+    "sailNumbers": [
+      "NC-498"
+    ]
+  },
+  {
+    "id": "m:bastiaan-de-koningh",
+    "division": "men",
+    "name": "Bastiaan De Koningh",
+    "pseudonym": "Bastiaam De Kuningh",
+    "sailNumbers": [
+      "NB-111"
+    ]
+  },
+  {
+    "id": "m:berend-pronk",
+    "division": "men",
+    "name": "Berend Pronk",
+    "pseudonym": "Berent Prunk",
+    "sailNumbers": [
+      "ARU-47"
+    ]
+  },
+  {
+    "id": "m:berk-yalgin",
+    "division": "men",
+    "name": "Berk Yalgin",
+    "pseudonym": "Berc Ialgin",
+    "sailNumbers": [
+      "TUR-466"
+    ]
+  },
+  {
+    "id": "m:bjorn-saragoza",
+    "division": "men",
+    "name": "Björn Saragoza",
+    "pseudonym": "Björm Seragoza",
+    "sailNumbers": [
+      "NB-11"
+    ]
+  },
+  {
+    "id": "m:bodhi-kempen",
+    "division": "men",
+    "name": "Bodhi Kempen",
+    "pseudonym": "Bodhy Kampen",
+    "sailNumbers": [
+      "H-242"
+    ]
+  },
+  {
+    "id": "m:bryan-metcalf-perez",
+    "division": "men",
+    "name": "Bryan Metcalf-Perez",
+    "pseudonym": "Bryam Matcalf-Perez",
+    "sailNumbers": [
+      "US-505"
+    ]
+  },
+  {
+    "id": "m:caesar-finies",
+    "division": "men",
+    "name": "Caesar Finies",
+    "pseudonym": "Caesal Fynies",
+    "sailNumbers": [
+      "NB-13"
+    ]
+  },
+  {
+    "id": "m:camilo-galeano",
+    "division": "men",
+    "name": "Camilo Galeano",
+    "pseudonym": "Camila Geleano",
+    "sailNumbers": [
+      "C-64"
+    ]
+  },
+  {
+    "id": "m:choko-frans",
+    "division": "men",
+    "name": "Choko Frans",
+    "pseudonym": "Choka Frens",
+    "sailNumbers": [
+      "NB-6"
+    ]
+  },
+  {
+    "id": "m:christian-sammer",
+    "division": "men",
+    "name": "Christian Sammer",
+    "pseudonym": "Christiam Semmer",
+    "sailNumbers": [
+      "AUT-291"
+    ]
+  },
+  {
+    "id": "m:christofer-kalk",
+    "division": "men",
+    "name": "Christofer Kalk",
+    "pseudonym": "Christofel Kelk",
+    "sailNumbers": [
+      "EST-141"
+    ]
+  },
+  {
+    "id": "m:colin-sifferlen",
+    "division": "men",
+    "name": "Colin Sifferlen",
+    "pseudonym": "Colim Syfferlen",
+    "sailNumbers": [
+      "NC-4"
+    ]
+  },
+  {
+    "id": "m:corto-dumond",
+    "division": "men",
+    "name": "Corto Dumond",
+    "pseudonym": "Corta Domond",
+    "sailNumbers": [
+      "NC-26"
+    ]
+  },
+  {
+    "id": "m:cosmo-pezzetti",
+    "division": "men",
+    "name": "Cosmo Pezzetti",
+    "pseudonym": "Cosma Pazzetti",
+    "sailNumbers": [
+      "I-117"
+    ]
+  },
+  {
+    "id": "m:dai-nagamine",
+    "division": "men",
+    "name": "Dai Nagamine",
+    "pseudonym": "Day Negamine",
+    "sailNumbers": [
+      "J-111"
+    ]
+  },
+  {
+    "id": "m:damien-potier",
+    "division": "men",
+    "name": "Damien Potier",
+    "pseudonym": "Damiem Putier",
+    "sailNumbers": [
+      "F-01"
+    ]
+  },
+  {
+    "id": "m:daniel-schenk",
+    "division": "men",
+    "name": "Daniel Schenk",
+    "pseudonym": "Danier Schank",
+    "sailNumbers": [
+      "G-803"
+    ]
+  },
+  {
+    "id": "m:danilo-menezes-da-silva",
+    "division": "men",
+    "name": "Danilo Menezes da Silva",
+    "pseudonym": "Danila Menezes da Sylva",
+    "sailNumbers": [
+      "BRA-83"
+    ]
+  },
+  {
+    "id": "m:danny-kater",
+    "division": "men",
+    "name": "Danny Kater",
+    "pseudonym": "Danni Keter",
+    "sailNumbers": [
+      "H-322"
+    ]
+  },
+  {
+    "id": "m:davide-giardini",
+    "division": "men",
+    "name": "Davide Giardini",
+    "pseudonym": "Davida Gyardini",
+    "sailNumbers": [
+      "ITA-878"
+    ]
+  },
+  {
+    "id": "m:davy-scheffers",
+    "division": "men",
+    "name": "Davy Scheffers",
+    "pseudonym": "Davi Schaffers",
+    "sailNumbers": [
+      "H-311"
+    ]
+  },
+  {
+    "id": "m:deivis-paternina-teran",
+    "division": "men",
+    "name": "Deivis Paternina Teran",
+    "pseudonym": "Deiviz Paternina Taran",
+    "sailNumbers": [
+      "V-04"
+    ]
+  },
+  {
+    "id": "m:dennis-muller",
+    "division": "men",
+    "name": "Dennis Müller",
+    "pseudonym": "Denniz Möller",
+    "sailNumbers": [
+      "GER-89"
+    ]
+  },
+  {
+    "id": "m:dieter-van-der-eyken",
+    "division": "men",
+    "name": "Dieter Van der Eyken",
+    "pseudonym": "Dietel Van der Ayken",
+    "sailNumbers": [
+      "B-35"
+    ]
+  },
+  {
+    "id": "m:dimitris-bratanov",
+    "division": "men",
+    "name": "Dimitris Bratanov",
+    "pseudonym": "Dimitriz Bretanov",
+    "sailNumbers": [
+      "BUL-204"
+    ]
+  },
+  {
+    "id": "m:diony-guadagnino",
+    "division": "men",
+    "name": "Diony Guadagnino",
+    "pseudonym": "Dioni Goadagnino",
+    "sailNumbers": [
+      "V-69"
+    ]
+  },
+  {
+    "id": "m:dominik-kovarik",
+    "division": "men",
+    "name": "Dominik Kovarik",
+    "pseudonym": "Dominic Kuvarik",
+    "sailNumbers": [
+      "CZ-23"
+    ]
+  },
+  {
+    "id": "m:dominik-schonthal",
+    "division": "men",
+    "name": "Dominik Schönthal",
+    "pseudonym": "Dominic Schünthal",
+    "sailNumbers": [
+      "G-265"
+    ]
+  },
+  {
+    "id": "m:douglas-diaz",
+    "division": "men",
+    "name": "Douglas Diaz",
+    "pseudonym": "Douglaz Dyaz",
+    "sailNumbers": [
+      "V-34"
+    ]
+  },
+  {
+    "id": "m:duccio-dezzi-bardeschi",
+    "division": "men",
+    "name": "Duccio Dezzi Bardeschi",
+    "pseudonym": "Duccia Dezzi Berdeschi",
+    "sailNumbers": [
+      "ITA-3333"
+    ]
+  },
+  {
+    "id": "m:dudu-levi",
+    "division": "men",
+    "name": "Dudu Levi",
+    "pseudonym": "Dudo Lavi",
+    "sailNumbers": [
+      "ISR-421"
+    ]
+  },
+  {
+    "id": "m:edvan-souza",
+    "division": "men",
+    "name": "Edvan Souza",
+    "pseudonym": "Edvam Suuza",
+    "sailNumbers": [
+      "BRA-250"
+    ]
+  },
+  {
+    "id": "m:eilon-wilson",
+    "division": "men",
+    "name": "Eilon Wilson",
+    "pseudonym": "Eilom Wylson",
+    "sailNumbers": [
+      "ISR-24"
+    ]
+  },
+  {
+    "id": "m:eliran-levi",
+    "division": "men",
+    "name": "Eliran Levi",
+    "pseudonym": "Eliram Lavi",
+    "sailNumbers": [
+      "ISR-22"
+    ]
+  },
+  {
+    "id": "m:elton-frans",
+    "division": "men",
+    "name": "Elton (Taty) Frans",
+    "pseudonym": "Eltom Frens",
+    "sailNumbers": [
+      "NB-9"
+    ]
+  },
+  {
+    "id": "m:endro-finies",
+    "division": "men",
+    "name": "Endro Finies",
+    "pseudonym": "Endra Fynies",
+    "sailNumbers": [
+      "NB-77"
+    ]
+  },
+  {
+    "id": "m:ercole-rosso-chioso",
+    "division": "men",
+    "name": "Ercole Rosso-Chioso",
+    "pseudonym": "Ercola Russo-Chioso",
+    "sailNumbers": [
+      "ITA-420"
+    ]
+  },
+  {
+    "id": "m:eric-sanllehy",
+    "division": "men",
+    "name": "Eric Sanllehy",
+    "pseudonym": "Erik Senllehy",
+    "sailNumbers": [
+      "CAT-111"
+    ]
+  },
+  {
+    "id": "m:erik-hakman",
+    "division": "men",
+    "name": "Erik Håkman",
+    "pseudonym": "Eric Håkmen",
+    "sailNumbers": [
+      "S-1988"
+    ]
+  },
+  {
+    "id": "m:ethan-westera",
+    "division": "men",
+    "name": "Ethan Westera",
+    "pseudonym": "Etham Wastera",
+    "sailNumbers": [
+      "ARU-4"
+    ]
+  },
+  {
+    "id": "m:eugenio-marconi",
+    "division": "men",
+    "name": "Eugenio Marconi",
+    "pseudonym": "Eugenia Merconi",
+    "sailNumbers": [
+      "ITA-312"
+    ]
+  },
+  {
+    "id": "m:everon-frans",
+    "division": "men",
+    "name": "Everon (Tonky) Frans",
+    "pseudonym": "Everom Frens",
+    "sailNumbers": [
+      "NB-7"
+    ]
+  },
+  {
+    "id": "m:ezri-heijmans",
+    "division": "men",
+    "name": "Ezri Heijmans",
+    "pseudonym": "Ezry Haijmans",
+    "sailNumbers": [
+      "NB-109"
+    ]
+  },
+  {
+    "id": "m:fabian-weber",
+    "division": "men",
+    "name": "Fabian Weber",
+    "pseudonym": "Fabiam Waber",
+    "sailNumbers": [
+      "G-999"
+    ]
+  },
+  {
+    "id": "m:felix-martina",
+    "division": "men",
+    "name": "Felix Martina",
+    "pseudonym": "Felis Mertina",
+    "sailNumbers": [
+      "CUR-22"
+    ]
+  },
+  {
+    "id": "m:fernando-rioja-vargas",
+    "division": "men",
+    "name": "Fernando Rioja Vargas",
+    "pseudonym": "Fernanda Rioja Vergas",
+    "sailNumbers": [
+      "E-126"
+    ]
+  },
+  {
+    "id": "m:florian-jung",
+    "division": "men",
+    "name": "Florian Jung",
+    "pseudonym": "Floriam Jong",
+    "sailNumbers": [
+      "G-210"
+    ]
+  },
+  {
+    "id": "m:florian-wegerer",
+    "division": "men",
+    "name": "Florian Wegerer",
+    "pseudonym": "Floriam Wagerer",
+    "sailNumbers": [
+      "NB-16"
+    ]
+  },
+  {
+    "id": "m:francesco-cappuzzo",
+    "division": "men",
+    "name": "Francesco Cappuzzo",
+    "pseudonym": "Francesca Ceppuzzo",
+    "sailNumbers": [
+      "I-333"
+    ]
+  },
+  {
+    "id": "m:francisco-teixeira",
+    "division": "men",
+    "name": "Francisco Teixeira",
+    "pseudonym": "Francisca Taixeira",
+    "sailNumbers": [
+      "BRA-64"
+    ]
+  },
+  {
+    "id": "m:gabriele-varrucciu",
+    "division": "men",
+    "name": "Gabriele Varrucciu",
+    "pseudonym": "Gabriela Verrucciu",
+    "sailNumbers": [
+      "I-984"
+    ]
+  },
+  {
+    "id": "m:george-grisley",
+    "division": "men",
+    "name": "George Grisley",
+    "pseudonym": "Georga Grysley",
+    "sailNumbers": [
+      "K-468"
+    ]
+  },
+  {
+    "id": "m:gilbert-bimbi",
+    "division": "men",
+    "name": "Gilbert Bimbi",
+    "pseudonym": "Gilberd Bymbi",
+    "sailNumbers": [
+      "NB-82"
+    ]
+  },
+  {
+    "id": "m:giovanni-passani",
+    "division": "men",
+    "name": "Giovanni Passani",
+    "pseudonym": "Giovanny Pessani",
+    "sailNumbers": [
+      "ITA-139"
+    ]
+  },
+  {
+    "id": "m:hakon-skorge",
+    "division": "men",
+    "name": "Håkon Skorge",
+    "pseudonym": "Håkom Skurge",
+    "sailNumbers": [
+      "N-50"
+    ]
+  },
+  {
+    "id": "m:haruto-konishi",
+    "division": "men",
+    "name": "Haruto Konishi",
+    "pseudonym": "Haruta Kunishi",
+    "sailNumbers": [
+      "J-811"
+    ]
+  },
+  {
+    "id": "m:hendryck-balentien",
+    "division": "men",
+    "name": "Hendryck Balentien",
+    "pseudonym": "Hendrycc Belentien",
+    "sailNumbers": [
+      "NB-52"
+    ]
+  },
+  {
+    "id": "m:hiroumi-yoshida",
+    "division": "men",
+    "name": "Hiroumi Yoshida",
+    "pseudonym": "Hiroumy Ioshida",
+    "sailNumbers": [
+      "J-117"
+    ]
+  },
+  {
+    "id": "m:hugo-de-sousa",
+    "division": "men",
+    "name": "Hugo De Sousa",
+    "pseudonym": "Huga De Suusa",
+    "sailNumbers": [
+      "BRA-204"
+    ]
+  },
+  {
+    "id": "m:ian-mouro-lemos",
+    "division": "men",
+    "name": "Ian Mouro Lemos",
+    "pseudonym": "Iam Mouro Lamos",
+    "sailNumbers": [
+      "BRA-85"
+    ]
+  },
+  {
+    "id": "m:ilay-bamnolker",
+    "division": "men",
+    "name": "Ilay Bamnolker",
+    "pseudonym": "Ilai Bemnolker",
+    "sailNumbers": [
+      "ISR-7"
+    ]
+  },
+  {
+    "id": "m:jacopo-testa",
+    "division": "men",
+    "name": "Jacopo Testa",
+    "pseudonym": "Jacopa Tasta",
+    "sailNumbers": [
+      "ITA-261"
+    ]
+  },
+  {
+    "id": "m:jakob-grosse-ophoff",
+    "division": "men",
+    "name": "Jakob Große Ophoff",
+    "pseudonym": "Jakop Große Uphoff",
+    "sailNumbers": [
+      "G-715"
+    ]
+  },
+  {
+    "id": "m:jakub-kawalkowski",
+    "division": "men",
+    "name": "Jakub Kawałkowski",
+    "pseudonym": "Jakup Kewałkowski",
+    "sailNumbers": [
+      "POL-13"
+    ]
+  },
+  {
+    "id": "m:jakub-kosmowski",
+    "division": "men",
+    "name": "Jakub Kosmowski",
+    "pseudonym": "Jakup Kusmowski",
+    "sailNumbers": [
+      "POL-288"
+    ]
+  },
+  {
+    "id": "m:jamie-drummond",
+    "division": "men",
+    "name": "Jamie Drummond",
+    "pseudonym": "Jamia Drommond",
+    "sailNumbers": [
+      "K-787"
+    ]
+  },
+  {
+    "id": "m:jamie-howard",
+    "division": "men",
+    "name": "Jamie Howard",
+    "pseudonym": "Jamia Huward",
+    "sailNumbers": [
+      "K-582"
+    ]
+  },
+  {
+    "id": "m:jayson-jonge",
+    "division": "men",
+    "name": "Jayson Jonge",
+    "pseudonym": "Jaysom Junge",
+    "sailNumbers": [
+      "NB-1111"
+    ]
+  },
+  {
+    "id": "m:jeager-sint-jago",
+    "division": "men",
+    "name": "Jeager Sint Jago",
+    "pseudonym": "Jeagel Sint Jego",
+    "sailNumbers": [
+      "NB-107"
+    ]
+  },
+  {
+    "id": "m:jeremy-pluss",
+    "division": "men",
+    "name": "Jeremy Plüss",
+    "pseudonym": "Jeremi Plöss",
+    "sailNumbers": [
+      "SUI-500"
+    ]
+  },
+  {
+    "id": "m:joao-henrique",
+    "division": "men",
+    "name": "João \"Janjão\" Henrique",
+    "pseudonym": "Joãa Hanrique",
+    "sailNumbers": [
+      "BRA-291"
+    ]
+  },
+  {
+    "id": "m:johannes-witte",
+    "division": "men",
+    "name": "Johannes Witte",
+    "pseudonym": "Johannez Wytte",
+    "sailNumbers": [
+      "G-687"
+    ]
+  },
+  {
+    "id": "m:john-skye",
+    "division": "men",
+    "name": "John Skye",
+    "pseudonym": "Johm Skie",
+    "sailNumbers": [
+      "K-57"
+    ]
+  },
+  {
+    "id": "m:johnny-yagen",
+    "division": "men",
+    "name": "Johnny Yagen",
+    "pseudonym": "Johnni Iagen",
+    "sailNumbers": [
+      "ISR-02"
+    ]
+  },
+  {
+    "id": "m:jomilson-de-souza",
+    "division": "men",
+    "name": "Jomilson De Souza",
+    "pseudonym": "Jomilsom De Suuza",
+    "sailNumbers": [
+      "BRA-840"
+    ]
+  },
+  {
+    "id": "m:jonas-ceballos",
+    "division": "men",
+    "name": "Jonas Ceballos",
+    "pseudonym": "Jonaz Caballos",
+    "sailNumbers": [
+      "E-40"
+    ]
+  },
+  {
+    "id": "m:jordi-verschooten",
+    "division": "men",
+    "name": "Jordi Verschooten",
+    "pseudonym": "Jordy Varschooten",
+    "sailNumbers": [
+      "B-123"
+    ]
+  },
+  {
+    "id": "m:jose-estredo",
+    "division": "men",
+    "name": "Jose \"Gollito\" Estredo",
+    "pseudonym": "Josa Astredo",
+    "sailNumbers": [
+      "V-10"
+    ]
+  },
+  {
+    "id": "m:julian-wiemar",
+    "division": "men",
+    "name": "Julian Wiemar",
+    "pseudonym": "Juliam Wyemar",
+    "sailNumbers": [
+      "G-2111"
+    ]
+  },
+  {
+    "id": "m:julien-mas",
+    "division": "men",
+    "name": "Julien Mas",
+    "pseudonym": "Juliem Mes",
+    "sailNumbers": [
+      "FRA-07"
+    ]
+  },
+  {
+    "id": "m:julien-quentel",
+    "division": "men",
+    "name": "Julien Quentel",
+    "pseudonym": "Juliem Qoentel",
+    "sailNumbers": [
+      "SXM-421"
+    ]
+  },
+  {
+    "id": "m:jurgen-saragoza",
+    "division": "men",
+    "name": "Jurgen Saragoza",
+    "pseudonym": "Jurgem Seragoza",
+    "sailNumbers": [
+      "NB-117"
+    ]
+  },
+  {
+    "id": "m:kango-iketeru",
+    "division": "men",
+    "name": "Kango Iketeru",
+    "pseudonym": "Kanga Yketeru",
+    "sailNumbers": [
+      "J-812"
+    ]
+  },
+  {
+    "id": "m:kareem-naipal",
+    "division": "men",
+    "name": "Kareem Naipal",
+    "pseudonym": "Kareen Neipal",
+    "sailNumbers": [
+      "CUR-35"
+    ]
+  },
+  {
+    "id": "m:karl-emil-magaard-bogh",
+    "division": "men",
+    "name": "Karl-Emil Magaard Bøgh",
+    "pseudonym": "Karl-Emir Magaard Bøgh",
+    "sailNumbers": [
+      "D-253"
+    ]
+  },
+  {
+    "id": "m:kauli-seadi",
+    "division": "men",
+    "name": "Kauli Seadi",
+    "pseudonym": "Kauly Saadi",
+    "sailNumbers": [
+      "BRA-253"
+    ]
+  },
+  {
+    "id": "m:kenneth-danielsen",
+    "division": "men",
+    "name": "Kenneth Danielsen",
+    "pseudonym": "Kennedh Denielsen",
+    "sailNumbers": [
+      "D-38"
+    ]
+  },
+  {
+    "id": "m:kenny-janssen",
+    "division": "men",
+    "name": "Kenny Janssen",
+    "pseudonym": "Kenni Jenssen",
+    "sailNumbers": [
+      "B-34"
+    ]
+  },
+  {
+    "id": "m:kevin-langbehn",
+    "division": "men",
+    "name": "Kevin Langbehn",
+    "pseudonym": "Kevim Lengbehn",
+    "sailNumbers": [
+      "G-1515"
+    ]
+  },
+  {
+    "id": "m:kevin-mevissen",
+    "division": "men",
+    "name": "Kevin Mevissen",
+    "pseudonym": "Kevim Mavissen",
+    "sailNumbers": [
+      "H-79"
+    ]
+  },
+  {
+    "id": "m:kiri-thode",
+    "division": "men",
+    "name": "Kiri Thode",
+    "pseudonym": "Kiry Thude",
+    "sailNumbers": [
+      "NB-61"
+    ]
+  },
+  {
+    "id": "m:klaas-voget",
+    "division": "men",
+    "name": "Klaas Voget",
+    "pseudonym": "Klaaz Vuget",
+    "sailNumbers": [
+      "G-4"
+    ]
+  },
+  {
+    "id": "m:lennart-neubauer",
+    "division": "men",
+    "name": "Lennart Neubauer",
+    "pseudonym": "Lennard Naubauer",
+    "sailNumbers": [
+      "GRE-734"
+    ]
+  },
+  {
+    "id": "m:leo-ray",
+    "division": "men",
+    "name": "Leo Ray",
+    "pseudonym": "Lea Rey",
+    "sailNumbers": [
+      "F-200"
+    ]
+  },
+  {
+    "id": "m:levi-lenz",
+    "division": "men",
+    "name": "Levi Lenz",
+    "pseudonym": "Levy Lanz",
+    "sailNumbers": [
+      "BRA-91"
+    ]
+  },
+  {
+    "id": "m:liam-dunkerbeck-morales",
+    "division": "men",
+    "name": "Liam Dunkerbeck Morales",
+    "pseudonym": "Lian Dunkerbeck Murales",
+    "sailNumbers": [
+      "E-11"
+    ]
+  },
+  {
+    "id": "m:loic-viandier",
+    "division": "men",
+    "name": "Loïc Viandier",
+    "pseudonym": "Loïk Vyandier",
+    "sailNumbers": [
+      "F-2"
+    ]
+  },
+  {
+    "id": "m:loick-spicher",
+    "division": "men",
+    "name": "Loick Spicher",
+    "pseudonym": "Loicc Spycher",
+    "sailNumbers": [
+      "SUI-19"
+    ]
+  },
+  {
+    "id": "m:lorenz-forstenlechner",
+    "division": "men",
+    "name": "Lorenz Forstenlechner",
+    "pseudonym": "Lorent Furstenlechner",
+    "sailNumbers": [
+      "AUT-7"
+    ]
+  },
+  {
+    "id": "m:lucas-nebelung",
+    "division": "men",
+    "name": "Lucas Nebelung",
+    "pseudonym": "Lucaz Nabelung",
+    "sailNumbers": [
+      "G-001"
+    ]
+  },
+  {
+    "id": "m:luka-stomp",
+    "division": "men",
+    "name": "Luka Stomp",
+    "pseudonym": "Luko Stump",
+    "sailNumbers": [
+      "CUR-111"
+    ]
+  },
+  {
+    "id": "m:maarten-molenaar",
+    "division": "men",
+    "name": "Maarten Molenaar",
+    "pseudonym": "Maartem Mulenaar",
+    "sailNumbers": [
+      "POL-510"
+    ]
+  },
+  {
+    "id": "m:maarten-van-ochten",
+    "division": "men",
+    "name": "Maarten van Ochten",
+    "pseudonym": "Maartem van Uchten",
+    "sailNumbers": [
+      "H-73"
+    ]
+  },
+  {
+    "id": "m:maksymilian-lesniewski",
+    "division": "men",
+    "name": "Maksymilian Lesniewski",
+    "pseudonym": "Maksymiliam Lasniewski",
+    "sailNumbers": [
+      "POL-770"
+    ]
+  },
+  {
+    "id": "m:manolis-chrysopoulos",
+    "division": "men",
+    "name": "Manolis Chrysopoulos",
+    "pseudonym": "Manoliz Chrisopoulos",
+    "sailNumbers": [
+      "GRE-374"
+    ]
+  },
+  {
+    "id": "m:marcilio-browne",
+    "division": "men",
+    "name": "Marcilio Browne",
+    "pseudonym": "Marcilia Bruwne",
+    "sailNumbers": [
+      "BRA-105"
+    ]
+  },
+  {
+    "id": "m:marco-lang",
+    "division": "men",
+    "name": "Marco Lang",
+    "pseudonym": "Marca Leng",
+    "sailNumbers": [
+      "AUT-66"
+    ]
+  },
+  {
+    "id": "m:marco-lufen",
+    "division": "men",
+    "name": "Marco Lufen",
+    "pseudonym": "Marca Lofen",
+    "sailNumbers": [
+      "G-2626"
+    ]
+  },
+  {
+    "id": "m:marco-vinante",
+    "division": "men",
+    "name": "Marco Vinante",
+    "pseudonym": "Marca Vynante",
+    "sailNumbers": [
+      "I-205"
+    ]
+  },
+  {
+    "id": "m:marco-wedele",
+    "division": "men",
+    "name": "Marco Wedele",
+    "pseudonym": "Marca Wadele",
+    "sailNumbers": [
+      "G-125"
+    ]
+  },
+  {
+    "id": "m:marino-gil-gherardi",
+    "division": "men",
+    "name": "Marino Gil Gherardi",
+    "pseudonym": "Marina Gil Gharardi",
+    "sailNumbers": [
+      "E-959"
+    ]
+  },
+  {
+    "id": "m:mathias-genkel",
+    "division": "men",
+    "name": "Mathias Genkel",
+    "pseudonym": "Mathiaz Gankel",
+    "sailNumbers": [
+      "G-984"
+    ]
+  },
+  {
+    "id": "m:mathias-verploeg",
+    "division": "men",
+    "name": "Mathias Verploeg",
+    "pseudonym": "Mathiaz Varploeg",
+    "sailNumbers": [
+      "ARU-20"
+    ]
+  },
+  {
+    "id": "m:matteo-testa",
+    "division": "men",
+    "name": "Matteo Testa",
+    "pseudonym": "Mattea Tasta",
+    "sailNumbers": [
+      "ITA-156"
+    ]
+  },
+  {
+    "id": "m:matthias-kraschitzer",
+    "division": "men",
+    "name": "Matthias Kraschitzer",
+    "pseudonym": "Matthiaz Kreschitzer",
+    "sailNumbers": [
+      "AUT-122"
+    ]
+  },
+  {
+    "id": "m:matthias-zimmermann",
+    "division": "men",
+    "name": "Matthias Zimmermann",
+    "pseudonym": "Matthiaz Zymmermann",
+    "sailNumbers": [
+      "AUT-20"
+    ]
+  },
+  {
+    "id": "m:mattia-fabrizi",
+    "division": "men",
+    "name": "Mattia Fabrizi",
+    "pseudonym": "Mattio Febrizi",
+    "sailNumbers": [
+      "ITA-991"
+    ]
+  },
+  {
+    "id": "m:mattia-pedrani",
+    "division": "men",
+    "name": "Mattia Pedrani",
+    "pseudonym": "Mattio Padrani",
+    "sailNumbers": [
+      "I-00"
+    ]
+  },
+  {
+    "id": "m:mauricio-alvarez",
+    "division": "men",
+    "name": "Mauricio Alvarez",
+    "pseudonym": "Mauricia Elvarez",
+    "sailNumbers": [
+      "AUT-86"
+    ]
+  },
+  {
+    "id": "m:max-matissek",
+    "division": "men",
+    "name": "Max Matissek",
+    "pseudonym": "Mas Metissek",
+    "sailNumbers": [
+      "OE-9"
+    ]
+  },
+  {
+    "id": "m:max-rowe",
+    "division": "men",
+    "name": "Max Rowe",
+    "pseudonym": "Mas Ruwe",
+    "sailNumbers": [
+      "K-20"
+    ]
+  },
+  {
+    "id": "m:max-schanda",
+    "division": "men",
+    "name": "Max Schanda",
+    "pseudonym": "Mas Schenda",
+    "sailNumbers": [
+      "AUT-235"
+    ]
+  },
+  {
+    "id": "m:meikel-thies",
+    "division": "men",
+    "name": "Meikel Thies",
+    "pseudonym": "Meiker Thyes",
+    "sailNumbers": [
+      "GER-106"
+    ]
+  },
+  {
+    "id": "m:michael-chovan",
+    "division": "men",
+    "name": "Michael Chovan",
+    "pseudonym": "Michaer Chuvan",
+    "sailNumbers": [
+      "SVK-70"
+    ]
+  },
+  {
+    "id": "m:michael-czech",
+    "division": "men",
+    "name": "Michael Czech",
+    "pseudonym": "Michaer Czach",
+    "sailNumbers": [
+      "AUT-74"
+    ]
+  },
+  {
+    "id": "m:michael-rossmeier",
+    "division": "men",
+    "name": "Michael Roßmeier",
+    "pseudonym": "Michaer Rußmeier",
+    "sailNumbers": [
+      "AUT-256"
+    ]
+  },
+  {
+    "id": "m:michael-sumereder",
+    "division": "men",
+    "name": "Michael Sumereder",
+    "pseudonym": "Michaer Somereder",
+    "sailNumbers": [
+      "AUT-9"
+    ]
+  },
+  {
+    "id": "m:michael-wieczorek",
+    "division": "men",
+    "name": "Michael Wieczorek",
+    "pseudonym": "Michaer Wyeczorek",
+    "sailNumbers": [
+      "G-192"
+    ]
+  },
+  {
+    "id": "m:milan-gielingh",
+    "division": "men",
+    "name": "Milan Gielingh",
+    "pseudonym": "Milam Gyelingh",
+    "sailNumbers": [
+      "CUR-28"
+    ]
+  },
+  {
+    "id": "m:milos-milosevic",
+    "division": "men",
+    "name": "Milos Milosevic",
+    "pseudonym": "Miloz Mylosevic",
+    "sailNumbers": [
+      "SLO-217"
+    ]
+  },
+  {
+    "id": "m:nic-hibdige",
+    "division": "men",
+    "name": "Nic Hibdige",
+    "pseudonym": "Nik Hybdige",
+    "sailNumbers": [
+      "K-700"
+    ]
+  },
+  {
+    "id": "m:nick-van-ingen",
+    "division": "men",
+    "name": "Nick van Ingen",
+    "pseudonym": "Nicc van Yngen",
+    "sailNumbers": [
+      "H-122"
+    ]
+  },
+  {
+    "id": "m:niclas-nebelung",
+    "division": "men",
+    "name": "Niclas Nebelung",
+    "pseudonym": "Niclaz Nabelung",
+    "sailNumbers": [
+      "G-584"
+    ]
+  },
+  {
+    "id": "m:nicola-spadea",
+    "division": "men",
+    "name": "Nicola Spadea",
+    "pseudonym": "Nicolo Spedea",
+    "sailNumbers": [
+      "ITA-44"
+    ]
+  },
+  {
+    "id": "m:nicolas-akgazciyan",
+    "division": "men",
+    "name": "Nicolas Akgazciyan",
+    "pseudonym": "Nicolaz Ekgazciyan",
+    "sailNumbers": [
+      "F-400"
+    ]
+  },
+  {
+    "id": "m:nicolo-di-marco",
+    "division": "men",
+    "name": "Nicolo Di Marco",
+    "pseudonym": "Nicola Di Merco",
+    "sailNumbers": [
+      "ITA-11"
+    ]
+  },
+  {
+    "id": "m:nigel-hart",
+    "division": "men",
+    "name": "Nigel Hart",
+    "pseudonym": "Niger Hert",
+    "sailNumbers": [
+      "NB-65"
+    ]
+  },
+  {
+    "id": "m:nik-van-den-eerenbeemt",
+    "division": "men",
+    "name": "Nik van den Eerenbeemt",
+    "pseudonym": "Nic van den Aerenbeemt",
+    "sailNumbers": [
+      "ARU-9"
+    ]
+  },
+  {
+    "id": "m:niklas-strahlen",
+    "division": "men",
+    "name": "Niklas Stråhlén",
+    "pseudonym": "Niklaz Stråhlan",
+    "sailNumbers": [
+      "S-4444"
+    ]
+  },
+  {
+    "id": "m:nil-bacon",
+    "division": "men",
+    "name": "Nil Bacon",
+    "pseudonym": "Nir Becon",
+    "sailNumbers": [
+      "F-712"
+    ]
+  },
+  {
+    "id": "m:normen-gunzlein",
+    "division": "men",
+    "name": "Normen Günzlein",
+    "pseudonym": "Normem Gönzlein",
+    "sailNumbers": [
+      "G-186"
+    ]
+  },
+  {
+    "id": "m:ole-hasholt",
+    "division": "men",
+    "name": "Ole Hasholt",
+    "pseudonym": "Ola Hesholt",
+    "sailNumbers": [
+      "D-210"
+    ]
+  },
+  {
+    "id": "m:oliver-stauffacher",
+    "division": "men",
+    "name": "Oliver Stauffacher",
+    "pseudonym": "Olivel Steuffacher",
+    "sailNumbers": [
+      "SUI-111"
+    ]
+  },
+  {
+    "id": "m:oliver-townsend",
+    "division": "men",
+    "name": "Oliver Townsend",
+    "pseudonym": "Olivel Tuwnsend",
+    "sailNumbers": [
+      "K-936"
+    ]
+  },
+  {
+    "id": "m:omri-shapira",
+    "division": "men",
+    "name": "Omri Shapira",
+    "pseudonym": "Omry Shepira",
+    "sailNumbers": [
+      "ISR-89"
+    ]
+  },
+  {
+    "id": "m:oscar-carmichael",
+    "division": "men",
+    "name": "Oscar Carmichael",
+    "pseudonym": "Oscal Cermichael",
+    "sailNumbers": [
+      "K-668"
+    ]
+  },
+  {
+    "id": "m:paul-boef",
+    "division": "men",
+    "name": "Paul Boef",
+    "pseudonym": "Paur Buef",
+    "sailNumbers": [
+      "NED-720"
+    ]
+  },
+  {
+    "id": "m:paul-simmerl",
+    "division": "men",
+    "name": "Paul Simmerl",
+    "pseudonym": "Paur Symmerl",
+    "sailNumbers": [
+      "AUT-21"
+    ]
+  },
+  {
+    "id": "m:paul-zeper",
+    "division": "men",
+    "name": "Paul Zeper",
+    "pseudonym": "Paur Zaper",
+    "sailNumbers": [
+      "H-115"
+    ]
+  },
+  {
+    "id": "m:phil-richards",
+    "division": "men",
+    "name": "Phil Richards",
+    "pseudonym": "Phir Rychards",
+    "sailNumbers": [
+      "K-823"
+    ]
+  },
+  {
+    "id": "m:philip-soltysiak",
+    "division": "men",
+    "name": "Philip Soltysiak",
+    "pseudonym": "Philib Sultysiak",
+    "sailNumbers": [
+      "CAN-9"
+    ]
+  },
+  {
+    "id": "m:primus-sorling",
+    "division": "men",
+    "name": "Primus Sorling",
+    "pseudonym": "Primuz Surling",
+    "sailNumbers": [
+      "SWE-333"
+    ]
+  },
+  {
+    "id": "m:quincy-marchena",
+    "division": "men",
+    "name": "Quincy Marchena",
+    "pseudonym": "Quinci Merchena",
+    "sailNumbers": [
+      "NB-01"
+    ]
+  },
+  {
+    "id": "m:quincy-offringa",
+    "division": "men",
+    "name": "Quincy Offringa",
+    "pseudonym": "Quinci Uffringa",
+    "sailNumbers": [
+      "ARU-10"
+    ]
+  },
+  {
+    "id": "m:rafael-cervero-climent",
+    "division": "men",
+    "name": "Rafael Cervero Climent",
+    "pseudonym": "Rafaer Cervero Clyment",
+    "sailNumbers": [
+      "E-13"
+    ]
+  },
+  {
+    "id": "m:rafael-de-windt",
+    "division": "men",
+    "name": "Rafael de Windt",
+    "pseudonym": "Rafaer de Wyndt",
+    "sailNumbers": [
+      "CUR-45"
+    ]
+  },
+  {
+    "id": "m:raimondo-gasperini",
+    "division": "men",
+    "name": "Raimondo Gasperini",
+    "pseudonym": "Raimonda Gesperini",
+    "sailNumbers": [
+      "I-157"
+    ]
+  },
+  {
+    "id": "m:rasmus-oegelund",
+    "division": "men",
+    "name": "Rasmus Oegelund",
+    "pseudonym": "Rasmuz Uegelund",
+    "sailNumbers": [
+      "D-22"
+    ]
+  },
+  {
+    "id": "m:remi-vila",
+    "division": "men",
+    "name": "Rémi Vila",
+    "pseudonym": "Rémy Vyla",
+    "sailNumbers": [
+      "F-07"
+    ]
+  },
+  {
+    "id": "m:remko-de-weerd",
+    "division": "men",
+    "name": "Remko de Weerd",
+    "pseudonym": "Remka de Waerd",
+    "sailNumbers": [
+      "H-23"
+    ]
+  },
+  {
+    "id": "m:remko-de-zeeuw",
+    "division": "men",
+    "name": "Remko de Zeeuw",
+    "pseudonym": "Remka de Zaeuw",
+    "sailNumbers": [
+      "NED-444"
+    ]
+  },
+  {
+    "id": "m:ricardo-campello",
+    "division": "men",
+    "name": "Ricardo Campello",
+    "pseudonym": "Ricarda Cempello",
+    "sailNumbers": [
+      "V-111"
+    ]
+  },
+  {
+    "id": "m:riccardo-marca",
+    "division": "men",
+    "name": "Riccardo Marca",
+    "pseudonym": "Riccarda Merca",
+    "sailNumbers": [
+      "ITA-988"
+    ]
+  },
+  {
+    "id": "m:rich-cicilia",
+    "division": "men",
+    "name": "Rich Cicilia",
+    "pseudonym": "Rikh Cycilia",
+    "sailNumbers": [
+      "ARU-39"
+    ]
+  },
+  {
+    "id": "m:rick-jendrusch",
+    "division": "men",
+    "name": "Rick Jendrusch",
+    "pseudonym": "Ricc Jandrusch",
+    "sailNumbers": [
+      "H-120"
+    ]
+  },
+  {
+    "id": "m:robin-van-linden",
+    "division": "men",
+    "name": "Robin Van Linden",
+    "pseudonym": "Robim Van Lynden",
+    "sailNumbers": [
+      "H-102"
+    ]
+  },
+  {
+    "id": "m:romain-pinocheau",
+    "division": "men",
+    "name": "Romain Pinocheau",
+    "pseudonym": "Romaim Pynocheau",
+    "sailNumbers": [
+      "F-08"
+    ]
+  },
+  {
+    "id": "m:rossel-bertoldo",
+    "division": "men",
+    "name": "Rossel Bertoldo",
+    "pseudonym": "Rosser Bartoldo",
+    "sailNumbers": [
+      "ITA-832"
+    ]
+  },
+  {
+    "id": "m:ruben-petrisie",
+    "division": "men",
+    "name": "Ruben Petrisie",
+    "pseudonym": "Rubem Patrisie",
+    "sailNumbers": [
+      "NB-50"
+    ]
+  },
+  {
+    "id": "m:ryoma-sugi",
+    "division": "men",
+    "name": "Ryoma Sugi",
+    "pseudonym": "Ryomo Sogi",
+    "sailNumbers": [
+      "JPN-12"
+    ]
+  },
+  {
+    "id": "m:salvador-martinez-llobet",
+    "division": "men",
+    "name": "Salvador Martinez Llobet",
+    "pseudonym": "Salvadol Martinez Llubet",
+    "sailNumbers": [
+      "E-18"
+    ]
+  },
+  {
+    "id": "m:sam-esteve",
+    "division": "men",
+    "name": "Sam Esteve",
+    "pseudonym": "San Asteve",
+    "sailNumbers": [
+      "F-79"
+    ]
+  },
+  {
+    "id": "m:sam-green",
+    "division": "men",
+    "name": "Sam Green",
+    "pseudonym": "San Graen",
+    "sailNumbers": [
+      "AUS-533"
+    ]
+  },
+  {
+    "id": "m:sebastian-gux",
+    "division": "men",
+    "name": "Sebastian Gux",
+    "pseudonym": "Sebastiam Gox",
+    "sailNumbers": [
+      "G-177"
+    ]
+  },
+  {
+    "id": "m:sebastijan-jankovic",
+    "division": "men",
+    "name": "Sebastijan Jankovic",
+    "pseudonym": "Sebastijam Jenkovic",
+    "sailNumbers": [
+      "SLO-397"
+    ]
+  },
+  {
+    "id": "m:shamil-ageev",
+    "division": "men",
+    "name": "Shamil Ageev",
+    "pseudonym": "Shamir Egeev",
+    "sailNumbers": [
+      "RUS-5"
+    ]
+  },
+  {
+    "id": "m:stefan-kruse",
+    "division": "men",
+    "name": "Stefan Kruse",
+    "pseudonym": "Stefam Krose",
+    "sailNumbers": [
+      "G-360"
+    ]
+  },
+  {
+    "id": "m:stefanos-damianos",
+    "division": "men",
+    "name": "Stefanos Damianos",
+    "pseudonym": "Stefanoz Demianos",
+    "sailNumbers": [
+      "GRE-334"
+    ]
+  },
+  {
+    "id": "m:sten-aava",
+    "division": "men",
+    "name": "Sten Aava",
+    "pseudonym": "Stem Eava",
+    "sailNumbers": [
+      "EST-151"
+    ]
+  },
+  {
+    "id": "m:stepherd-gustowski",
+    "division": "men",
+    "name": "Stepherd \"Cheppi\" Gustowski",
+    "pseudonym": "Stephert Gostowski",
+    "sailNumbers": [
+      "NB-33"
+    ]
+  },
+  {
+    "id": "m:steven-max",
+    "division": "men",
+    "name": "Steven Max",
+    "pseudonym": "Stevem Mex",
+    "sailNumbers": [
+      "ARU-888"
+    ]
+  },
+  {
+    "id": "m:steven-van-broeckhoven",
+    "division": "men",
+    "name": "Steven Van Broeckhoven",
+    "pseudonym": "Stevem Van Brueckhoven",
+    "sailNumbers": [
+      "B-72"
+    ]
+  },
+  {
+    "id": "m:takuma-sugi",
+    "division": "men",
+    "name": "Takuma Sugi",
+    "pseudonym": "Takumo Sogi",
+    "sailNumbers": [
+      "J-7"
+    ]
+  },
+  {
+    "id": "m:takumi-moriya",
+    "division": "men",
+    "name": "Takumi Moriya",
+    "pseudonym": "Takumy Muriya",
+    "sailNumbers": [
+      "J-171"
+    ]
+  },
+  {
+    "id": "m:thierry-castillan",
+    "division": "men",
+    "name": "Thierry Castillan",
+    "pseudonym": "Thierri Cestillan",
+    "sailNumbers": [
+      "F-19"
+    ]
+  },
+  {
+    "id": "m:thijs-westbroek",
+    "division": "men",
+    "name": "Thijs Westbroek",
+    "pseudonym": "Thijz Wastbroek",
+    "sailNumbers": [
+      "H-666"
+    ]
+  },
+  {
+    "id": "m:thomas-traversa",
+    "division": "men",
+    "name": "Thomas Traversa",
+    "pseudonym": "Thomaz Treversa",
+    "sailNumbers": [
+      "F-3"
+    ]
+  },
+  {
+    "id": "m:tigo-kort",
+    "division": "men",
+    "name": "Tigo Kort",
+    "pseudonym": "Tiga Kurt",
+    "sailNumbers": [
+      "NED-195"
+    ]
+  },
+  {
+    "id": "m:tilo-eber",
+    "division": "men",
+    "name": "Tilo Eber",
+    "pseudonym": "Tila Aber",
+    "sailNumbers": [
+      "G-414"
+    ]
+  },
+  {
+    "id": "m:tim-gerdes",
+    "division": "men",
+    "name": "Tim Gerdes",
+    "pseudonym": "Tin Gardes",
+    "sailNumbers": [
+      "H-60"
+    ]
+  },
+  {
+    "id": "m:tim-ruyssenaars",
+    "division": "men",
+    "name": "Tim Ruyssenaars",
+    "pseudonym": "Tin Royssenaars",
+    "sailNumbers": [
+      "NED-66"
+    ]
+  },
+  {
+    "id": "m:tine-slabe",
+    "division": "men",
+    "name": "Tine Slabe",
+    "pseudonym": "Tina Slebe",
+    "sailNumbers": [
+      "SLO-6"
+    ]
+  },
+  {
+    "id": "m:tobias-schwarz",
+    "division": "men",
+    "name": "Tobias Schwarz",
+    "pseudonym": "Tobiaz Schwerz",
+    "sailNumbers": [
+      "G-4444"
+    ]
+  },
+  {
+    "id": "m:tom-foda",
+    "division": "men",
+    "name": "Tom Föda",
+    "pseudonym": "Ton Füda",
+    "sailNumbers": [
+      "AUT-29"
+    ]
+  },
+  {
+    "id": "m:tom-hartmann",
+    "division": "men",
+    "name": "Tom Hartmann",
+    "pseudonym": "Ton Hertmann",
+    "sailNumbers": [
+      "AUT-44"
+    ]
+  },
+  {
+    "id": "m:tomasz-wieczorek",
+    "division": "men",
+    "name": "Tomasz Wieczorek",
+    "pseudonym": "Tomast Wyeczorek",
+    "sailNumbers": [
+      "POL-589"
+    ]
+  },
+  {
+    "id": "m:tomer-shamgar",
+    "division": "men",
+    "name": "Tomer Shamgar",
+    "pseudonym": "Tomel Shemgar",
+    "sailNumbers": [
+      "ISR-13"
+    ]
+  },
+  {
+    "id": "m:tony-mottus",
+    "division": "men",
+    "name": "Tony Mõttus",
+    "pseudonym": "Toni Mõttos",
+    "sailNumbers": [
+      "EST-21"
+    ]
+  },
+  {
+    "id": "m:tyson-poor",
+    "division": "men",
+    "name": "Tyson Poor",
+    "pseudonym": "Tysom Puor",
+    "sailNumbers": [
+      "US-22"
+    ]
+  },
+  {
+    "id": "m:valentin-bockler",
+    "division": "men",
+    "name": "Valentin Böckler",
+    "pseudonym": "Valentim Bückler",
+    "sailNumbers": [
+      "G-315"
+    ]
+  },
+  {
+    "id": "m:victor-fernandez",
+    "division": "men",
+    "name": "Victor Fernandez",
+    "pseudonym": "Victol Farnandez",
+    "sailNumbers": [
+      "E-42"
+    ]
+  },
+  {
+    "id": "m:victor-wederfoort",
+    "division": "men",
+    "name": "Victor Wederfoort",
+    "pseudonym": "Victol Waderfoort",
+    "sailNumbers": [
+      "CUR-12"
+    ]
+  },
+  {
+    "id": "m:vladimir-yakovlev",
+    "division": "men",
+    "name": "Vladimir Yakovlev",
+    "pseudonym": "Vladimil Iakovlev",
+    "sailNumbers": [
+      "RUS-99"
+    ]
+  },
+  {
+    "id": "m:yarden-meir",
+    "division": "men",
+    "name": "Yarden Meir",
+    "pseudonym": "Yardem Mair",
+    "sailNumbers": [
+      "ISR-91"
+    ]
+  },
+  {
+    "id": "m:yegor-popretinskiy",
+    "division": "men",
+    "name": "Yegor Popretinskiy",
+    "pseudonym": "Yegol Pupretinskiy",
+    "sailNumbers": [
+      "RUS-11"
+    ]
+  },
+  {
+    "id": "m:yentel-caers",
+    "division": "men",
+    "name": "Yentel Caers",
+    "pseudonym": "Yenter Ceers",
+    "sailNumbers": [
+      "B-16"
+    ]
+  },
+  {
+    "id": "m:youp-schmit",
+    "division": "men",
+    "name": "Youp Schmit",
+    "pseudonym": "Youb Schmyt",
+    "sailNumbers": [
+      "NB-12"
+    ]
+  },
+  {
+    "id": "m:yuma-kobayashi",
+    "division": "men",
+    "name": "Yuma Kobayashi",
+    "pseudonym": "Yumo Kubayashi",
+    "sailNumbers": [
+      "J-100"
+    ]
+  },
+  {
+    "id": "m:zohar-torfstein",
+    "division": "men",
+    "name": "Zohar Torfstein",
+    "pseudonym": "Zohal Turfstein",
+    "sailNumbers": [
+      "ISR-14"
+    ]
+  },
+  {
+    "id": "w:alexa-escherich",
+    "division": "women",
+    "name": "Alexa Escherich",
+    "pseudonym": "Alexo Ascherich",
+    "sailNumbers": [
+      "G-200"
+    ]
+  },
+  {
+    "id": "w:amanda-westera",
+    "division": "women",
+    "name": "Amanda Westera",
+    "pseudonym": "Amando Wastera",
+    "sailNumbers": [
+      "ARU-23"
+    ]
+  },
+  {
+    "id": "w:angela-koch",
+    "division": "women",
+    "name": "Angela Koch",
+    "pseudonym": "Angelo Kuch",
+    "sailNumbers": [
+      "NB-31"
+    ]
+  },
+  {
+    "id": "w:anna-jonsson",
+    "division": "women",
+    "name": "Anna Jönsson",
+    "pseudonym": "Anno Jünsson",
+    "sailNumbers": [
+      "S-78"
+    ]
+  },
+  {
+    "id": "w:annamaria-zollet",
+    "division": "women",
+    "name": "Annamaria Zollet",
+    "pseudonym": "Annamario Zullet",
+    "sailNumbers": [
+      "I-908"
+    ]
+  },
+  {
+    "id": "w:arrianne-aukes",
+    "division": "women",
+    "name": "Arrianne Aukes",
+    "pseudonym": "Arrianna Eukes",
+    "sailNumbers": [
+      "H-131"
+    ]
+  },
+  {
+    "id": "w:astrid-muldoon",
+    "division": "women",
+    "name": "Astrid Muldoon",
+    "pseudonym": "Astrit Moldoon",
+    "sailNumbers": [
+      "F-002"
+    ]
+  },
+  {
+    "id": "w:bijou-shahmirian",
+    "division": "women",
+    "name": "Bijou Shahmirian",
+    "pseudonym": "Bijoo Shehmirian",
+    "sailNumbers": [
+      "AUT-707"
+    ]
+  },
+  {
+    "id": "w:birgit-rieger",
+    "division": "women",
+    "name": "Birgit Rieger",
+    "pseudonym": "Birgid Ryeger",
+    "sailNumbers": [
+      "AUT-32"
+    ]
+  },
+  {
+    "id": "w:britta-kuhn",
+    "division": "women",
+    "name": "Britta Kühn",
+    "pseudonym": "Britto Köhn",
+    "sailNumbers": [
+      "G-506"
+    ]
+  },
+  {
+    "id": "w:carina-staltner",
+    "division": "women",
+    "name": "Carina Staltner",
+    "pseudonym": "Carino Steltner",
+    "sailNumbers": [
+      "AUT-25"
+    ]
+  },
+  {
+    "id": "w:chantale-pottgens",
+    "division": "women",
+    "name": "Chantale Pöttgens",
+    "pseudonym": "Chantala Püttgens",
+    "sailNumbers": [
+      "G-65"
+    ]
+  },
+  {
+    "id": "w:clare-elliott",
+    "division": "women",
+    "name": "Clare Elliott",
+    "pseudonym": "Clara Alliott",
+    "sailNumbers": [
+      "K-101"
+    ]
+  },
+  {
+    "id": "w:daida-ruano-moreno",
+    "division": "women",
+    "name": "Daida Ruano Moreno",
+    "pseudonym": "Daido Ruano Mureno",
+    "sailNumbers": [
+      "E-64"
+    ]
+  },
+  {
+    "id": "w:daniela-simal",
+    "division": "women",
+    "name": "Daniela Simal",
+    "pseudonym": "Danielo Symal",
+    "sailNumbers": [
+      "NB-54"
+    ]
+  },
+  {
+    "id": "w:danielle-lucas",
+    "division": "women",
+    "name": "Danielle Lucas",
+    "pseudonym": "Daniella Locas",
+    "sailNumbers": [
+      "K-825"
+    ]
+  },
+  {
+    "id": "w:elena-dominick",
+    "division": "women",
+    "name": "Elena Dominick",
+    "pseudonym": "Eleno Duminick",
+    "sailNumbers": [
+      "G-1309"
+    ]
+  },
+  {
+    "id": "w:emma-johansson",
+    "division": "women",
+    "name": "Emma Johansson",
+    "pseudonym": "Emmo Juhansson",
+    "sailNumbers": [
+      "S-37"
+    ]
+  },
+  {
+    "id": "w:eva-chiochetti",
+    "division": "women",
+    "name": "Eva Chiochetti",
+    "pseudonym": "Evo Chyochetti",
+    "sailNumbers": [
+      "I-191"
+    ]
+  },
+  {
+    "id": "w:eva-oude-ophuis",
+    "division": "women",
+    "name": "Eva Oude Ophuis",
+    "pseudonym": "Evo Oude Uphuis",
+    "sailNumbers": [
+      "H-99"
+    ]
+  },
+  {
+    "id": "w:eva-wyss",
+    "division": "women",
+    "name": "Eva Wyss",
+    "pseudonym": "Evo Wiss",
+    "sailNumbers": [
+      "SUI-13"
+    ]
+  },
+  {
+    "id": "w:evi-tsape",
+    "division": "women",
+    "name": "Evi Tsape",
+    "pseudonym": "Evy Tsepe",
+    "sailNumbers": [
+      "GR-2"
+    ]
+  },
+  {
+    "id": "w:ewa-szulc",
+    "division": "women",
+    "name": "Ewa Szulc",
+    "pseudonym": "Ewo Szolc",
+    "sailNumbers": [
+      "POL"
+    ]
+  },
+  {
+    "id": "w:fleur-van-der-burg",
+    "division": "women",
+    "name": "Fleur Van der Burg",
+    "pseudonym": "Fleul Van der Borg",
+    "sailNumbers": [
+      "CUR-36"
+    ]
+  },
+  {
+    "id": "w:francesca-floris",
+    "division": "women",
+    "name": "Francesca Floris",
+    "pseudonym": "Francesco Fluris",
+    "sailNumbers": [
+      "ITA-2111",
+      "ITA-211"
+    ]
+  },
+  {
+    "id": "w:hanna-heidemann",
+    "division": "women",
+    "name": "Hanna Heidemann",
+    "pseudonym": "Hanno Haidemann",
+    "sailNumbers": [
+      "G-703"
+    ]
+  },
+  {
+    "id": "w:hanna-poschinger",
+    "division": "women",
+    "name": "Hanna Poschinger",
+    "pseudonym": "Hanno Puschinger",
+    "sailNumbers": [
+      "AUT-61"
+    ]
+  },
+  {
+    "id": "w:heike-reimann",
+    "division": "women",
+    "name": "Heike Reimann",
+    "pseudonym": "Heika Raimann",
+    "sailNumbers": [
+      "G-545"
+    ]
+  },
+  {
+    "id": "w:heleen-muijsers",
+    "division": "women",
+    "name": "Heleen Muijsers",
+    "pseudonym": "Heleem Moijsers",
+    "sailNumbers": [
+      "NED-206"
+    ]
+  },
+  {
+    "id": "w:helena-derya-lale",
+    "division": "women",
+    "name": "Helena Derya Lale",
+    "pseudonym": "Heleno Derya Lele",
+    "sailNumbers": [
+      "G-288"
+    ]
+  },
+  {
+    "id": "w:iballa-ruano-moreno",
+    "division": "women",
+    "name": "Iballa Ruano Moreno",
+    "pseudonym": "Iballo Ruano Mureno",
+    "sailNumbers": [
+      "E-63"
+    ]
+  },
+  {
+    "id": "w:jazzy-zwerus",
+    "division": "women",
+    "name": "Jazzy Zwerus",
+    "pseudonym": "Jazzi Zwarus",
+    "sailNumbers": [
+      "NED-180"
+    ]
+  },
+  {
+    "id": "w:johanna-rumenapp",
+    "division": "women",
+    "name": "Johanna Rümenapp",
+    "pseudonym": "Johanno Römenapp",
+    "sailNumbers": [
+      "GER-190"
+    ]
+  },
+  {
+    "id": "w:julia-pakosz",
+    "division": "women",
+    "name": "Julia Pakosz",
+    "pseudonym": "Julio Pekosz",
+    "sailNumbers": [
+      "POL-1819"
+    ]
+  },
+  {
+    "id": "w:junko-nagoshi",
+    "division": "women",
+    "name": "Junko Nagoshi",
+    "pseudonym": "Junka Negoshi",
+    "sailNumbers": [
+      "J-11"
+    ]
+  },
+  {
+    "id": "w:karin-jaggi",
+    "division": "women",
+    "name": "Karin Jaggi",
+    "pseudonym": "Karim Jeggi",
+    "sailNumbers": [
+      "SUI-14"
+    ]
+  },
+  {
+    "id": "w:laure-treboux",
+    "division": "women",
+    "name": "Laure Treboux",
+    "pseudonym": "Laura Traboux",
+    "sailNumbers": [
+      "SUI-4"
+    ]
+  },
+  {
+    "id": "w:lena-erdil",
+    "division": "women",
+    "name": "Lena Erdil",
+    "pseudonym": "Leno Ardil",
+    "sailNumbers": [
+      "GER-33"
+    ]
+  },
+  {
+    "id": "w:lene-kyte",
+    "division": "women",
+    "name": "Lene Kyte",
+    "pseudonym": "Lena Kite",
+    "sailNumbers": [
+      "N-13"
+    ]
+  },
+  {
+    "id": "w:lina-erpenstein",
+    "division": "women",
+    "name": "Lina Erpenstein",
+    "pseudonym": "Lino Arpenstein",
+    "sailNumbers": [
+      "G-3"
+    ]
+  },
+  {
+    "id": "w:lina-erzen",
+    "division": "women",
+    "name": "Lina Eržen",
+    "pseudonym": "Lino Aržen",
+    "sailNumbers": [
+      "SLO-51"
+    ]
+  },
+  {
+    "id": "w:lina-schmied",
+    "division": "women",
+    "name": "Lina Schmied",
+    "pseudonym": "Lino Schmyed",
+    "sailNumbers": [
+      "AUT-311"
+    ]
+  },
+  {
+    "id": "w:lisa-kloster",
+    "division": "women",
+    "name": "Lisa Kloster",
+    "pseudonym": "Liso Kluster",
+    "sailNumbers": [
+      "G-444"
+    ]
+  },
+  {
+    "id": "w:lizzie-smith",
+    "division": "women",
+    "name": "Lizzie Smith",
+    "pseudonym": "Lizzia Smyth",
+    "sailNumbers": [
+      "K-458"
+    ]
+  },
+  {
+    "id": "w:maaike-huvermann",
+    "division": "women",
+    "name": "Maaike Huvermann",
+    "pseudonym": "Maaika Hovermann",
+    "sailNumbers": [
+      "NED-10"
+    ]
+  },
+  {
+    "id": "w:maeli-cherel",
+    "division": "women",
+    "name": "Maeli Cherel",
+    "pseudonym": "Maely Charel",
+    "sailNumbers": [
+      "AUS-558"
+    ]
+  },
+  {
+    "id": "w:marie-tjernberg",
+    "division": "women",
+    "name": "Marie Tjernberg",
+    "pseudonym": "Maria Tjarnberg",
+    "sailNumbers": [
+      "S-6"
+    ]
+  },
+  {
+    "id": "w:marine-hunter",
+    "division": "women",
+    "name": "Marine Hunter",
+    "pseudonym": "Marina Honter",
+    "sailNumbers": [
+      "F-181"
+    ]
+  },
+  {
+    "id": "w:maxime-van-gent",
+    "division": "women",
+    "name": "Maxime van Gent",
+    "pseudonym": "Maxima van Gant",
+    "sailNumbers": [
+      "NB-22"
+    ]
+  },
+  {
+    "id": "w:michaela-malina",
+    "division": "women",
+    "name": "Michaela Malina",
+    "pseudonym": "Michaelo Melina",
+    "sailNumbers": [
+      "CZ-901"
+    ]
+  },
+  {
+    "id": "w:mio-anayama",
+    "division": "women",
+    "name": "Mio Anayama",
+    "pseudonym": "Mia Enayama",
+    "sailNumbers": [
+      "JPN-311"
+    ]
+  },
+  {
+    "id": "w:nayra-alonso",
+    "division": "women",
+    "name": "Nayra Alonso",
+    "pseudonym": "Nayro Elonso",
+    "sailNumbers": [
+      "E-4"
+    ]
+  },
+  {
+    "id": "w:nicole-bandini",
+    "division": "women",
+    "name": "Nicole Bandini",
+    "pseudonym": "Nicola Bendini",
+    "sailNumbers": [
+      "ITA-613"
+    ]
+  },
+  {
+    "id": "w:nina-tjernberg",
+    "division": "women",
+    "name": "Nina Tjernberg",
+    "pseudonym": "Nino Tjarnberg",
+    "sailNumbers": [
+      "S-165"
+    ]
+  },
+  {
+    "id": "w:oda-johanne-brodholt",
+    "division": "women",
+    "name": "Oda Johanne Brødholt",
+    "pseudonym": "Odo Johanne Brødhult",
+    "sailNumbers": [
+      "NOR-500"
+    ]
+  },
+  {
+    "id": "w:olga-malysheva",
+    "division": "women",
+    "name": "Olga Malysheva",
+    "pseudonym": "Olgo Melysheva",
+    "sailNumbers": [
+      "RUS-1"
+    ]
+  },
+  {
+    "id": "w:olya-raskina",
+    "division": "women",
+    "name": "Olya Raskina",
+    "pseudonym": "Olyo Reskina",
+    "sailNumbers": [
+      "14"
+    ]
+  },
+  {
+    "id": "w:rolien-caers",
+    "division": "women",
+    "name": "Rolien Caers",
+    "pseudonym": "Roliem Ceers",
+    "sailNumbers": [
+      "B-74"
+    ]
+  },
+  {
+    "id": "w:salome-fournier",
+    "division": "women",
+    "name": "Salome Fournier",
+    "pseudonym": "Saloma Fuurnier",
+    "sailNumbers": [
+      "F-59"
+    ]
+  },
+  {
+    "id": "w:sarah-jackson",
+    "division": "women",
+    "name": "Sarah Jackson",
+    "pseudonym": "Saroh Jeckson",
+    "sailNumbers": [
+      "GBR-71"
+    ]
+  },
+  {
+    "id": "w:sarah-quita-offringa",
+    "division": "women",
+    "name": "Sarah-Quita Offringa",
+    "pseudonym": "Sarah-Quito Uffringa",
+    "sailNumbers": [
+      "ARU-91"
+    ]
+  },
+  {
+    "id": "w:silvia-alba-orozco",
+    "division": "women",
+    "name": "Silvia Alba Orozco",
+    "pseudonym": "Silvio Alba Urozco",
+    "sailNumbers": [
+      "E-67"
+    ]
+  },
+  {
+    "id": "w:stefania-fumagalli",
+    "division": "women",
+    "name": "Stefania Fumagalli",
+    "pseudonym": "Stefanio Fomagalli",
+    "sailNumbers": [
+      "ITA-221"
+    ]
+  },
+  {
+    "id": "w:steffi-wahl",
+    "division": "women",
+    "name": "Steffi Wahl",
+    "pseudonym": "Steffy Wehl",
+    "sailNumbers": [
+      "G-303"
+    ]
+  },
+  {
+    "id": "w:sterre-meijer",
+    "division": "women",
+    "name": "Sterre Meijer",
+    "pseudonym": "Sterra Maijer",
+    "sailNumbers": [
+      "H-221"
+    ]
+  },
+  {
+    "id": "w:svetlana-martynova",
+    "division": "women",
+    "name": "Svetlana Martynova",
+    "pseudonym": "Svetlano Mertynova",
+    "sailNumbers": [
+      "RUS-10"
+    ]
+  },
+  {
+    "id": "w:ulrike-holzl",
+    "division": "women",
+    "name": "Ulrike Hölzl",
+    "pseudonym": "Ulrika Hülzl",
+    "sailNumbers": [
+      "AT-123"
+    ]
+  },
+  {
+    "id": "w:vicky-sanchez",
+    "division": "women",
+    "name": "Vicky Sanchez",
+    "pseudonym": "Vicki Senchez",
+    "sailNumbers": [
+      "E-360"
+    ]
+  },
+  {
+    "id": "w:waka-nishida",
+    "division": "women",
+    "name": "Waka Nishida",
+    "pseudonym": "Wako Nyshida",
+    "sailNumbers": [
+      "J-700"
+    ]
+  },
+  {
+    "id": "w:xenia-kessler",
+    "division": "women",
+    "name": "Xenia Kessler",
+    "pseudonym": "Xenio Kassler",
+    "sailNumbers": [
+      "D-211"
+    ]
+  },
+  {
+    "id": "w:yolanda-freites-de-brendt",
+    "division": "women",
+    "name": "Yolanda Freites de Brendt",
+    "pseudonym": "Yolando Freites de Brandt",
+    "sailNumbers": [
+      "V-26"
+    ]
+  },
+  {
+    "id": "w:ziva-batis",
+    "division": "women",
+    "name": "Živa Batis",
+    "pseudonym": "Živo Betis",
+    "sailNumbers": [
+      "SLO-390"
+    ]
+  },
+  {
+    "id": "w:ziva-trajbaric",
+    "division": "women",
+    "name": "Živa Trajbarič",
+    "pseudonym": "Živo Trejbarič",
+    "sailNumbers": [
+      "SLO-21"
+    ]
+  },
+  {
+    "id": "w:zofia-roguska",
+    "division": "women",
+    "name": "Zofia Roguska",
+    "pseudonym": "Zofio Ruguska",
+    "sailNumbers": [
+      "POL-31"
+    ]
+  }
+]

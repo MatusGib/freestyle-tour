@@ -1,0 +1,893 @@
+{
+  "season": 2009,
+  "events": [
+    {
+      "id": 154,
+      "slug": "2009-costa-teguise-lanzarote",
+      "name": "2009 Costa Teguise, Lanzarote",
+      "start": "2009-06-30",
+      "end": "2009-07-04",
+      "location": "Las Chucharas, Costa Teguise, Lanzarote, Canary Islands",
+      "divisions": {
+        "men": {
+          "entries": [
+            {
+              "rider": "m:jose-estredo",
+              "name": "Jose \"Gollito\" Estredo",
+              "sailNumber": "V-10",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "m:kiri-thode",
+              "name": "Kiri Thode",
+              "sailNumber": "NB-61",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "m:antxon-otaegui",
+              "name": "Antxon Otaegui",
+              "sailNumber": "E-169",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "m:marcilio-browne",
+              "name": "Marcilio Browne",
+              "sailNumber": "BRA-105",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "m:everon-frans",
+              "name": "Everon (Tonky) Frans",
+              "sailNumber": "NB-7",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "m:steven-van-broeckhoven",
+              "name": "Steven Van Broeckhoven",
+              "sailNumber": "B-72",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "m:elton-frans",
+              "name": "Elton (Taty) Frans",
+              "sailNumber": "NB-9",
+              "place": 7,
+              "points": 1902
+            },
+            {
+              "rider": "m:nicolas-akgazciyan",
+              "name": "Nicolas Akgazciyan",
+              "sailNumber": "F-400",
+              "place": 8,
+              "points": 1869
+            },
+            {
+              "rider": "m:andre-paskowski",
+              "name": "Andre Paskowski",
+              "sailNumber": "G-2",
+              "place": 9,
+              "points": 1836
+            },
+            {
+              "rider": "m:antony-ruenes",
+              "name": "Antony Ruenes",
+              "sailNumber": "F-85",
+              "place": 10,
+              "points": 1803
+            },
+            {
+              "rider": "m:andy-bubble-chambers",
+              "name": "Andy 'Bubble' Chambers",
+              "sailNumber": "K-540",
+              "place": 11,
+              "points": 1770
+            },
+            {
+              "rider": "m:leo-ray",
+              "name": "Leo Ray",
+              "sailNumber": "F-200",
+              "place": 12,
+              "points": 1737
+            },
+            {
+              "rider": "m:yegor-popretinskiy",
+              "name": "Yegor Popretinskiy",
+              "sailNumber": "RUS-11",
+              "place": 13,
+              "points": 1704
+            },
+            {
+              "rider": "m:philip-soltysiak",
+              "name": "Philip Soltysiak",
+              "sailNumber": "CAN-9",
+              "place": 14,
+              "points": 1671
+            },
+            {
+              "rider": "m:maarten-van-ochten",
+              "name": "Maarten van Ochten",
+              "sailNumber": "H-73",
+              "place": 15,
+              "points": 1622
+            },
+            {
+              "rider": "m:mattia-pedrani",
+              "name": "Mattia Pedrani",
+              "sailNumber": "I-00",
+              "place": 15,
+              "points": 1622
+            },
+            {
+              "rider": "m:andraz-zan",
+              "name": "Andraž Žan",
+              "sailNumber": "SLO-49",
+              "place": 17,
+              "points": 1572
+            },
+            {
+              "rider": "m:edvan-souza",
+              "name": "Edvan Souza",
+              "sailNumber": "BRA-250",
+              "place": 18,
+              "points": 1490
+            },
+            {
+              "rider": "m:ian-mouro-lemos",
+              "name": "Ian Mouro Lemos",
+              "sailNumber": "BRA-85",
+              "place": 18,
+              "points": 1490
+            },
+            {
+              "rider": "m:michael-rossmeier",
+              "name": "Michael Roßmeier",
+              "sailNumber": "AUT-256",
+              "place": 18,
+              "points": 1490
+            },
+            {
+              "rider": "m:quincy-offringa",
+              "name": "Quincy Offringa",
+              "sailNumber": "ARU-10",
+              "place": 18,
+              "points": 1490
+            },
+            {
+              "rider": "m:danilo-menezes-da-silva",
+              "name": "Danilo Menezes da Silva",
+              "sailNumber": "BRA-83",
+              "place": 22,
+              "points": 1391
+            },
+            {
+              "rider": "m:francisco-teixeira",
+              "name": "Francisco Teixeira",
+              "sailNumber": "BRA-64",
+              "place": 22,
+              "points": 1391
+            },
+            {
+              "rider": "m:arthur-pollet",
+              "name": "Arthur Pollet",
+              "sailNumber": "F-00",
+              "place": 24,
+              "points": 1325
+            },
+            {
+              "rider": "m:levi-lenz",
+              "name": "Levi Lenz",
+              "sailNumber": "BRA-91",
+              "place": 24,
+              "points": 1325
+            },
+            {
+              "rider": "m:tomasz-wieczorek",
+              "name": "Tomasz Wieczorek",
+              "sailNumber": "POL-589",
+              "place": 26,
+              "points": 1275
+            },
+            {
+              "rider": "m:camilo-galeano",
+              "name": "Camilo Galeano",
+              "sailNumber": "C-64",
+              "place": 27,
+              "points": 1176
+            },
+            {
+              "rider": "m:dai-nagamine",
+              "name": "Dai Nagamine",
+              "sailNumber": "J-111",
+              "place": 27,
+              "points": 1176
+            },
+            {
+              "rider": "m:damien-potier",
+              "name": "Damien Potier",
+              "sailNumber": "F-01",
+              "place": 27,
+              "points": 1176
+            },
+            {
+              "rider": "m:fernando-rioja-vargas",
+              "name": "Fernando Rioja Vargas",
+              "sailNumber": "E-126",
+              "place": 27,
+              "points": 1176
+            },
+            {
+              "rider": "m:joao-henrique",
+              "name": "João \"Janjão\" Henrique",
+              "sailNumber": "BRA-291",
+              "place": 27,
+              "points": 1176
+            },
+            {
+              "rider": "m:hiroumi-yoshida",
+              "name": "Hiroumi Yoshida",
+              "sailNumber": "J-117",
+              "place": 32,
+              "points": 1077
+            }
+          ],
+          "ladders": []
+        },
+        "women": {
+          "entries": [
+            {
+              "rider": "w:sarah-quita-offringa",
+              "name": "Sarah-Quita Offringa",
+              "sailNumber": "ARU-91",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "w:junko-nagoshi",
+              "name": "Junko Nagoshi",
+              "sailNumber": "J-11",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "w:daida-ruano-moreno",
+              "name": "Daida Ruano Moreno",
+              "sailNumber": "E-64",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "w:laure-treboux",
+              "name": "Laure Treboux",
+              "sailNumber": "SUI-4",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "w:yolanda-freites-de-brendt",
+              "name": "Yolanda Freites de Brendt",
+              "sailNumber": "V-26",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "w:nayra-alonso",
+              "name": "Nayra Alonso",
+              "sailNumber": "E-4",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "w:iballa-ruano-moreno",
+              "name": "Iballa Ruano Moreno",
+              "sailNumber": "E-63",
+              "place": 7,
+              "points": 1902
+            },
+            {
+              "rider": "w:silvia-alba-orozco",
+              "name": "Silvia Alba Orozco",
+              "sailNumber": "E-67",
+              "place": 8,
+              "points": 1869
+            },
+            {
+              "rider": "w:olya-raskina",
+              "name": "Olya Raskina",
+              "sailNumber": "14",
+              "place": 9,
+              "points": 1836
+            },
+            {
+              "rider": "w:michaela-malina",
+              "name": "Michaela Malina",
+              "sailNumber": "CZ-901",
+              "place": 10,
+              "points": 1787
+            },
+            {
+              "rider": "w:xenia-kessler",
+              "name": "Xenia Kessler",
+              "sailNumber": "D-211",
+              "place": 10,
+              "points": 1787
+            }
+          ],
+          "ladders": []
+        }
+      }
+    },
+    {
+      "id": 156,
+      "slug": "2009-sotavento-fuerteventura",
+      "name": "2009 Sotavento Fuerteventura",
+      "start": "2009-07-22",
+      "end": "2009-08-01",
+      "location": "Sotavento, Fuerteventura",
+      "divisions": {
+        "men": {
+          "entries": [
+            {
+              "rider": "m:jose-estredo",
+              "name": "Jose \"Gollito\" Estredo",
+              "sailNumber": "V-10",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "m:everon-frans",
+              "name": "Everon (Tonky) Frans",
+              "sailNumber": "NB-7",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "m:marcilio-browne",
+              "name": "Marcilio Browne",
+              "sailNumber": "BRA-105",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "m:steven-van-broeckhoven",
+              "name": "Steven Van Broeckhoven",
+              "sailNumber": "B-72",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "m:kiri-thode",
+              "name": "Kiri Thode",
+              "sailNumber": "NB-61",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "m:andre-paskowski",
+              "name": "Andre Paskowski",
+              "sailNumber": "G-2",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "m:normen-gunzlein",
+              "name": "Normen Günzlein",
+              "sailNumber": "G-186",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "m:philip-soltysiak",
+              "name": "Philip Soltysiak",
+              "sailNumber": "CAN-9",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "m:davy-scheffers",
+              "name": "Davy Scheffers",
+              "sailNumber": "H-311",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:elton-frans",
+              "name": "Elton (Taty) Frans",
+              "sailNumber": "NB-9",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:leo-ray",
+              "name": "Leo Ray",
+              "sailNumber": "F-200",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:quincy-offringa",
+              "name": "Quincy Offringa",
+              "sailNumber": "ARU-10",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:andraz-zan",
+              "name": "Andraž Žan",
+              "sailNumber": "SLO-49",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:jakub-kosmowski",
+              "name": "Jakub Kosmowski",
+              "sailNumber": "POL-288",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:levi-lenz",
+              "name": "Levi Lenz",
+              "sailNumber": "BRA-91",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:yegor-popretinskiy",
+              "name": "Yegor Popretinskiy",
+              "sailNumber": "RUS-11",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:adrien-bosson",
+              "name": "Adrien Bosson",
+              "sailNumber": "F-296",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:bjorn-saragoza",
+              "name": "Björn Saragoza",
+              "sailNumber": "NB-11",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:edvan-souza",
+              "name": "Edvan Souza",
+              "sailNumber": "BRA-250",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:ian-mouro-lemos",
+              "name": "Ian Mouro Lemos",
+              "sailNumber": "BRA-85",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:joao-henrique",
+              "name": "João \"Janjão\" Henrique",
+              "sailNumber": "BRA-291",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:loic-viandier",
+              "name": "Loïc Viandier",
+              "sailNumber": "F-2",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:michael-rossmeier",
+              "name": "Michael Roßmeier",
+              "sailNumber": "AUT-256",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:rafael-cervero-climent",
+              "name": "Rafael Cervero Climent",
+              "sailNumber": "E-13",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:arthur-pollet",
+              "name": "Arthur Pollet",
+              "sailNumber": "F-00",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:danilo-menezes-da-silva",
+              "name": "Danilo Menezes da Silva",
+              "sailNumber": "BRA-83",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:dominik-kovarik",
+              "name": "Dominik Kovarik",
+              "sailNumber": "CZ-23",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:eric-sanllehy",
+              "name": "Eric Sanllehy",
+              "sailNumber": "CAT-111",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:francisco-teixeira",
+              "name": "Francisco Teixeira",
+              "sailNumber": "BRA-64",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:kenneth-danielsen",
+              "name": "Kenneth Danielsen",
+              "sailNumber": "D-38",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:mattia-pedrani",
+              "name": "Mattia Pedrani",
+              "sailNumber": "I-00",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:mauricio-alvarez",
+              "name": "Mauricio Alvarez",
+              "sailNumber": "AUT-86",
+              "place": 25,
+              "points": 1193
+            },
+            {
+              "rider": "m:antony-ruenes",
+              "name": "Antony Ruenes",
+              "sailNumber": "F-85",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:dai-nagamine",
+              "name": "Dai Nagamine",
+              "sailNumber": "J-111",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:damien-potier",
+              "name": "Damien Potier",
+              "sailNumber": "F-01",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:lorenz-forstenlechner",
+              "name": "Lorenz Forstenlechner",
+              "sailNumber": "AUT-7",
+              "place": 33,
+              "points": 0
+            },
+            {
+              "rider": "m:nicola-spadea",
+              "name": "Nicola Spadea",
+              "sailNumber": "ITA-44",
+              "place": 33,
+              "points": 0
+            }
+          ],
+          "ladders": []
+        },
+        "women": {
+          "entries": [
+            {
+              "rider": "w:sarah-quita-offringa",
+              "name": "Sarah-Quita Offringa",
+              "sailNumber": "ARU-91",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "w:daida-ruano-moreno",
+              "name": "Daida Ruano Moreno",
+              "sailNumber": "E-64",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "w:yolanda-freites-de-brendt",
+              "name": "Yolanda Freites de Brendt",
+              "sailNumber": "V-26",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "w:nayra-alonso",
+              "name": "Nayra Alonso",
+              "sailNumber": "E-4",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "w:iballa-ruano-moreno",
+              "name": "Iballa Ruano Moreno",
+              "sailNumber": "E-63",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "w:junko-nagoshi",
+              "name": "Junko Nagoshi",
+              "sailNumber": "J-11",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "w:heike-reimann",
+              "name": "Heike Reimann",
+              "sailNumber": "G-545",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "w:olya-raskina",
+              "name": "Olya Raskina",
+              "sailNumber": "14",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "w:annamaria-zollet",
+              "name": "Annamaria Zollet",
+              "sailNumber": "I-908",
+              "place": 9,
+              "points": 1820
+            },
+            {
+              "rider": "w:laure-treboux",
+              "name": "Laure Treboux",
+              "sailNumber": "SUI-4",
+              "place": 9,
+              "points": 1820
+            }
+          ],
+          "ladders": []
+        }
+      }
+    },
+    {
+      "id": 159,
+      "slug": "2009-sylt-germany",
+      "name": "2009 Sylt, Germany",
+      "start": "2009-09-25",
+      "end": "2009-10-04",
+      "location": "Westerland, Sylt, Germany",
+      "divisions": {
+        "men": {
+          "entries": [
+            {
+              "rider": "m:elton-frans",
+              "name": "Elton (Taty) Frans",
+              "sailNumber": "NB-9",
+              "place": 1,
+              "points": 2100
+            },
+            {
+              "rider": "m:kiri-thode",
+              "name": "Kiri Thode",
+              "sailNumber": "NB-61",
+              "place": 2,
+              "points": 2067
+            },
+            {
+              "rider": "m:everon-frans",
+              "name": "Everon (Tonky) Frans",
+              "sailNumber": "NB-7",
+              "place": 3,
+              "points": 2034
+            },
+            {
+              "rider": "m:jose-estredo",
+              "name": "Jose \"Gollito\" Estredo",
+              "sailNumber": "V-10",
+              "place": 4,
+              "points": 2001
+            },
+            {
+              "rider": "m:nicolas-akgazciyan",
+              "name": "Nicolas Akgazciyan",
+              "sailNumber": "F-400",
+              "place": 5,
+              "points": 1968
+            },
+            {
+              "rider": "m:yegor-popretinskiy",
+              "name": "Yegor Popretinskiy",
+              "sailNumber": "RUS-11",
+              "place": 6,
+              "points": 1935
+            },
+            {
+              "rider": "m:marcilio-browne",
+              "name": "Marcilio Browne",
+              "sailNumber": "BRA-105",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "m:steven-van-broeckhoven",
+              "name": "Steven Van Broeckhoven",
+              "sailNumber": "B-72",
+              "place": 7,
+              "points": 1886
+            },
+            {
+              "rider": "m:andre-paskowski",
+              "name": "Andre Paskowski",
+              "sailNumber": "G-2",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:michael-rossmeier",
+              "name": "Michael Roßmeier",
+              "sailNumber": "AUT-256",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:normen-gunzlein",
+              "name": "Normen Günzlein",
+              "sailNumber": "G-186",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:thomas-traversa",
+              "name": "Thomas Traversa",
+              "sailNumber": "F-3",
+              "place": 9,
+              "points": 1787
+            },
+            {
+              "rider": "m:ian-mouro-lemos",
+              "name": "Ian Mouro Lemos",
+              "sailNumber": "BRA-85",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:leo-ray",
+              "name": "Leo Ray",
+              "sailNumber": "F-200",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:mattia-pedrani",
+              "name": "Mattia Pedrani",
+              "sailNumber": "I-00",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:quincy-offringa",
+              "name": "Quincy Offringa",
+              "sailNumber": "ARU-10",
+              "place": 13,
+              "points": 1655
+            },
+            {
+              "rider": "m:andraz-zan",
+              "name": "Andraž Žan",
+              "sailNumber": "SLO-49",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:antxon-otaegui",
+              "name": "Antxon Otaegui",
+              "sailNumber": "E-169",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:dennis-muller",
+              "name": "Dennis Müller",
+              "sailNumber": "GER-89",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:jakub-kosmowski",
+              "name": "Jakub Kosmowski",
+              "sailNumber": "POL-288",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:johannes-witte",
+              "name": "Johannes Witte",
+              "sailNumber": "G-687",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:kenneth-danielsen",
+              "name": "Kenneth Danielsen",
+              "sailNumber": "D-38",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:levi-lenz",
+              "name": "Levi Lenz",
+              "sailNumber": "BRA-91",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:philip-soltysiak",
+              "name": "Philip Soltysiak",
+              "sailNumber": "CAN-9",
+              "place": 17,
+              "points": 1457
+            },
+            {
+              "rider": "m:arthur-pollet",
+              "name": "Arthur Pollet",
+              "sailNumber": "F-00",
+              "place": 25,
+              "points": 1242
+            },
+            {
+              "rider": "m:diony-guadagnino",
+              "name": "Diony Guadagnino",
+              "sailNumber": "V-69",
+              "place": 25,
+              "points": 1242
+            },
+            {
+              "rider": "m:edvan-souza",
+              "name": "Edvan Souza",
+              "sailNumber": "BRA-250",
+              "place": 25,
+              "points": 1242
+            },
+            {
+              "rider": "m:fabian-weber",
+              "name": "Fabian Weber",
+              "sailNumber": "G-999",
+              "place": 25,
+              "points": 1242
+            },
+            {
+              "rider": "m:paul-zeper",
+              "name": "Paul Zeper",
+              "sailNumber": "H-115",
+              "place": 25,
+              "points": 1242
+            }
+          ],
+          "ladders": []
+        }
+      }
+    }
+  ]
+}

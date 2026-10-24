@@ -1,0 +1,2047 @@
+{
+  "season": 2023,
+  "events": [
+    {
+      "id": 340,
+      "slug": "2023-fuerteventura-pwa-grand-slam",
+      "name": "2023 Fuerteventura PWA Grand Slam ******",
+      "start": "2023-07-27",
+      "end": "2023-08-05",
+      "location": "Sotavento, Fuerteventura",
+      "divisions": {
+        "men": {
+          "entries": [
+            {
+              "rider": "m:yentel-caers",
+              "name": "Yentel Caers",
+              "sailNumber": "B-16",
+              "place": 1,
+              "points": 10000
+            },
+            {
+              "rider": "m:adrien-bosson",
+              "name": "Adrien Bosson",
+              "sailNumber": "F-296",
+              "place": 2,
+              "points": 8500
+            },
+            {
+              "rider": "m:antony-ruenes",
+              "name": "Antony Ruenes",
+              "sailNumber": "F-85",
+              "place": 3,
+              "points": 7650
+            },
+            {
+              "rider": "m:amado-vrieswijk",
+              "name": "Amado Vrieswijk",
+              "sailNumber": "NB-20",
+              "place": 4,
+              "points": 6885
+            },
+            {
+              "rider": "m:jacopo-testa",
+              "name": "Jacopo Testa",
+              "sailNumber": "ITA-261",
+              "place": 5,
+              "points": 6370
+            },
+            {
+              "rider": "m:lennart-neubauer",
+              "name": "Lennart Neubauer",
+              "sailNumber": "GRE-734",
+              "place": 6,
+              "points": 5930
+            },
+            {
+              "rider": "m:steven-van-broeckhoven",
+              "name": "Steven Van Broeckhoven",
+              "sailNumber": "B-72",
+              "place": 7,
+              "points": 5285
+            },
+            {
+              "rider": "m:youp-schmit",
+              "name": "Youp Schmit",
+              "sailNumber": "NB-12",
+              "place": 7,
+              "points": 5285
+            },
+            {
+              "rider": "m:antoine-albert",
+              "name": "Antoine Albert",
+              "sailNumber": "NC-21",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:balz-muller",
+              "name": "Balz Müller",
+              "sailNumber": "SUI-21",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:niclas-nebelung",
+              "name": "Niclas Nebelung",
+              "sailNumber": "G-584",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:sam-esteve",
+              "name": "Sam Esteve",
+              "sailNumber": "F-79",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:george-grisley",
+              "name": "George Grisley",
+              "sailNumber": "K-468",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:nicolas-akgazciyan",
+              "name": "Nicolas Akgazciyan",
+              "sailNumber": "F-400",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:nil-bacon",
+              "name": "Nil Bacon",
+              "sailNumber": "F-712",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:takuma-sugi",
+              "name": "Takuma Sugi",
+              "sailNumber": "J-7",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:bodhi-kempen",
+              "name": "Bodhi Kempen",
+              "sailNumber": "H-242",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:corto-dumond",
+              "name": "Corto Dumond",
+              "sailNumber": "NC-26",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:dieter-van-der-eyken",
+              "name": "Dieter Van der Eyken",
+              "sailNumber": "B-35",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:maarten-molenaar",
+              "name": "Maarten Molenaar",
+              "sailNumber": "POL-510",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:marino-gil-gherardi",
+              "name": "Marino Gil Gherardi",
+              "sailNumber": "E-959",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:michael-chovan",
+              "name": "Michael Chovan",
+              "sailNumber": "SVK-70",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:robin-van-linden",
+              "name": "Robin Van Linden",
+              "sailNumber": "H-102",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:takumi-moriya",
+              "name": "Takumi Moriya",
+              "sailNumber": "J-171",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:dudu-levi",
+              "name": "Dudu Levi",
+              "sailNumber": "ISR-421",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:elton-frans",
+              "name": "Elton (Taty) Frans",
+              "sailNumber": "NB-9",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:ilay-bamnolker",
+              "name": "Ilay Bamnolker",
+              "sailNumber": "ISR-7",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:liam-dunkerbeck-morales",
+              "name": "Liam Dunkerbeck Morales",
+              "sailNumber": "E-11",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:nicolo-di-marco",
+              "name": "Nicolo Di Marco",
+              "sailNumber": "ITA-11",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:primus-sorling",
+              "name": "Primus Sorling",
+              "sailNumber": "SWE-333",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:tigo-kort",
+              "name": "Tigo Kort",
+              "sailNumber": "NED-195",
+              "place": 25,
+              "points": 1784
+            },
+            {
+              "rider": "m:zohar-torfstein",
+              "name": "Zohar Torfstein",
+              "sailNumber": "ISR-14",
+              "place": 25,
+              "points": 1784
+            }
+          ],
+          "ladders": [
+            {
+              "title": "Mens 2023 Fuerteventura PWA Grand Slam ****** Mens Freestyle elimination 1(double)",
+              "double": true,
+              "rounds": [
+                [
+                  {
+                    "heat": "18 a",
+                    "riders": [
+                      "m:michael-chovan",
+                      "m:zohar-torfstein"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "18 b",
+                    "riders": [
+                      "m:marino-gil-gherardi",
+                      "m:liam-dunkerbeck-morales"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "19 a",
+                    "riders": [
+                      "m:maarten-molenaar",
+                      "m:elton-frans"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "19 b",
+                    "riders": [
+                      "m:dudu-levi",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "20 a",
+                    "riders": [
+                      "m:jacopo-testa",
+                      "m:nicolo-di-marco"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "20 b",
+                    "riders": [
+                      "m:nicolas-akgazciyan",
+                      "m:ilay-bamnolker"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "21 a",
+                    "riders": [
+                      "m:takumi-moriya",
+                      "m:primus-sorling"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "21 b",
+                    "riders": [
+                      "m:tigo-kort",
+                      "m:nil-bacon"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "22 a",
+                    "riders": [
+                      "m:takuma-sugi",
+                      "m:michael-chovan"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "22 b",
+                    "riders": [
+                      "m:steven-van-broeckhoven",
+                      "m:marino-gil-gherardi"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "23 a",
+                    "riders": [
+                      "m:george-grisley",
+                      "m:maarten-molenaar"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "23 b",
+                    "riders": [
+                      "m:bodhi-kempen",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "24 a",
+                    "riders": [
+                      "m:dieter-van-der-eyken",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "24 b",
+                    "riders": [
+                      "m:corto-dumond",
+                      "m:nicolas-akgazciyan"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "25 a",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:takumi-moriya"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "25 b",
+                    "riders": [
+                      "m:robin-van-linden",
+                      "m:nil-bacon"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "26 a",
+                    "riders": [
+                      "m:takuma-sugi",
+                      "m:steven-van-broeckhoven"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "26 b",
+                    "riders": [
+                      "m:george-grisley",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "27 a",
+                    "riders": [
+                      "m:jacopo-testa",
+                      "m:nicolas-akgazciyan"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "27 b",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:nil-bacon"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "28 a",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:steven-van-broeckhoven"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "28 b",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "29 a",
+                    "riders": [
+                      "m:balz-muller",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "29 b",
+                    "riders": [
+                      "m:niclas-nebelung",
+                      "m:youp-schmit"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "30 a",
+                    "riders": [
+                      "m:steven-van-broeckhoven",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "30 b",
+                    "riders": [
+                      "m:jacopo-testa",
+                      "m:youp-schmit"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "31",
+                    "riders": [
+                      "m:lennart-neubauer",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "32",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "33",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:amado-vrieswijk"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "34",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "35",
+                    "riders": [
+                      "m:adrien-bosson",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "36",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              "title": "Mens 2023 Fuerteventura PWA Grand Slam ****** Mens Freestyle elimination 1",
+              "double": false,
+              "rounds": [
+                [
+                  {
+                    "heat": "1 a",
+                    "riders": [
+                      "m:takuma-sugi",
+                      "m:nil-bacon"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "1 b",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:tigo-kort"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "2 a",
+                    "riders": [
+                      "m:niclas-nebelung",
+                      "m:primus-sorling"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "2 b",
+                    "riders": [
+                      "m:steven-van-broeckhoven",
+                      "m:takumi-moriya"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "3 a",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:ilay-bamnolker"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "3 b",
+                    "riders": [
+                      "m:nicolas-akgazciyan",
+                      "m:george-grisley"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "4 a",
+                    "riders": [
+                      "m:bodhi-kempen",
+                      "m:nicolo-di-marco"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "4 b",
+                    "riders": [
+                      "m:jacopo-testa",
+                      "m:balz-muller"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "5 a",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "5 b",
+                    "riders": [
+                      "m:dieter-van-der-eyken",
+                      "m:dudu-levi"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "6 a",
+                    "riders": [
+                      "m:elton-frans",
+                      "m:corto-dumond"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "6 b",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:maarten-molenaar"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "7 a",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:liam-dunkerbeck-morales"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "7 b",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:marino-gil-gherardi"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "8 a",
+                    "riders": [
+                      "m:zohar-torfstein",
+                      "m:robin-van-linden"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "8 b",
+                    "riders": [
+                      "m:adrien-bosson",
+                      "m:michael-chovan"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "9 a",
+                    "riders": [
+                      "m:takuma-sugi",
+                      "m:antony-ruenes"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "9 b",
+                    "riders": [
+                      "m:niclas-nebelung",
+                      "m:steven-van-broeckhoven"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "10 a",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:george-grisley"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "10 b",
+                    "riders": [
+                      "m:bodhi-kempen",
+                      "m:balz-muller"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "11 a",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:dieter-van-der-eyken"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "11 b",
+                    "riders": [
+                      "m:corto-dumond",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "12 a",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:sam-esteve"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "12 b",
+                    "riders": [
+                      "m:robin-van-linden",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "13 a",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:niclas-nebelung"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "13 b",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:balz-muller"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "14 a",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "14 b",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "15 a",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:amado-vrieswijk"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "15 b",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "16",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "17",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        },
+        "women": {
+          "entries": [
+            {
+              "rider": "w:sarah-quita-offringa",
+              "name": "Sarah-Quita Offringa",
+              "sailNumber": "ARU-91",
+              "place": 1,
+              "points": 10000
+            },
+            {
+              "rider": "w:maaike-huvermann",
+              "name": "Maaike Huvermann",
+              "sailNumber": "NED-10",
+              "place": 2,
+              "points": 9900
+            },
+            {
+              "rider": "w:oda-johanne-brodholt",
+              "name": "Oda Johanne Brødholt",
+              "sailNumber": "NOR-500",
+              "place": 3,
+              "points": 9800
+            },
+            {
+              "rider": "w:lisa-kloster",
+              "name": "Lisa Kloster",
+              "sailNumber": "G-444",
+              "place": 4,
+              "points": 9700
+            },
+            {
+              "rider": "w:lina-erpenstein",
+              "name": "Lina Erpenstein",
+              "sailNumber": "G-3",
+              "place": 5,
+              "points": 9600
+            },
+            {
+              "rider": "w:arrianne-aukes",
+              "name": "Arrianne Aukes",
+              "sailNumber": "H-131",
+              "place": 6,
+              "points": 9500
+            },
+            {
+              "rider": "w:bijou-shahmirian",
+              "name": "Bijou Shahmirian",
+              "sailNumber": "AUT-707",
+              "place": 7,
+              "points": 9350
+            },
+            {
+              "rider": "w:olya-raskina",
+              "name": "Olya Raskina",
+              "sailNumber": "14",
+              "place": 7,
+              "points": 9350
+            }
+          ],
+          "ladders": [
+            {
+              "title": "Womens 2023 Fuerteventura PWA Grand Slam ****** Womens Freestyle elimination 1(double)",
+              "double": true,
+              "rounds": [
+                [
+                  {
+                    "heat": "30 a",
+                    "riders": [
+                      "w:bijou-shahmirian",
+                      "w:arrianne-aukes"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "30 b",
+                    "riders": [
+                      "w:lisa-kloster",
+                      "w:olya-raskina"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "31",
+                    "riders": [
+                      "w:arrianne-aukes",
+                      "w:lisa-kloster"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "32",
+                    "riders": [
+                      "w:lina-erpenstein",
+                      "w:lisa-kloster"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "33",
+                    "riders": [
+                      "w:maaike-huvermann",
+                      "w:lisa-kloster"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "34",
+                    "riders": [
+                      "w:oda-johanne-brodholt",
+                      "w:maaike-huvermann"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "35",
+                    "riders": [
+                      "w:sarah-quita-offringa",
+                      "w:maaike-huvermann"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "36",
+                    "riders": [
+                      "w:sarah-quita-offringa",
+                      "w:maaike-huvermann"
+                    ],
+                    "ranks": [
+                      1,
+                      1
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              "title": "Womens 2023 Fuerteventura PWA Grand Slam ****** Womens Freestyle elimination 1",
+              "double": false,
+              "rounds": [
+                [
+                  {
+                    "heat": "13 a",
+                    "riders": [
+                      "w:olya-raskina",
+                      "w:oda-johanne-brodholt"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "13 b",
+                    "riders": [
+                      "w:lisa-kloster",
+                      "w:maaike-huvermann"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "14 a",
+                    "riders": [
+                      "w:lina-erpenstein",
+                      "w:arrianne-aukes"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "14 b",
+                    "riders": [
+                      "w:bijou-shahmirian",
+                      "w:sarah-quita-offringa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "15 a",
+                    "riders": [
+                      "w:oda-johanne-brodholt",
+                      "w:maaike-huvermann"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "15 b",
+                    "riders": [
+                      "w:lina-erpenstein",
+                      "w:sarah-quita-offringa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "16",
+                    "riders": [
+                      "w:maaike-huvermann",
+                      "w:lina-erpenstein"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "17",
+                    "riders": [
+                      "w:oda-johanne-brodholt",
+                      "w:sarah-quita-offringa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 342,
+      "slug": "schauinslandreisen-windsurf-world-cup-sylt-presented-by-got2b",
+      "name": "schauinslandreisen Windsurf World Cup Sylt, presented by got2b *******",
+      "start": "2023-09-22",
+      "end": "2023-10-01",
+      "location": "Westerland, Sylt, Germany",
+      "divisions": {
+        "men": {
+          "entries": [
+            {
+              "rider": "m:lennart-neubauer",
+              "name": "Lennart Neubauer",
+              "sailNumber": "GRE-734",
+              "place": 1,
+              "points": 10000
+            },
+            {
+              "rider": "m:yentel-caers",
+              "name": "Yentel Caers",
+              "sailNumber": "B-16",
+              "place": 2,
+              "points": 8500
+            },
+            {
+              "rider": "m:steven-van-broeckhoven",
+              "name": "Steven Van Broeckhoven",
+              "sailNumber": "B-72",
+              "place": 3,
+              "points": 7650
+            },
+            {
+              "rider": "m:adrien-bosson",
+              "name": "Adrien Bosson",
+              "sailNumber": "F-296",
+              "place": 4,
+              "points": 6885
+            },
+            {
+              "rider": "m:jacopo-testa",
+              "name": "Jacopo Testa",
+              "sailNumber": "ITA-261",
+              "place": 5,
+              "points": 6370
+            },
+            {
+              "rider": "m:antoine-albert",
+              "name": "Antoine Albert",
+              "sailNumber": "NC-21",
+              "place": 6,
+              "points": 5930
+            },
+            {
+              "rider": "m:balz-muller",
+              "name": "Balz Müller",
+              "sailNumber": "SUI-21",
+              "place": 7,
+              "points": 5285
+            },
+            {
+              "rider": "m:takuma-sugi",
+              "name": "Takuma Sugi",
+              "sailNumber": "J-7",
+              "place": 7,
+              "points": 5285
+            },
+            {
+              "rider": "m:amado-vrieswijk",
+              "name": "Amado Vrieswijk",
+              "sailNumber": "NB-20",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:sam-esteve",
+              "name": "Sam Esteve",
+              "sailNumber": "F-79",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:takumi-moriya",
+              "name": "Takumi Moriya",
+              "sailNumber": "J-171",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:youp-schmit",
+              "name": "Youp Schmit",
+              "sailNumber": "NB-12",
+              "place": 9,
+              "points": 4476
+            },
+            {
+              "rider": "m:antony-ruenes",
+              "name": "Antony Ruenes",
+              "sailNumber": "F-85",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:corto-dumond",
+              "name": "Corto Dumond",
+              "sailNumber": "NC-26",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:dieter-van-der-eyken",
+              "name": "Dieter Van der Eyken",
+              "sailNumber": "B-35",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:nicolas-akgazciyan",
+              "name": "Nicolas Akgazciyan",
+              "sailNumber": "F-400",
+              "place": 13,
+              "points": 3645
+            },
+            {
+              "rider": "m:antoine-martin",
+              "name": "Antoine Martin",
+              "sailNumber": "F-193",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:bodhi-kempen",
+              "name": "Bodhi Kempen",
+              "sailNumber": "H-242",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:elton-frans",
+              "name": "Elton (Taty) Frans",
+              "sailNumber": "NB-9",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:marco-vinante",
+              "name": "Marco Vinante",
+              "sailNumber": "I-205",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:marino-gil-gherardi",
+              "name": "Marino Gil Gherardi",
+              "sailNumber": "E-959",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:niclas-nebelung",
+              "name": "Niclas Nebelung",
+              "sailNumber": "G-584",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:rasmus-oegelund",
+              "name": "Rasmus Oegelund",
+              "sailNumber": "D-22",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:thomas-traversa",
+              "name": "Thomas Traversa",
+              "sailNumber": "F-3",
+              "place": 17,
+              "points": 2693
+            },
+            {
+              "rider": "m:liam-dunkerbeck-morales",
+              "name": "Liam Dunkerbeck Morales",
+              "sailNumber": "E-11",
+              "place": 25,
+              "points": 2068
+            },
+            {
+              "rider": "m:nigel-hart",
+              "name": "Nigel Hart",
+              "sailNumber": "NB-65",
+              "place": 25,
+              "points": 2068
+            }
+          ],
+          "ladders": [
+            {
+              "title": "Mens Mens Freestyle elimination (double)",
+              "double": true,
+              "rounds": [
+                [
+                  {
+                    "heat": "18 b",
+                    "riders": [
+                      "m:marco-vinante",
+                      "m:liam-dunkerbeck-morales"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "20 b",
+                    "riders": [
+                      "m:nigel-hart",
+                      "m:marino-gil-gherardi"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "22 a",
+                    "riders": [
+                      "m:dieter-van-der-eyken",
+                      "m:niclas-nebelung"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "22 b",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:marco-vinante"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "23 a",
+                    "riders": [
+                      "m:nicolas-akgazciyan",
+                      "m:elton-frans"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "23 b",
+                    "riders": [
+                      "m:rasmus-oegelund",
+                      "m:takuma-sugi"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "24 a",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:antoine-martin"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "24 b",
+                    "riders": [
+                      "m:balz-muller",
+                      "m:marino-gil-gherardi"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "25 a",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:thomas-traversa"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "25 b",
+                    "riders": [
+                      "m:bodhi-kempen",
+                      "m:corto-dumond"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "26 a",
+                    "riders": [
+                      "m:dieter-van-der-eyken",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "26 b",
+                    "riders": [
+                      "m:nicolas-akgazciyan",
+                      "m:takuma-sugi"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "27 a",
+                    "riders": [
+                      "m:antony-ruenes",
+                      "m:balz-muller"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "27 b",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:corto-dumond"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "28 a",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "28 b",
+                    "riders": [
+                      "m:takumi-moriya",
+                      "m:takuma-sugi"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "29 a",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:balz-muller"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "29 b",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:amado-vrieswijk"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "30 a",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:takuma-sugi"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "30 b",
+                    "riders": [
+                      "m:balz-muller",
+                      "m:antoine-albert"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "31",
+                    "riders": [
+                      "m:yentel-caers",
+                      "m:antoine-albert"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "32",
+                    "riders": [
+                      "m:jacopo-testa",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "33",
+                    "riders": [
+                      "m:adrien-bosson",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "34",
+                    "riders": [
+                      "m:steven-van-broeckhoven",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "35",
+                    "riders": [
+                      "m:lennart-neubauer",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "36",
+                    "riders": [
+                      "m:lennart-neubauer",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      1,
+                      1
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              "title": "Mens Mens Freestyle elimination",
+              "double": false,
+              "rounds": [
+                [
+                  {
+                    "heat": "1 a",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:corto-dumond"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "2 a",
+                    "riders": [
+                      "m:thomas-traversa",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "3 a",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:marino-gil-gherardi"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "3 b",
+                    "riders": [
+                      "m:nicolas-akgazciyan",
+                      "m:nigel-hart"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "4 a",
+                    "riders": [
+                      "m:antoine-martin",
+                      "m:rasmus-oegelund"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "5 a",
+                    "riders": [
+                      "m:takuma-sugi",
+                      "m:takumi-moriya"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "6 a",
+                    "riders": [
+                      "m:elton-frans",
+                      "m:balz-muller"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "7 a",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:liam-dunkerbeck-morales"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "7 b",
+                    "riders": [
+                      "m:amado-vrieswijk",
+                      "m:marco-vinante"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "8 a",
+                    "riders": [
+                      "m:niclas-nebelung",
+                      "m:bodhi-kempen"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "9 a",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:dieter-van-der-eyken"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "9 b",
+                    "riders": [
+                      "m:lennart-neubauer",
+                      "m:yentel-caers"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "10 a",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:nicolas-akgazciyan"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "10 b",
+                    "riders": [
+                      "m:rasmus-oegelund",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "11 a",
+                    "riders": [
+                      "m:takumi-moriya",
+                      "m:antony-ruenes"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "11 b",
+                    "riders": [
+                      "m:balz-muller",
+                      "m:steven-van-broeckhoven"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "12 a",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:amado-vrieswijk"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "12 b",
+                    "riders": [
+                      "m:bodhi-kempen",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "13 a",
+                    "riders": [
+                      "m:antoine-albert",
+                      "m:lennart-neubauer"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "13 b",
+                    "riders": [
+                      "m:youp-schmit",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "14 a",
+                    "riders": [
+                      "m:takumi-moriya",
+                      "m:steven-van-broeckhoven"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "14 b",
+                    "riders": [
+                      "m:sam-esteve",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "15 a",
+                    "riders": [
+                      "m:lennart-neubauer",
+                      "m:jacopo-testa"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  },
+                  {
+                    "heat": "15 b",
+                    "riders": [
+                      "m:steven-van-broeckhoven",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "heat": "16",
+                    "riders": [
+                      "m:jacopo-testa",
+                      "m:adrien-bosson"
+                    ],
+                    "ranks": [
+                      2,
+                      1
+                    ]
+                  },
+                  {
+                    "heat": "17",
+                    "riders": [
+                      "m:lennart-neubauer",
+                      "m:steven-van-broeckhoven"
+                    ],
+                    "ranks": [
+                      1,
+                      2
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
