@@ -14,3 +14,7 @@ export const ghostSample = (pose, now) => ({ pose, updatedAt: now, streamId: "gh
 // A solo heat at its first step: practice has no heat, and 1v1 heats run on a
 // competition clock.
 export const isHeatStart = (state, game) => state.heat.enabled && state.totalTime === 0 && !game.competitionClock;
+
+// The ghost starts at a solo heat's start, unless another mod holds the
+// opponent slot (owner, from mods/lib/opponent.js).
+export const mayShowGhost = (state, game, owner) => isHeatStart(state, game) && owner === null;

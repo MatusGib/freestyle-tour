@@ -2,8 +2,9 @@
 // that heat's recording with the game's own engine, one step for every step you
 // sail, and is drawn with the game's 1v1 opponent display. It never affects
 // your physics or score.
+import { opponentOwner } from "../lib/opponent.js";
 import { createRunner } from "../lib/replay.js";
-import { ghostLabel, ghostSample, isHeatStart, pickGhost, stepOf } from "./ghost.js";
+import { ghostLabel, ghostSample, mayShowGhost, pickGhost, stepOf } from "./ghost.js";
 
 const STORAGE_KEY = "freestyle-tour.ghosts";
 
@@ -59,13 +60,13 @@ export default {
     async function start(state) {
       const heats = await getJson(`/api/local/heats?week=${engine.weekStart(Date.now())}`);
       const pick = pickGhost(heats);
-      if (session !== state || !enabled) return;
+      if (session !== state || !enabled || opponentOwner()) return;
       if (!pick) {
         status.textContent = " · No ghost yet this week";
         return;
       }
       const heat = await getJson(`/api/local/heats/${encodeURIComponent(pick.heatId)}`);
-      if (session !== state || !enabled) return;
+      if (session !== state || !enabled || opponentOwner()) return;
       const runner = createRunner(engine, { conditions: heat.conditions, replay: heat.replay });
       runner.seek(stepOf(state));
       const appearance = Object.keys(heat.appearance).length ? heat.appearance : undefined;
@@ -82,7 +83,7 @@ export default {
           session = state;
           stop();
           status.textContent = "";
-          if (enabled && isHeatStart(state, game)) start(state).catch((error) => log("could not load the ghost", error));
+          if (enabled && mayShowGhost(state, game, opponentOwner())) start(state).catch((error) => log("could not load the ghost", error));
         }
         if (!ghost) return;
         ghost.advance(1);
