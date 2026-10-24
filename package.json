@@ -1,0 +1,11 @@
+{
+  "name": "freestyle-tour",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "snapshot": "node tools/snapshot.mjs",
+    "start": "node server/index.mjs",
+    "test": "node --test test/*.test.mjs"
+  }
+}
