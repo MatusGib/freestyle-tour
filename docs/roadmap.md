@@ -92,9 +92,19 @@ Built in three pieces, each with its own spec, in this order:
   mod lets you sail a solo heat against any rider of any event.
   Spec: `docs/superpowers/specs/2026-10-24-ai-riders-design.md`.
   Plan: `docs/superpowers/plans/2026-10-24-ai-riders.md`.
-- **3c. Events:** real event fields, 2-rider heats under the original's heat
-  rules, single and double elimination ladders, and finishing points from the
-  PWA table (10000, 8500, 7650, 6885…, tied places sharing the average).
+- **3c. Weekly challenge:** each week you relive a past PWA event against the
+  real riders who sailed it, in the game's own 1v1 heats, with the AI riders'
+  heats following what really happened. Built in parts:
+  1. **Weekly super final:** you against the event's winner in one real 1v1
+     heat (the local server plays the 1v1 lobby and relay), with the game's
+     hidden gear as the prize.
+     Spec: `docs/superpowers/specs/2026-10-25-weekly-super-final-design.md`.
+  2. **Event winds:** each event's wind from its PWA reports, mapped into the
+     game's 1v1 range (15–19 kt, gusts) through the room id.
+  3. **Full bracket:** your slot in the event's real ladder, with AI-vs-AI
+     heats following the real results, and finishing points from the PWA table
+     (10000, 8500, 7650, 6885…, tied places sharing the average).
+  4. **More collectibles:** new designs as prizes.
 
 Done when you can play a full event against a recognisable 2026 field and the
 AI riders' results resemble the real ones.
