@@ -4,7 +4,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { CSP, createApp } from "../server/app.mjs";
 import { LOADER_TAG } from "../server/html.mjs";
-import { fakeGame, makeSnapshot, tempDir } from "./helpers.mjs";
+import { loadTour } from "../server/tour.mjs";
+import { fakeGame, makeSnapshot, tempDir, writeTour } from "./helpers.mjs";
 
 const NOW = Date.parse("2026-10-21T12:00:00Z");
 const FILES = {
@@ -14,7 +15,7 @@ const FILES = {
   "/wordmark.svg": `<svg xmlns="http://www.w3.org/2000/svg"></svg>`,
 };
 
-async function startServer(t, { mods = [], modFiles = {} } = {}) {
+async function startServer(t, { mods = [], modFiles = {}, tour, ai } = {}) {
   const root = tempDir(t);
   makeSnapshot(root, "fixture", FILES, { engine: "/_next/static/chunks/engine.js" });
   for (const [path, text] of Object.entries(modFiles)) {
@@ -23,7 +24,7 @@ async function startServer(t, { mods = [], modFiles = {} } = {}) {
     writeFileSync(out, text);
   }
   const logs = [];
-  const server = await createApp({ root, mods, dataFile: join(root, "data", "db.json"), game: fakeGame, now: () => NOW, log: (m) => logs.push(m) });
+  const server = await createApp({ root, mods, dataFile: join(root, "data", "db.json"), game: fakeGame, now: () => NOW, log: (m) => logs.push(m), tour, ai });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   t.after(() => {
     server.closeAllConnections();
@@ -91,4 +92,21 @@ test("API calls reach the fake APIs; unknown ones are 404 and logged", async (t)
   assert.deepEqual(await (await get("/api/lagoons/lobby-connect", post({}))).json(), { relay: null });
   assert.equal((await get("/api/admin")).status, 404);
   assert.ok(logs.includes("Unknown API call: GET /api/admin"));
+});
+
+test("an AI heat is answered when the planner is done", async (t) => {
+  const dir = tempDir(t);
+  writeTour(dir);
+  const ai = {
+    async sail(conditions, target) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return { replay: { format: 1, steps: 1, events: "" }, score: target, attempts: [], tricks: [], steps: 1 };
+    },
+  };
+  const { get } = await startServer(t, { tour: loadTour(dir), ai });
+  const res = await get("/api/local/ai-heats", post({ rider: "m:balz-muller", event: 378 }));
+  assert.equal(res.status, 200);
+  const heat = await res.json();
+  assert.equal(heat.pseudonym, "Balt Möller");
+  assert.equal(heat.score, heat.target);
 });

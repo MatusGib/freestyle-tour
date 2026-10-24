@@ -7,7 +7,7 @@ import { board, submitHeat } from "./leaderboard.mjs";
 import { heatDetail, listHeats } from "./local.mjs";
 import { fail } from "./reply.mjs";
 import { rider } from "./rider.mjs";
-import { eventRiders, listSeasons } from "./tour.mjs";
+import { aiHeat, eventRiders, listSeasons } from "./tour.mjs";
 
 const HEAT_PATH = "/api/local/heats/";
 const EVENT_PATH = "/api/local/tour/events/";
@@ -28,5 +28,6 @@ export function handleApi({ method, path, query, body }, ctx) {
   if (method === "GET" && path.startsWith(HEAT_PATH)) return heatDetail(path.slice(HEAT_PATH.length), store, game);
   if (route === "GET /api/local/tour/seasons") return listSeasons(ctx.tour);
   if (method === "GET" && path.startsWith(EVENT_PATH)) return eventRiders(ctx.tour, path.slice(EVENT_PATH.length));
+  if (route === "POST /api/local/ai-heats") return aiHeat(body, ctx);
   return { ...fail(404, "Not available in the local copy."), unknown: true };
 }

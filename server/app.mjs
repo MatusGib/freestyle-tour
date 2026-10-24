@@ -3,12 +3,14 @@
 // internet, and the CSP header makes the browser refuse other hosts too.
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
-import { extname, join, resolve, sep } from "node:path";
+import { dirname, extname, join, resolve, sep } from "node:path";
+import { createSailer } from "../lib/ai/sailer.mjs";
 import { fileFor, loadGame, openSnapshot } from "../lib/snapshot.mjs";
 import { handleApi } from "./api/index.mjs";
 import { prepareHtml } from "./html.mjs";
 import { loadPatches, patchSnapshot } from "./patches.mjs";
 import { createStore } from "./store.mjs";
+import { loadTour } from "./tour.mjs";
 
 export const CSP = [
   "default-src 'self'",
@@ -35,18 +37,23 @@ const TYPES = {
 };
 const typeOf = (path) => TYPES[extname(path)] ?? "application/octet-stream";
 
-// Returns an http.Server that isn't listening yet. `game` and `now` can be
-// replaced in tests; by default the snapshot's engine and calendar are loaded.
-export async function createApp({ root, snapshot: name, mods, dataFile, modsDir = join(root, "mods"), game, now = Date.now, log = console.log }) {
+// Returns an http.Server that isn't listening yet. `game`, `now`, `tour` and
+// `ai` can be replaced in tests; by default the snapshot's engine and calendar
+// are loaded, the tour data is read from tour/, and AI heats are sailed in a
+// worker thread.
+export async function createApp({ root, snapshot: name, mods, dataFile, modsDir = join(root, "mods"), game, now = Date.now, log = console.log, tour, ai }) {
   const snapshot = openSnapshot(root, name);
   game ??= await loadGame(snapshot, ["engine", "week"]);
+  tour ??= loadTour(join(root, "tour"));
+  ai ??= createSailer({ root, snapshot: snapshot.name });
   const store = createStore(dataFile);
+  const aiHeats = createStore(join(dirname(dataFile), "ai-heats.json"), { heats: {} });
   const patched = patchSnapshot(snapshot, await loadPatches(modsDir, mods), log);
   const page = prepareHtml(readFileSync(join(snapshot.dir, "index.html"), "utf8"));
   const config = JSON.stringify({ snapshot: snapshot.name, parts: snapshot.manifest.parts, mods });
   const files = new Set(snapshot.manifest.files.map((f) => f.path));
   const modsRoot = resolve(modsDir) + sep;
-  const ctx = { store, game, now };
+  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name };
 
   const send = (res, status, type, body) => {
     res.writeHead(status, { "content-type": type, "content-security-policy": CSP, "cache-control": "no-store" });
@@ -58,7 +65,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
     const path = decodeURIComponent(url.pathname);
     if (path.startsWith("/api/")) {
       const body = req.method === "POST" ? await readJson(req) : undefined;
-      const result = handleApi({ method: req.method, path, query: url.searchParams, body }, ctx);
+      const result = await handleApi({ method: req.method, path, query: url.searchParams, body }, ctx);
       if (result.unknown) log(`Unknown API call: ${req.method} ${path}`);
       return send(res, result.status, TYPES[".json"], JSON.stringify(result.body));
     }
