@@ -25,7 +25,7 @@ give us a reliable way to change it through mods.
 
 ## Out of scope
 
-- Any new gameplay. The PWA rules, replays, tournaments, venues and tricks are
+- Any new gameplay. Replays and ghosts, tournaments, venues and tricks are
   later sub-projects.
 - 1v1 and anything else online. The lobby stays empty.
 - Hosting, accounts and passwords. The local copy assumes a single user on a
