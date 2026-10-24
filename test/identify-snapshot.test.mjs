@@ -10,12 +10,15 @@ const snapshot = tryOpenSnapshot(ROOT);
 const skip = !snapshot && "no snapshot yet: run npm run snapshot";
 
 test("every signature matches exactly once in the current snapshot", { skip }, async () => {
-  const game = await loadGame(snapshot, ["engine", "wind", "controls", "week"]);
+  const game = await loadGame(snapshot, ["engine", "wind", "controls", "week", "pose"]);
   for (const signatures of Object.values(SIGNATURES)) {
     for (const label of Object.keys(signatures)) assert.notEqual(game[label], undefined, `${label} not found`);
   }
   assert.equal(typeof game.step, "function");
   assert.equal(typeof game.heatRules.seconds, "number");
+  assert.equal(game.keyCodes[0], "Space");
+  assert.equal(typeof game.Recorder, "function");
+  assert.equal(typeof game.riderPose, "function");
 });
 
 test("the weekly calendar starts weeks on Monday at midnight in Warsaw", { skip }, async () => {

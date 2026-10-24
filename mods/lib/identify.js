@@ -28,11 +28,16 @@ export const SIGNATURES = {
   controls: {
     Controls: (v) => isClass(v, ["setKey", "setStick", "read", "release"]),
     heatStart: (v) => /^function [\w$]+\(t,n\)\{let r=[\w$]+\(t\);return r\.heat\.enabled=!0,n\.release\(r\)/.test(src(v)),
+    keyCodes: (v) => Array.isArray(v) && v[0] === "Space" && v.includes("SpeedDial"),
+    Recorder: (v) => isClass(v, ["step", "replay"]),
   },
   week: {
     weekStart: (v) => /^function [\w$]+\(e\)\{let t=e\+[\w$]+\(e\),n=\(new Date\(t\)\.getUTCDay\(\)\+6\)%7/.test(src(v)),
     nextWeekStart: (v) => /^e=>[\w$]+\(e\+7\.5\*[\w$]+\)$/.test(src(v)),
     weekConditions: (v) => /^function [\w$]+\([\w$]+\)\{return\{\.\.\.[\w$]+\([\w$]+\(`week:\$\{[\w$]+\}`\)\),/.test(src(v)),
+  },
+  pose: {
+    riderPose: (v) => /trickStartedAt=[\w$]+\.trick\?/.test(src(v)),
   },
 };
 

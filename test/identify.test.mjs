@@ -31,6 +31,6 @@ test("parts without signatures are ignored", () => {
   assert.deepEqual(identify({ scene: { anything: 1 } }, signatures), {});
 });
 
-test("signatures cover the four parts the loader identifies", () => {
-  assert.deepEqual(Object.keys(SIGNATURES), ["engine", "wind", "controls", "week"]);
+test("signatures cover the five parts the loader identifies", () => {
+  assert.deepEqual(Object.keys(SIGNATURES), ["engine", "wind", "controls", "week", "pose"]);
 });
