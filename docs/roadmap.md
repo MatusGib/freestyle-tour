@@ -18,7 +18,8 @@ game's developer concrete improvement ideas. It is never released.
 - **Every feature is a separate mod.** Each one can be switched on or off and
   shown to the developer on its own.
 - **Real people appear only under pseudonyms.** The tour and the riders get
-  recognisable but changed names.
+  recognisable but changed names in the game. The private repo's data keeps the
+  real names beside the pseudonyms, so they can be checked and fixed.
 
 ## Working names
 
@@ -41,6 +42,7 @@ proposed answer.
 | Ghosts | Your best run and the week's top local run, in practice and solo only, never in competition heats |
 | Opponents | AI riders that actually sail on the water, tuned to hit their target scores; online play needs hosting and is out of scope while the copy stays private |
 | Riders | Men and women from PWA freestyle events 2006–2026; pre-2006 legends later |
+| Rider strength | Each rider's form going into that event: a Glicko-2 rating from all results before it, one rating period per event |
 | Score scale | Riders are mapped onto the game's own scoring scale, not each era's real scale |
 | Venues | Every venue that hosted a PWA freestyle World Cup, each with its own wind, water and scenery; wave and slalom venues later |
 | Tricks | New tricks drawn from the move names in Tricktionary 3's contents (names only, the book is copyrighted) and from modern PWA freestyle |
@@ -61,7 +63,7 @@ Plan: `docs/superpowers/plans/2026-10-24-local-copy.md`.
 The original game runs entirely from this machine, the browser makes no requests
 to any other host, and a proof mod changes the game.
 
-### 2. Replays and ghosts (idea 1)
+### 2. Replays and ghosts (idea 1, done)
 
 Heat replay viewer (scrub, slow motion, cameras, score overlay) and sailing
 against a ghost of a stored run. The original already records each heat's
@@ -70,18 +72,25 @@ keep.
 
 Done when any stored heat replays exactly, and you can sail against a ghost of
 your best run.
+Spec: `docs/superpowers/specs/2026-10-24-replays-ghosts-design.md`.
+Plan: `docs/superpowers/plans/2026-10-24-replays-ghosts.md`.
 
 ### 3. Tournament mode with pseudo-real riders (ideas 4 and 19)
 
-- **Data pipeline:** PWA freestyle results and rankings 2006–2026, giving each
-  rider a skill rating from their real placings. The score scale is anchored to
-  the few heat totals published in news reports, because per-heat scores are
-  not public.
-- **AI riders:** they sail with the game's engine, using a planner like the
-  Freestajlo bot, and are tuned so their heat scores match their rating.
-- **Events:** real event fields, 2-rider heats under the original's heat rules,
-  single and double elimination ladders, and finishing points (1st 10,000, 100
-  fewer per place).
+Built in three pieces, each with its own spec, in this order:
+
+- **3a. Rider and event data:** every PWA freestyle event 2006–2026 with its
+  entries, placings, points and (from 2014) heat-by-heat ladders, riders under
+  pseudonyms, and a Glicko-2 rating for each rider going into each event. Per-heat
+  scores are not public, so strength comes from who beat whom.
+  Spec: `docs/superpowers/specs/2026-10-24-tour-data-design.md`.
+- **3b. AI riders:** they sail with the game's engine, using a planner like the
+  Freestajlo bot, which can already aim for a chosen heat score. Ratings map to
+  target scores on the game's scale, anchored to the few heat totals published
+  in news reports, so that in-game win chances match the ratings.
+- **3c. Events:** real event fields, 2-rider heats under the original's heat
+  rules, single and double elimination ladders, and finishing points from the
+  PWA table (10000, 8500, 7650, 6885…, tied places sharing the average).
 
 Done when you can play a full event against a recognisable 2026 field and the
 AI riders' results resemble the real ones.
