@@ -35,6 +35,9 @@ proposed answer.
 | Approach | Local mirror of the original plus a mod layer; small serve-time patches where a mod can't hook in |
 | Backend | Our own local server with fake versions of the original's APIs; no hosting |
 | Heat rules (default) | PWA "Best Move" format: up to 6 moves per tack, best 4 per tack count (8 in total); the original rules stay available behind a switch |
+| Tack rule | Kept from the original: tack or jibe between scored moves |
+| Repeated moves | Original rules: one Culo slot per tack, and a move repeated on the other tack loses 1 point |
+| Start sequence | 5 seconds: red at 5 s to go, yellow at 2.5 s, green at the start |
 | Combinations (default) | A combination counts as one move, with a bonus for the combination |
 | Heat length (default) | 6 minutes, adjustable from 5 to 10 |
 | Judges (default) | 5 simulated judges with small seeded differences; highest and lowest dropped; each judge's sheet visible |
