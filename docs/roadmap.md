@@ -85,12 +85,13 @@ Built in three pieces, each with its own spec, in this order:
   scores are not public, so strength comes from who beat whom.
   Spec: `docs/superpowers/specs/2026-10-24-tour-data-design.md`.
   Plan: `docs/superpowers/plans/2026-10-24-tour-data.md`.
-- **3b. AI riders:** they sail with the game's engine, using a planner like the
+- **3b. AI riders (done):** they sail with the game's engine, using a planner like the
   Freestajlo bot, which can already aim for a chosen heat score. Ratings map to
   target scores on the game's scale, anchored to the few heat totals published
   in news reports, so that in-game win chances match the ratings. A challenge
   mod lets you sail a solo heat against any rider of any event.
   Spec: `docs/superpowers/specs/2026-10-24-ai-riders-design.md`.
+  Plan: `docs/superpowers/plans/2026-10-24-ai-riders.md`.
 - **3c. Events:** real event fields, 2-rider heats under the original's heat
   rules, single and double elimination ladders, and finishing points from the
   PWA table (10000, 8500, 7650, 6885…, tied places sharing the average).

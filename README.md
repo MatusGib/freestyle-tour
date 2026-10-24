@@ -29,12 +29,22 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
   week. The "Ghost" switch in the overlay turns it off.
 - `replay-viewer`: the "Replays" button in the menu plays stored heats again,
   with a timeline, speeds, cameras, the move list and video clips.
+- `challenge`: pick an event and a rider, and your next solo heat is against
+  them. The local server sails their heat first (about 20 seconds) with the
+  Freestajlo planner, aiming for the score their rating says. Needs the tour
+  data (`npm run tour-data`).
 
 `node tools/demo-heat.mjs` stores a short demo heat with real moves for the
 current week, so replays and ghosts can be shown without playing first.
 
 Our mods also use two local endpoints that the original client never calls:
 `GET /api/local/heats?week=&version=` and `GET /api/local/heats/<heatId>`.
+
+The challenge mod uses three more: `GET /api/local/tour/seasons`,
+`GET /api/local/tour/events/<id>` and `POST /api/local/ai-heats`. AI heats
+are cached in `data/ai-heats.json`. `node tools/ai-check.mjs` sails 25 heats
+at several targets in five weeks' winds and checks that the AI lands within
+1.0 of its target on average.
 
 ## Tour data
 
