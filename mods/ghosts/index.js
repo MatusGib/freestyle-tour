@@ -3,7 +3,7 @@
 // sail, and is drawn with the game's 1v1 opponent display. It never affects
 // your physics or score.
 import { createRunner } from "../lib/replay.js";
-import { ghostLabel, isHeatStart, pickGhost, stepOf } from "./ghost.js";
+import { ghostLabel, ghostSample, isHeatStart, pickGhost, stepOf } from "./ghost.js";
 
 const STORAGE_KEY = "freestyle-tour.ghosts";
 
@@ -86,7 +86,7 @@ export default {
         }
         if (!ghost) return;
         ghost.advance(1);
-        game.receiveOpponent({ ...engine.riderPose(ghost.state), updatedAt: performance.now(), streamId: "ghost" });
+        game.receiveOpponent(ghostSample(engine.riderPose(ghost.state), performance.now()));
         if (ghost.done) stop();
       });
     });

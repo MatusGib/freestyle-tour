@@ -30,6 +30,7 @@ export const SIGNATURES = {
     heatStart: (v) => /^function [\w$]+\(t,n\)\{let r=[\w$]+\(t\);return r\.heat\.enabled=!0,n\.release\(r\)/.test(src(v)),
     keyCodes: (v) => Array.isArray(v) && v[0] === "Space" && v.includes("SpeedDial"),
     Recorder: (v) => isClass(v, ["step", "replay"]),
+    blendPoses: (v) => /\.pose\.trick/.test(src(v)) && src(v).includes("updatedAt"),
   },
   week: {
     weekStart: (v) => /^function [\w$]+\(e\)\{let t=e\+[\w$]+\(e\),n=\(new Date\(t\)\.getUTCDay\(\)\+6\)%7/.test(src(v)),

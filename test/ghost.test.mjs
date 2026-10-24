@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ghostLabel, isHeatStart, pickGhost, stepOf } from "../mods/ghosts/ghost.js";
+import { ghostLabel, ghostSample, isHeatStart, pickGhost, stepOf } from "../mods/ghosts/ghost.js";
 
 const heat = (heatId, score, hasReplay = true) => ({ heatId, score, hasReplay, nickname: "Tester" });
 
@@ -17,6 +17,11 @@ test("ghostLabel shows the rider and score", () => {
 test("stepOf turns the heat clock into a step count", () => {
   assert.equal(stepOf({ totalTime: 1.5 }), 180);
   assert.equal(stepOf({ totalTime: 0.9999999999 }), 120);
+});
+
+test("ghostSample nests the pose the way the game's 1v1 transport does", () => {
+  const pose = { x: 1, z: 2, trick: "" };
+  assert.deepEqual(ghostSample(pose, 1234.5), { pose, updatedAt: 1234.5, streamId: "ghost" });
 });
 
 test("isHeatStart is true only for a solo heat at its first step", () => {

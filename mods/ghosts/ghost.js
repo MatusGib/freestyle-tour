@@ -7,6 +7,10 @@ export const ghostLabel = (heat) => `Ghost · ${heat.nickname} · ${heat.score.t
 
 export const stepOf = (state) => Math.round(state.totalTime * 120);
 
+// A sample for the game's opponent display, shaped like the ones its 1v1
+// transports send: the pose nested under `pose`, plus a timestamp and stream.
+export const ghostSample = (pose, now) => ({ pose, updatedAt: now, streamId: "ghost" });
+
 // A solo heat at its first step: practice has no heat, and 1v1 heats run on a
 // competition clock.
 export const isHeatStart = (state, game) => state.heat.enabled && state.totalTime === 0 && !game.competitionClock;
