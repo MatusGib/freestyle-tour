@@ -101,7 +101,9 @@ grows while they are away, which suits a tour where riders come and go.
 - Pages are cached in the git-ignored `cache/pwa/`, one file per URL. A cached
   page is read from disk. Otherwise the crawler downloads it, one request at a
   time, at least 1 second after the previous request, with a User-Agent naming
-  the tool. Failed requests are never cached.
+  the tool. A failed request's page is never cached, so an online run always
+  tries it again. Its status is kept, so that an `--offline` run fails that
+  page the same way and ends with the same files.
 - `fresh` downloads a cached page again, once per run. The tool passes it for
   every page of the seasons named by `--refresh` (a season, like `2026`, or
   `all`), from the season listing down. `offline` never downloads; a page

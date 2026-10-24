@@ -59,6 +59,15 @@ test("offline reads the cache and fails on a page it doesn't have", async (t) =>
   assert.equal(site.requests.length, 1);
 });
 
+test("offline fails a page with the status it last failed with, so an offline rebuild ends the same way", async (t) => {
+  const cacheDir = tempDir(t);
+  const site = fakeSite({});
+  await assert.rejects(createCrawler({ cacheDir, ...site }).get("https://pwa.test/broken"), { status: 404 });
+  const offline = createCrawler({ cacheDir, offline: true, ...site });
+  await assert.rejects(offline.get("https://pwa.test/broken"), (error) => error.status === 404 && /answered 404/.test(error.message));
+  assert.equal(site.requests.length, 1);
+});
+
 test("an answer other than 200 rejects with its status and isn't cached", async (t) => {
   const site = fakeSite({});
   const crawler = createCrawler({ cacheDir: tempDir(t), ...site });
