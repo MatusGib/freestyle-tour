@@ -20,7 +20,7 @@ Checked on 2026-10-24:
 | 2010 Sotavento Fuerteventura, men | A "Sotavento Fuerteventura" column, 38 placed riders | Filled |
 | 2010 Colgate World Cup Sylt, men | A "Colgate World Cup Sylt, Germany" column, 37 placed riders | Filled |
 | 2011 Podersdorf Austria, men | A "Podersdorf Austria" column, 47 placed riders | Filled |
-| 2006 Sotavento, Fuerteventura, men | Shows wave riders with no event columns | Stays missing |
+| 2006 Sotavento, Fuerteventura, men | Holds the wave ranking (wave events and riders, points without places) | Stays missing |
 | 2006 Sotavento, Fuerteventura, women | Empty | Stays missing |
 
 The tabs that say "no results" (2011 Sylt, 2015 Podersdorf, 2015 Sylt and
@@ -63,15 +63,16 @@ are left as they are.
   - each event has a `rank-score` cell. `2034 (3)` is 2034 points and 3rd
     place, `0 (33)` is 33rd with no points, and a bare `0` means the rider
     didn't compete.
-- A page with no event columns (2006 men) or no rows (2006 women) gives no
-  entries.
+- The 2006 men's page holds the wave ranking, with points but no places, and
+  the 2006 women's page has no event columns or rows. Neither has a column for
+  2006 Sotavento, so they give no entries.
 
 ## Components
 
 - **`parseRanking(html)`** in `lib/pwa/parse.mjs`: returns
   `{ events: [title], riders: [{ name, sailNumber, results: [{ place, points } | null] }] }`,
-  with `null` for a bare `0`. A page without the table gives
-  `{ events: [], riders: [] }`.
+  with `null` for a cell without a place (a bare `0`, or the 2006 wave page's
+  bare points). A page without the table gives `{ events: [], riders: [] }`.
 - **`rankingEntries(ranking, eventName)`** in `lib/pwa/parse.mjs`: the entries
   `[{ place, name, sailNumber, points }]` of the column matching the event name,
   or `null` when no column matches. Entries are in place order, as
@@ -84,7 +85,8 @@ are left as they are.
   - It reads the rankings page with the same "skip on HTTP error" handling.
   - It notes `<event>: men's results taken from the 2010 rankings`. When no
     column matches, it notes `<event>: no men's results, not even in the 2006
-    rankings`.
+    rankings`. When the rankings page itself fails, the usual "answered 500,
+    skipped" note is enough.
   - Two events of one season read the same rankings page; the crawler's cache
     downloads it once.
 
