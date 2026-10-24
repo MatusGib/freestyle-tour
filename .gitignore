@@ -3,3 +3,5 @@ vendor/
 # Local fake-server data (rider profile, heats, leaderboard)
 data/
 node_modules/
+# Downloaded PWA pages for npm run tour-data: re-downloadable, never committed
+cache/

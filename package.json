@@ -6,6 +6,7 @@
   "scripts": {
     "snapshot": "node tools/snapshot.mjs",
     "start": "node server/index.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "tour-data": "node tools/pwa.mjs"
   }
 }
