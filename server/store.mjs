@@ -5,8 +5,9 @@ import { dirname } from "node:path";
 
 const EMPTY = { riders: [], heats: [], feedback: [] };
 
-export function createStore(file) {
-  let data = existsSync(file) ? { ...EMPTY, ...JSON.parse(readFileSync(file, "utf8")) } : structuredClone(EMPTY);
+// empty: what a new file holds (the fake server's data unless told otherwise).
+export function createStore(file, empty = EMPTY) {
+  let data = existsSync(file) ? { ...empty, ...JSON.parse(readFileSync(file, "utf8")) } : structuredClone(empty);
   return {
     get data() {
       return data;
