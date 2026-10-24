@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { PART_MARKERS, fileFor, findParts, openSnapshot, tryOpenSnapshot } from "../lib/snapshot.mjs";
+import { PART_MARKERS, fileFor, findParts, openSnapshot, reindexSnapshot, tryOpenSnapshot } from "../lib/snapshot.mjs";
 import { makeSnapshot, tempDir } from "./helpers.mjs";
 
 const pathFor = (part) => `/_next/static/chunks/${part}.js`;
@@ -42,4 +42,14 @@ test("without a snapshot, openSnapshot explains what to run and tryOpenSnapshot 
   const root = tempDir(t);
   assert.throws(() => openSnapshot(root), /run `npm run snapshot` first/);
   assert.equal(tryOpenSnapshot(root), null);
+});
+
+test("reindexSnapshot recomputes the parts from the snapshot's files", (t) => {
+  const root = tempDir(t);
+  const files = { "/": "<html><head></head></html>" };
+  for (const [part, marker] of Object.entries(PART_MARKERS)) files[pathFor(part)] = `x${marker}y`;
+  const snapshot = makeSnapshot(root, "s1", files, { engine: pathFor("engine") });
+  const expected = Object.fromEntries(Object.keys(PART_MARKERS).map((part) => [part, pathFor(part)]));
+  assert.deepEqual(reindexSnapshot(snapshot.dir).parts, expected);
+  assert.deepEqual(openSnapshot(root).manifest.parts, expected);
 });

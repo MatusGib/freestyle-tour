@@ -7,7 +7,7 @@ import { crawl, writeSnapshot } from "../tools/snapshot.mjs";
 import { tempDir } from "./helpers.mjs";
 
 const SITE = "https://game.test";
-const MARKERS = "attemptsPerTack:1;Math.sin(r*.17);syncAir(;areaArrow;Europe/Warsaw";
+const MARKERS = "attemptsPerTack:1;Math.sin(r*.17);syncAir(;areaArrow;Europe/Warsaw;Invalid rider pose.";
 const PAGES = {
   "/": `<html><head><link rel="stylesheet" href="/_next/static/css/a.css"/><script src="/_next/static/chunks/page-AAAAAAAA.js"></script></head></html>`,
   "/_next/static/css/a.css": `@font-face{src:url(/fonts/f.ttf)}`,

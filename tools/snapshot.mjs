@@ -7,7 +7,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { fileFor, findParts } from "../lib/snapshot.mjs";
+import { fileFor, findParts, reindexSnapshot } from "../lib/snapshot.mjs";
 import { extractRefs } from "./refs.mjs";
 
 const followsRefs = (path) => path === "/" || /\.(m?js|css)$/.test(path);
@@ -69,9 +69,16 @@ async function main() {
     options: {
       site: { type: "string", default: "https://fristajlo.ws" },
       name: { type: "string", default: new Date().toISOString().slice(0, 10) },
+      reindex: { type: "string" },
     },
   });
   const root = fileURLToPath(new URL("..", import.meta.url));
+  if (values.reindex) {
+    const manifest = reindexSnapshot(join(root, "vendor", values.reindex));
+    console.log(`Reindexed vendor/${values.reindex}`);
+    for (const [part, path] of Object.entries(manifest.parts)) console.log(`  ${part.padEnd(8)} ${path}`);
+    return;
+  }
   const dir = join(root, "vendor", values.name);
   if (existsSync(dir)) throw new Error(`vendor/${values.name} already exists; choose another --name`);
   const result = await crawl(values.site, fetchFile);
