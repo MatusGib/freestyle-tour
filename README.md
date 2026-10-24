@@ -22,6 +22,20 @@ npm test
 The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
 `data/db.json` (never committed). The 1v1 lobby stays empty.
 
+## Mods
+
+- `local-badge`: proof that the mod layer works (a badge and a key-guide label).
+- `ghosts`: in a solo heat, sail against a ghost of the best heat stored this
+  week. The "Ghost" switch in the overlay turns it off.
+- `replay-viewer`: the "Replays" button in the menu plays stored heats again,
+  with a timeline, speeds, cameras, the move list and video clips.
+
+`node tools/demo-heat.mjs` stores a short demo heat with real moves for the
+current week, so replays and ghosts can be shown without playing first.
+
+Our mods also use two local endpoints that the original client never calls:
+`GET /api/local/heats?week=&version=` and `GET /api/local/heats/<heatId>`.
+
 ## Writing a mod
 
 A mod is a folder in `mods/` that you add to `mods/enabled.json`.
