@@ -36,6 +36,24 @@ current week, so replays and ghosts can be shown without playing first.
 Our mods also use two local endpoints that the original client never calls:
 `GET /api/local/heats?week=&version=` and `GET /api/local/heats/<heatId>`.
 
+## Tour data
+
+`npm run tour-data` reads pwaworldtour.com and rebuilds `tour/`: every PWA
+freestyle event 2006–2026 with its entries, placings, points and ladders, the
+riders with their pseudonyms, and each rider's Glicko-2 rating going into each
+event. Pages are cached in `cache/pwa/` (never committed), one request per
+second, so a second run is quick.
+
+- `npm run tour-data -- --offline` rebuilds from the cache only.
+- `npm run tour-data -- --refresh 2026` downloads the 2026 pages again
+  (`--refresh all` for everything).
+- `tour/aliases.json` merges one rider's spellings (`{ "old id": "newest id" }`).
+- `tour/pseudonyms.json` fixes a pseudonym (`{ "rider id": "Pseudonym" }`).
+
+The summary lists unmatched ladder sailors, possible duplicate riders and how
+well the ratings predicted 2022–2026 heats. The build stops without writing if
+the favourite won fewer than 65% of them.
+
 ## Writing a mod
 
 A mod is a folder in `mods/` that you add to `mods/enabled.json`.
