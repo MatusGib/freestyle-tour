@@ -46,3 +46,8 @@ test("the favourite won at least 65% of the 2022-2026 ladder heats", () => {
   assert.ok(ratings.check.heats > 0, "there are heats to check");
   assert.ok(ratings.check.hitRate >= BAR, `the favourite won ${ratings.check.hitRate}`);
 });
+
+test("the divisions taken from the season rankings are there", () => {
+  const sizes = Object.fromEntries(events.filter((e) => [166, 169, 175].includes(e.id)).map((e) => [e.id, e.divisions.men?.entries.length]));
+  assert.deepEqual(sizes, { 166: 38, 169: 37, 175: 47 });
+});
