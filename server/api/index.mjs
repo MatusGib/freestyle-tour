@@ -13,9 +13,10 @@ import { startWeekly, weeklyInfo } from "./weekly.mjs";
 const HEAT_PATH = "/api/local/heats/";
 const EVENT_PATH = "/api/local/tour/events/";
 
-// request: { method, path, query: URLSearchParams, body }; ctx: { store, game,
-// now(), tour, ai, aiHeats, snapshot }. POST /api/local/ai-heats answers with a
-// promise, the rest straight away.
+// request: { method, path, query: URLSearchParams, body, host }; ctx: { store,
+// game, now(), tour, ai, aiHeats, snapshot, lobby, relay, weekly }. POST
+// /api/local/ai-heats and POST /api/local/weekly/start answer with a promise,
+// the rest straight away.
 export function handleApi({ method, path, query, body, host }, ctx) {
   const { store, game, now } = ctx;
   const route = `${method} ${path}`;

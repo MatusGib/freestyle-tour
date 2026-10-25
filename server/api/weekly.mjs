@@ -36,11 +36,13 @@ export async function startWeekly(body, { tour, game, now, ai, aiHeats, lobby, s
   const opponent = opponentFor(tour, week, body.division);
   if (!opponent) return fail(404, `${week.event.name} had no ${body.division}'s final.`);
   const { target } = opponent;
-  const roomIds = roomIdsFor(game.roomConditions, DEFAULT_WIND, `super-final-${week.event.id}-${now()}`);
-  const firstRoom = roomIds.next().value;
-  const conditions = game.roomConditions(firstRoom);
+  // Without gusts every matching room has the same wind, so one heat serves the
+  // whole week; gusty winds will need the room's seed in the key.
   const key = `${snapshot}|super-final|${week.weekStart}|${body.division}|${DEFAULT_WIND.knots}-${DEFAULT_WIND.gustKnots}|${target}`;
   try {
+    const roomIds = roomIdsFor(game.roomConditions, DEFAULT_WIND, `super-final-${week.event.id}-${now()}`);
+    const firstRoom = roomIds.next().value;
+    const conditions = game.roomConditions(firstRoom);
     let heat = aiHeats.data.heats[key];
     if (!heat) {
       const sailed = await ai.sail(conditions, target);
