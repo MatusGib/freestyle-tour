@@ -9,8 +9,11 @@ import { fileFor, loadGame, openSnapshot } from "../lib/snapshot.mjs";
 import { handleApi } from "./api/index.mjs";
 import { prepareHtml } from "./html.mjs";
 import { loadPatches, patchSnapshot } from "./patches.mjs";
+import { createLobby } from "./lagoon/lobby.mjs";
+import { createRelay } from "./lagoon/relay.mjs";
 import { createStore } from "./store.mjs";
 import { loadTour } from "./tour.mjs";
+import { recordRoom } from "./weekly.mjs";
 
 export const CSP = [
   "default-src 'self'",
@@ -38,22 +41,38 @@ const TYPES = {
 const typeOf = (path) => TYPES[extname(path)] ?? "application/octet-stream";
 
 // Returns an http.Server that isn't listening yet. `game`, `now`, `tour` and
-// `ai` can be replaced in tests; by default the snapshot's engine and calendar
-// are loaded, the tour data is read from tour/, and AI heats are sailed in a
-// worker thread.
+// `ai` can be replaced in tests; by default the snapshot's engine, calendar and
+// wind are loaded, the tour data is read from tour/, and AI heats are sailed in
+// a worker thread.
 export async function createApp({ root, snapshot: name, mods, dataFile, modsDir = join(root, "mods"), game, now = Date.now, log = console.log, tour, ai }) {
   const snapshot = openSnapshot(root, name);
-  game ??= await loadGame(snapshot, ["engine", "week"]);
+  game ??= await loadGame(snapshot, ["engine", "week", "wind"]);
   tour ??= loadTour(join(root, "tour"));
   ai ??= createSailer({ root, snapshot: snapshot.name });
   const store = createStore(dataFile);
   const aiHeats = createStore(join(dirname(dataFile), "ai-heats.json"), { heats: {} });
+  const weekly = createStore(join(dirname(dataFile), "weekly.json"), { weeks: {}, prize: null });
+  // A room usually finishes inside the relay's timer, where a thrown error would
+  // stop the server: a result that can't be written is logged instead.
+  const lobby = createLobby({
+    now,
+    score: (attempts) => game.heatTotals({ attempts }).total,
+    onResult: (room) => {
+      try {
+        recordRoom(weekly, room, now());
+      } catch (error) {
+        log(`Couldn't record the super final's result: ${error.stack ?? error}`);
+      }
+    },
+    log,
+  });
+  const relay = createRelay({ lobby, now });
   const patched = patchSnapshot(snapshot, await loadPatches(modsDir, mods), log);
   const page = prepareHtml(readFileSync(join(snapshot.dir, "index.html"), "utf8"));
   const config = JSON.stringify({ snapshot: snapshot.name, parts: snapshot.manifest.parts, mods });
   const files = new Set(snapshot.manifest.files.map((f) => f.path));
   const modsRoot = resolve(modsDir) + sep;
-  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name };
+  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly };
 
   const send = (res, status, type, body) => {
     res.writeHead(status, { "content-type": type, "content-security-policy": CSP, "cache-control": "no-store" });
@@ -65,7 +84,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
     const path = decodeURIComponent(url.pathname);
     if (path.startsWith("/api/")) {
       const body = req.method === "POST" ? await readJson(req) : undefined;
-      const result = await handleApi({ method: req.method, path, query: url.searchParams, body }, ctx);
+      const result = await handleApi({ method: req.method, path, query: url.searchParams, body, host: req.headers.host }, ctx);
       if (result.unknown) log(`Unknown API call: ${req.method} ${path}`);
       return send(res, result.status, TYPES[".json"], JSON.stringify(result.body));
     }
@@ -88,12 +107,14 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
     return send(res, 404, "text/plain", "Not found");
   }
 
-  return createServer((req, res) => {
+  const server = createServer((req, res) => {
     handle(req, res).catch((error) => {
       log(error.stack ?? String(error));
       send(res, 500, "text/plain", "Local server error");
     });
   });
+  server.on("upgrade", (req, socket) => relay.handleUpgrade(req, socket));
+  return server;
 }
 
 async function readJson(req) {

@@ -8,6 +8,7 @@ import { heatDetail, listHeats } from "./local.mjs";
 import { fail } from "./reply.mjs";
 import { rider } from "./rider.mjs";
 import { aiHeat, eventRiders, listSeasons } from "./tour.mjs";
+import { startWeekly, weeklyInfo } from "./weekly.mjs";
 
 const HEAT_PATH = "/api/local/heats/";
 const EVENT_PATH = "/api/local/tour/events/";
@@ -15,7 +16,7 @@ const EVENT_PATH = "/api/local/tour/events/";
 // request: { method, path, query: URLSearchParams, body }; ctx: { store, game,
 // now(), tour, ai, aiHeats, snapshot }. POST /api/local/ai-heats answers with a
 // promise, the rest straight away.
-export function handleApi({ method, path, query, body }, ctx) {
+export function handleApi({ method, path, query, body, host }, ctx) {
   const { store, game, now } = ctx;
   const route = `${method} ${path}`;
   if (route === "POST /api/rider") return rider(body, store);
@@ -23,11 +24,13 @@ export function handleApi({ method, path, query, body }, ctx) {
   if (route === "GET /api/leaderboard") return board(query, store, game, now());
   if (route === "POST /api/leaderboard") return submitHeat(body, store, game, now());
   if (route === "POST /api/feedback") return feedback(body, store, now());
-  if (path === "/api/lagoons" || path.startsWith("/api/lagoons/")) return lagoons(path, now());
+  if (path === "/api/lagoons" || path.startsWith("/api/lagoons/")) return lagoons(path, body, host, ctx);
   if (route === "GET /api/local/heats") return listHeats(query, store, game);
   if (method === "GET" && path.startsWith(HEAT_PATH)) return heatDetail(path.slice(HEAT_PATH.length), store, game);
   if (route === "GET /api/local/tour/seasons") return listSeasons(ctx.tour);
   if (method === "GET" && path.startsWith(EVENT_PATH)) return eventRiders(ctx.tour, path.slice(EVENT_PATH.length));
   if (route === "POST /api/local/ai-heats") return aiHeat(body, ctx);
+  if (route === "GET /api/local/weekly") return weeklyInfo(ctx);
+  if (route === "POST /api/local/weekly/start") return startWeekly(body, ctx);
   return { ...fail(404, "Not available in the local copy."), unknown: true };
 }
