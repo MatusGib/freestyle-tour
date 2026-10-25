@@ -33,7 +33,7 @@ const postJson = (url, body) => getJson(url, { method: "POST", headers: { "conte
 
 export default {
   name: "super-final",
-  setup({ log }) {
+  setup({ whenGame, log }) {
     let info = null;
     let division = read(DIVISION_KEY) ?? "men";
     let status = "";
@@ -55,7 +55,10 @@ export default {
         ...names.map((name) => Object.assign(document.createElement("button"), {
           type: "button",
           textContent: name === "men" ? "Men" : "Women",
-          disabled: name === division || busy,
+          // The game dims disabled buttons, so the chosen division is in bold.
+          disabled: busy,
+          ariaPressed: String(name === division),
+          style: name === division ? "font-weight:bold" : "",
           onclick: () => {
             division = name;
             write(DIVISION_KEY, name);
@@ -105,19 +108,26 @@ export default {
 
     // The menu is drawn by the game and redrawn often: put the button back after
     // "1v1 Lobby" whenever it's missing, and refresh this week's info then. (If
-    // a game update changes the menu, the button just doesn't appear.)
-    setInterval(() => {
-      const lobby = [...document.querySelectorAll("section.start-panel > button.lagoon-menu-button")].find((b) => b.textContent.includes("1v1 Lobby"));
-      if (lobby && button.previousElementSibling !== lobby) {
-        lobby.after(button, switcher);
-        // Without tour data, the server's answer says to run npm run tour-data.
-        refresh().catch((error) => {
-          log("could not load this week's super final", error);
-          status = error.message;
-          render();
-        });
-      }
-    }, 500);
+    // a game update changes the menu, the button just doesn't appear.) It starts
+    // once the game is running: an extra button in the page's first markup would
+    // upset React taking the page over. The button is off whenever the game's
+    // lobby button is (no rider yet).
+    whenGame().then(() => {
+      setInterval(() => {
+        const lobby = [...document.querySelectorAll("section.start-panel > button.lagoon-menu-button")].find((b) => b.textContent.includes("1v1 Lobby"));
+        if (!lobby) return;
+        button.disabled = lobby.disabled;
+        if (button.previousElementSibling !== lobby) {
+          lobby.after(button, switcher);
+          // Without tour data, the server's answer says to run npm run tour-data.
+          refresh().catch((error) => {
+            log("could not load this week's super final", error);
+            status = error.message;
+            render();
+          });
+        }
+      }, 500);
+    });
     render();
   },
 };
