@@ -24,6 +24,8 @@ export const SIGNATURES = {
   wind: {
     conditions: (v) => /\{if\(!([\w$]+)\)return\{\.\.\.[\w$]+\};let [\w$]+=[\w$]+\(\1\);return\{seed:\1,knots:/.test(src(v)),
     wind: (v) => /return e\.knots\+Math\.sin\(r\*\.17\)/.test(src(v)),
+    // A 1v1 room's wind: the room id hashed into a seed, then conditions(seed).
+    roomConditions: (v) => /^function [\w$]+\(([\w$]+)\)\{return [\w$]+\([\w$]+\(\1\)\)\}$/.test(src(v)),
   },
   controls: {
     Controls: (v) => isClass(v, ["setKey", "setStick", "read", "release"]),
