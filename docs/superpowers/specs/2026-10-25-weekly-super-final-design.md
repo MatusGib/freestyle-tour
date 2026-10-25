@@ -39,8 +39,8 @@ game's own 1v1 screens. Your first win unlocks the game's hidden gear.
 
 1. The main menu has a "Super final" button under "1v1 Lobby", styled like the
    game's own. It names this week's event and the opponent's pseudonym.
-2. Pressing it gets the opponent ready (under a minute) and opens the game's 1v1
-   lobby, where their challenge is waiting. Accepting starts a 1v1 heat with the
+2. Pressing it gets the opponent ready (under a minute), and their challenge
+   appears as the game's own challenge toast. Accepting starts a 1v1 heat with the
    game's countdown and the opponent sailing under their pseudonym. At the end,
    the game's result screen names the winner and shows both scores.
 3. A retry in the same week faces the same opponent heat, in the same wind.
@@ -272,7 +272,7 @@ browser.
 ## Errors
 
 - **Planning the opponent's heat fails:** the button shows "Couldn't get
-  <pseudonym> ready" with Retry.
+  <pseudonym> ready. Press to try again."
 - **The challenge expires:** it disappears from the lobby. Press "Super final"
   again.
 - **The relay doesn't match the game:** the game falls back to the HTTP pose
@@ -307,7 +307,7 @@ browser.
 - **Mod helpers:** button texts and the prize check, as plain functions.
 - **In the browser** (the pane visible):
   1. The menu button names the event and opponent.
-  2. Pressing it opens the lobby with the challenge. Accepting gives the
+  2. Pressing it brings the game's challenge toast. Accepting gives the
      countdown, then the opponent sails under their pseudonym.
   3. The result screen names the winner with both scores.
   4. A retry faces the same heat.

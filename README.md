@@ -20,7 +20,7 @@ npm test
   and makes it current; run `npm test` to see which mods need updating.
 
 The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
-`data/db.json` (never committed). The 1v1 lobby stays empty.
+`data/db.json` (never committed). The 1v1 lobby stays empty unless a super final is waiting.
 
 ## Mods
 
