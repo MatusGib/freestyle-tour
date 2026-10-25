@@ -9,13 +9,18 @@ export const DEFAULT_WIND = { knots: 17, gustKnots: 0 };
 const round = (value) => Math.round(value * 100) / 100;
 
 // The game's default look, as a woman or a man, so the lobby and result
-// screens have a full appearance to draw.
+// screens have a full appearance to draw, but with an orange sail and board
+// (the default is teal) so the opponent stands apart from a default-look player.
 const LOOK = { country: "", skinColor: "warm", hair: "short", glasses: "sunglasses", helmet: "none", facialHair: "none", hairColor: "brown", facialHairColor: "brown", bodyType: "male", outfit: "wetsuit", harness: "black", sail: "orange", board: "orange" };
 export const lookFor = (division) => ({ ...LOOK, bodyType: division === "women" ? "female" : "male", hair: division === "women" ? "long" : "short" });
 
-// The week's event, from all events with results in id order.
+// The week's event, from all events with a single winner in each division, in
+// id order. (An event whose final was never sailed lists several riders at
+// place 1, and has no winner to race.)
 export function weekOf(tour, weekStart) {
-  const events = [...tour.events.values()].sort((a, b) => a.id - b.id);
+  const events = [...tour.events.values()]
+    .filter((event) => Object.values(event.divisions).every((division) => division.entries[1]?.place !== 1))
+    .sort((a, b) => a.id - b.id);
   return { weekStart, event: events[seedOf("weekly", weekStart) % events.length] };
 }
 

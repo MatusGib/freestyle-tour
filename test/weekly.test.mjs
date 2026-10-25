@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { heatTarget, seedOf } from "../lib/ai/score.mjs";
+import { averageScore, heatTarget, seedOf } from "../lib/ai/score.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
 import { DEFAULT_WIND, lookFor, opponentFor, recordResult, recordRoom, roomIdsFor, weekOf } from "../server/weekly.mjs";
@@ -25,11 +25,21 @@ test("each week picks one event, the same all week, from all events in id order"
   assert.ok(picks.size > 1, "the event changes from week to week");
 });
 
+test("events without a single winner are left out, and the rest go in id order", () => {
+  const event = (id, places) => [id, { id, divisions: { men: { entries: places.map((place) => ({ place })) } } }];
+  const data = { events: new Map([event(378, [1, 2]), event(363, [1, 1, 3]), event(300, [1])]) };
+  const ids = [300, 378];
+  for (let i = 0; i < 12; i++) {
+    const weekStart = WEEK_START + i * WEEK;
+    assert.equal(weekOf(data, weekStart).event.id, ids[seedOf("weekly", weekStart) % 2]);
+  }
+});
+
 test("the opponent is the division's winner, aiming for a target seeded by the week", (t) => {
   const data = tour(t);
   const week = { weekStart: WEEK_START, event: data.events.get(378) };
   const men = opponentFor(data, week, "men");
-  assert.deepEqual({ ...men, average: undefined, target: undefined }, { id: "m:yentel-caers", nickname: "Yenter Ceers", appearance: lookFor("men"), rating: 1938, average: undefined, target: undefined });
+  assert.deepEqual({ ...men, target: undefined }, { id: "m:yentel-caers", nickname: "Yenter Ceers", appearance: lookFor("men"), rating: 1938, average: Math.round(averageScore(1938) * 100) / 100, target: undefined });
   assert.equal(men.target, Math.round(heatTarget(1938, seedOf("m:yentel-caers", 378, WEEK_START, "super-final")) * 100) / 100);
   assert.equal(opponentFor(data, week, "women").nickname, "Sarah-Quito Uffringa");
   assert.equal(opponentFor(data, week, "women").appearance.bodyType, "female");
@@ -62,11 +72,12 @@ test("a finished room is recorded as a win only with outcome 1, and a forfeit no
   const store = createStore(join(tempDir(t), "weekly.json"), { weeks: {}, prize: null });
   const meta = { weekStart: WEEK_START, event: 378, division: "men" };
   const room = (outcome, score, forfeited = false) => ({ meta, outcome, you: { score, forfeited } });
-  recordRoom(store, room("2", 25), 1);
-  assert.deepEqual(store.data.weeks[WEEK_START], { event: 378, division: "men", best: 25, won: false });
-  recordRoom(store, room("2", 0, true), 2);
-  recordRoom(store, { ...room("1", 50), meta: null }, 3);
-  assert.deepEqual(store.data.weeks[WEEK_START].best, 25, "forfeits and rooms without a super final aren't recorded");
-  recordRoom(store, room("1", 33), 4);
-  assert.deepEqual([store.data.weeks[WEEK_START].won, store.data.prize], [true, { earnedAt: 4 }]);
+  recordRoom(store, room("2", 0, true), 1);
+  recordRoom(store, { ...room("1", 50), meta: null }, 2);
+  assert.deepEqual(store.data.weeks, {}, "forfeits and rooms without a super final aren't recorded");
+  recordRoom(store, room("2", 25), 3);
+  recordRoom(store, room("draw", 30), 4);
+  assert.deepEqual(store.data.weeks[WEEK_START], { event: 378, division: "men", best: 30, won: false });
+  recordRoom(store, room("1", 33), 5);
+  assert.deepEqual([store.data.weeks[WEEK_START].won, store.data.prize], [true, { earnedAt: 5 }]);
 });
