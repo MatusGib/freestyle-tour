@@ -13,7 +13,7 @@ const YOU = "you";
 const QUIET = new Set(["sync", "exit", "offline", "presence"]);
 
 // score(attempts): the heat total, by the game's own rules. onResult(room) is
-// called once when a room finishes.
+// called once when a room finishes with a result (not when it's cancelled).
 export function createLobby({ now, score, onResult = () => {}, log = () => {} }) {
   let offer = null; // { challenge, opponent, heat, nextRoomId, meta }
   let room = null;
@@ -55,7 +55,7 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   // The AI's side as the game should see it now: during the heat, only the
   // attempts it has settled so far, and their total, like a live opponent.
   function aiNow() {
-    if (room.ai.submitted || room.status === "finished") return room.ai;
+    if (room.ai.submitted) return room.ai;
     if (room.status !== "racing") return { ...room.ai, attempts: [], score: 0 };
     const attempts = room.ai.attempts.filter((a) => offer.heat.settledAt[a.id] <= clock());
     return { ...room.ai, attempts, score: score(attempts) };
@@ -121,7 +121,8 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
     },
     leave({ roomId }) {
       if (room?.id !== roomId || room.status === "finished") return;
-      if (room.status === "pending") {
+      // Before the start, even in the countdown, the game calls leaving a cancel.
+      if (now() < room.startsAt) {
         room.status = "finished";
         room.outcome = "void";
         return;

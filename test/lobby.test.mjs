@@ -105,12 +105,19 @@ test("finishing first waits for the AI, and the result is reported once", () => 
   assert.equal(s.results.length, 1);
 });
 
-test("leaving before the start voids the room; leaving during the heat forfeits it", () => {
+test("leaving before the start, even in the countdown, voids the room; leaving during the heat forfeits it", () => {
   const before = setup();
   before.offer();
   before.poll({ action: "accept", challengeId: before.poll().challenges[0].id });
   assert.deepEqual(before.poll({ action: "leave", roomId: "room-0" }).room.outcome, "void");
   assert.equal(before.results.length, 0);
+  const countdown = setup();
+  countdown.offer();
+  countdown.poll({ action: "accept", challengeId: countdown.poll().challenges[0].id });
+  countdown.later(TIMES.racingAfter + 1000);
+  const cancelled = countdown.poll({ action: "leave", roomId: "room-0" }).room;
+  assert.deepEqual([cancelled.outcome, cancelled.seats[1].attempts, cancelled.seats[1].score], ["void", [], 0], "a cancelled room doesn't show the AI's heat");
+  assert.equal(countdown.results.length, 0);
   const during = setup();
   during.offer();
   race(during);
@@ -144,6 +151,16 @@ test("challenging again after a heat opens a new room at once, and dismissing hi
   const again = s.poll({ action: "challenge", challengeId: "c2", riderId: "m:balz-muller" });
   assert.deepEqual([again.room.id, again.room.status, again.challenges[0].status, again.challenges[0].incoming], ["room-1", "pending", "accepted", false]);
   assert.equal(s.poll({ action: "challenge", challengeId: "c3", riderId: "m:balz-muller" }).room.id, "room-1", "not while a room runs");
+});
+
+test("the game's own order, challenge again and then dismiss the old room, keeps the new room", () => {
+  const s = setup();
+  s.offer();
+  race(s);
+  s.later(HEAT_SECONDS * 1000);
+  s.poll({ action: "finish", roomId: "room-0", attempts: [] });
+  assert.equal(s.poll({ action: "challenge", challengeId: "c2", riderId: "m:balz-muller" }).room.id, "room-1");
+  assert.equal(s.poll({ action: "dismiss", roomId: "room-0" }).room.id, "room-1");
 });
 
 test("unknown actions are logged and answered with the snapshot", () => {
