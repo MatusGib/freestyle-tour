@@ -11,7 +11,7 @@ const info = {
 
 test("the menu line names the event, the opponent and the wind", () => {
   assert.equal(menuLine(info, "men"), "This week: 2019 Mercedes-Benz World Cup Sylt · vs Amada Vryeswijk · 17 kt");
-  assert.equal(menuLine({ ...info, wind: { knots: 19, gustKnots: 5 } }, "women"), "This week: 2019 Mercedes-Benz World Cup Sylt · vs Sarah-Quito Uffringa · 19 kt, gusts 5");
+  assert.equal(menuLine({ ...info, wind: { knots: 19, gustKnots: 5 } }, "women"), "This week: 2019 Mercedes-Benz World Cup Sylt · vs Sarah-Quito Uffringa · 19 kt, gusts 21–24 kt");
 });
 
 test("the button's other lines", () => {

@@ -5,7 +5,8 @@
 export const HIDDEN_GEAR = { key: "fristajlo.hidden-gear", event: "fristajlo-hidden-gear-change" };
 export const PRIZE_TEXT = "Unlocked: Severne Freek CC1 sail and Severne Psycho board";
 
-const windText = (wind) => (wind.gustKnots ? `${wind.knots} kt, gusts ${wind.gustKnots}` : `${wind.knots} kt`);
+// As the game writes it: gusts from 2 kt above the wind up to gustKnots above.
+const windText = (wind) => (wind.gustKnots ? `${wind.knots} kt, gusts ${wind.knots + 2}–${wind.knots + wind.gustKnots} kt` : `${wind.knots} kt`);
 export const menuLine = (info, division) => `This week: ${info.event.name} · vs ${info.divisions[division].pseudonym} · ${windText(info.wind)}`;
 export const readyText = (pseudonym) => `Getting ${pseudonym} ready…`;
 export const failedText = (pseudonym) => `Couldn't get ${pseudonym} ready. Press to try again.`;
