@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash, randomBytes } from "node:crypto";
+import { EventEmitter } from "node:events";
 import { createServer } from "node:http";
 import { connect } from "node:net";
 import { PROTOCOL, RELAY_PATH, createRelay, decodeFrames, encodeFrame } from "../server/lagoon/relay.mjs";
@@ -107,4 +108,11 @@ test("a socket without a valid ticket is refused", async (t) => {
   t.after(() => client.socket.destroy());
   await client.until(() => client.head());
   assert.match(client.head(), /^HTTP\/1\.1 401/);
+});
+
+test("a refused socket's connection errors don't crash the server", () => {
+  const relay = createRelay({ lobby: { racingPose: () => null }, now: () => 1000 });
+  const socket = Object.assign(new EventEmitter(), { end() {} });
+  relay.handleUpgrade({ url: RELAY_PATH, headers: {} }, socket);
+  assert.doesNotThrow(() => socket.emit("error", new Error("read ECONNRESET")));
 });

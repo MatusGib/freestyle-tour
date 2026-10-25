@@ -82,6 +82,9 @@ export function createRelay({ lobby, now, rate = 30 }) {
   }
 
   function handleUpgrade(req, socket) {
+    // Node drops its own error listener from an upgraded socket: without one, a
+    // client resetting the connection (even a refused one) would stop the server.
+    socket.on("error", () => {});
     const offered = (req.headers["sec-websocket-protocol"] ?? "").split(",").map((p) => p.trim());
     const ticket = offered.find((p) => p.startsWith("ticket."))?.slice("ticket.".length);
     const path = new URL(req.url, "http://localhost").pathname;
