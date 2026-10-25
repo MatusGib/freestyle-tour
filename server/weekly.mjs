@@ -1,73 +1,62 @@
-// This week's super final: one past event per week, seeded by the week, with
-// the winner of the division you pick as the opponent. The opponent's heat is
-// sailed by the AI riders at a target seeded by the week, in the wind of a room
-// id chosen to match the event's wind.
-import { averageScore, heatTarget, seedOf } from "../lib/ai/score.mjs";
+// The Champion's challenge: one of the champion's recent wins each week,
+// seeded by the week, with the champion himself as the opponent. His heat is
+// sailed by the AI riders in the champion's wind, 21 kt with each room's own
+// gusts (mods/champion/wind.js, shared with the patched game).
+// champion: server/champion.json.
+import { seedOf } from "../lib/ai/score.mjs";
+import { WIND, roomWind } from "../mods/champion/wind.js";
 
-// Until the event winds table exists, every super final sails at 17 kt.
-export const DEFAULT_WIND = { knots: 17, gustKnots: 0 };
-const round = (value) => Math.round(value * 100) / 100;
+export { WIND };
 
-// The game's default look, as a woman or a man, so the lobby and result
-// screens have a full appearance to draw, but with an orange sail and board
-// (the default is teal) so the opponent stands apart from a default-look player.
-const LOOK = { country: "", skinColor: "warm", hair: "short", glasses: "sunglasses", helmet: "none", facialHair: "none", hairColor: "brown", facialHairColor: "brown", bodyType: "male", outfit: "wetsuit", harness: "black", sail: "orange", board: "orange" };
-export const lookFor = (division) => ({ ...LOOK, bodyType: division === "women" ? "female" : "male", hair: division === "women" ? "long" : "short" });
+// The game's default look, so the lobby and result screens have a full
+// appearance to draw, but with an orange sail and board (the default is teal)
+// so the opponent stands apart from a default-look player.
+export const LOOK = { country: "", skinColor: "warm", hair: "short", glasses: "sunglasses", helmet: "none", facialHair: "none", hairColor: "brown", facialHairColor: "brown", bodyType: "male", outfit: "wetsuit", harness: "black", sail: "orange", board: "orange" };
 
-// The week's event, from all events with a single winner in each division, in
-// id order. (An event whose final was never sailed lists several riders at
-// place 1, and has no winner to race.)
-export function weekOf(tour, weekStart) {
-  const events = [...tour.events.values()]
-    .filter((event) => Object.values(event.divisions).every((division) => division.entries[1]?.place !== 1))
-    .sort((a, b) => a.id - b.id);
-  return { weekStart, event: events[seedOf("weekly", weekStart) % events.length] };
+// The week's event, from the champion's events in the order listed.
+export function weekOf(champion, weekStart) {
+  return { weekStart, event: champion.events[seedOf("weekly", weekStart) % champion.events.length] };
 }
 
-// The division's winner as the opponent, or null when the event had no such
-// division.
-export function opponentFor(tour, { event, weekStart }, division) {
-  const winner = event.divisions[division]?.entries[0];
-  if (!winner) return null;
-  const rating = tour.ratings.events[event.id][division][winner.rider].rating;
-  return {
-    id: winner.rider,
-    nickname: tour.riders.get(winner.rider).pseudonym,
-    appearance: lookFor(division),
-    rating: Math.round(rating),
-    average: round(averageScore(rating)),
-    target: round(heatTarget(rating, seedOf(winner.rider, event.id, weekStart, "super-final"))),
-  };
+// The champion as the opponent, aiming for champion.target (the AI lands about
+// half a point under it in this wind).
+export function opponentFor(champion) {
+  return { id: champion.rider, nickname: champion.name, appearance: LOOK, rating: champion.rating, target: champion.target };
 }
 
-// Room ids ("<prefix>-<n>") whose wind (by the game's own roomConditions)
-// matches, in order. Every room needs an id never used before: the game ignores
-// ids it has dismissed, and resumes an unfinished heat it kept for an id. So
-// the prefix should carry the time the super final was started. Without gusts,
-// all matching ids give exactly the same wind.
-export function* roomIdsFor(roomConditions, wind, prefix) {
+// The champion's rooms for an event, in order: ids "champion-<event>-<at>-<n>"
+// whose gusts (by the game's own roomConditions) are the champion's, with the
+// wind the patched game gives them. Every room needs an id never used before:
+// the game ignores ids it has dismissed, and resumes an unfinished heat it kept
+// for an id, so the ids carry the time the challenge was started (at). Each
+// room has its own gusts.
+export function* championRooms(roomConditions, eventId, at) {
   for (let n = 0; n < 100_000; n++) {
-    const id = `${prefix}-${n}`;
-    const c = roomConditions(id);
-    if (c.knots === wind.knots && c.gustKnots === wind.gustKnots) yield id;
+    const id = `champion-${eventId}-${at}-${n}`;
+    const conditions = roomWind(id, roomConditions(id));
+    if (conditions.gustKnots === WIND.gustKnots) yield { id, conditions };
   }
-  throw new Error(`no room id gives ${wind.knots} kt with gusts of ${wind.gustKnots}`);
+  throw new Error(`no room id gives gusts of ${WIND.gustKnots}`);
 }
 
-// Keeps each week's best score and whether you won, and when the prize was
-// earned (the first win). store: createStore(file, { weeks: {}, prize: null }).
-export function recordResult(store, { weekStart, event, division, score, won, at }) {
+// Keeps each week's best score and whether you won, your last win (so the mod
+// can congratulate you once), and when the prize was earned (the first win).
+// store: createStore(file, { weeks: {}, prize: null }).
+export function recordResult(store, { weekStart, event, score, opponentScore, won, at }) {
   store.update((data) => {
-    const week = data.weeks[weekStart] ?? { event, division, best: 0, won: false };
+    const week = data.weeks[weekStart] ?? { event, best: 0, won: false };
     week.best = Math.max(week.best, score);
     week.won ||= won;
     data.weeks[weekStart] = week;
-    if (won && !data.prize) data.prize = { earnedAt: at };
+    if (!won) return;
+    data.lastWin = { at, event, score, opponentScore };
+    data.prize ??= { earnedAt: at };
   });
 }
 
-// Records a finished super final room from the lobby; a forfeit isn't recorded.
+// Records a finished Champion's challenge room from the lobby; a forfeit isn't
+// recorded.
 export function recordRoom(store, room, at) {
   if (!room.meta || room.you.forfeited) return;
-  recordResult(store, { ...room.meta, score: room.you.score, won: room.outcome === "1", at });
+  recordResult(store, { ...room.meta, score: room.you.score, opponentScore: room.ai.score, won: room.outcome === "1", at });
 }

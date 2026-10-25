@@ -1,67 +1,67 @@
-// Endpoints for the super final mod: this week's event and opponents, and
-// getting an opponent ready in the local 1v1 lobby. Pseudonyms only.
-import { DEFAULT_WIND, opponentFor, roomIdsFor, weekOf } from "../weekly.mjs";
+// Endpoints for the Champion's challenge mod: this week's event, and getting the
+// champion ready in the local 1v1 lobby. Real names: the champion and the
+// podiums are named as they are.
+import { WIND, championRooms, opponentFor, weekOf } from "../weekly.mjs";
 import { fail, ok } from "./reply.mjs";
 
-const NO_TOUR = "No tour data on this computer: run npm run tour-data.";
-// The PWA's star rating, which some event names end with ("… Grand Slam ******").
-const STARS = /\s*\*+$/;
-
-// This week's event, its divisions' opponents, the wind, your best score,
-// whether you won, and whether the prize is earned.
-export function weeklyInfo({ tour, game, now, weekly }) {
-  if (!tour) return fail(404, NO_TOUR);
-  const week = weekOf(tour, game.weekStart(now()));
-  const { event } = week;
-  const divisions = {};
-  for (const name of Object.keys(event.divisions)) {
-    const opponent = opponentFor(tour, week, name);
-    divisions[name] = { pseudonym: opponent.nickname, average: opponent.average };
-  }
+// This week's event and its story, the champion, the wind, your best score,
+// whether you won, your last win, and whether the prize is earned.
+export function weeklyInfo({ champion, game, now, weekly }) {
+  const week = weekOf(champion, game.weekStart(now()));
+  const { id, name, when, place, podium, story } = week.event;
+  const opponent = opponentFor(champion);
   const record = weekly.data.weeks[week.weekStart];
   return ok({
     weekStart: week.weekStart,
-    event: { id: event.id, name: event.name.replace(STARS, ""), start: event.start, location: event.location },
-    divisions,
-    wind: DEFAULT_WIND,
+    event: { id, name, when, place, podium },
+    story,
+    opponent: { name: opponent.nickname, target: opponent.target },
+    wind: WIND,
     best: record?.best ?? null,
     won: !!record?.won,
+    lastWin: weekly.data.lastWin ?? null,
     prize: !!weekly.data.prize,
   });
 }
 
-// Sails (or reuses) the opponent's heat in the room's wind, turns it into a
-// pose track and offers the challenge in the lobby. body: { division }.
-export async function startWeekly(body, { tour, game, now, ai, aiHeats, lobby, snapshot }) {
-  if (!tour) return fail(404, NO_TOUR);
-  const week = weekOf(tour, game.weekStart(now()));
-  const opponent = opponentFor(tour, week, body.division);
-  if (!opponent) return fail(404, `${week.event.name} had no ${body.division}'s final.`);
-  const { target } = opponent;
-  // Without gusts every matching room has the same wind, so one heat serves the
-  // whole week; gusty winds will need the room's seed in the key.
-  const key = `${snapshot}|super-final|${week.weekStart}|${body.division}|${DEFAULT_WIND.knots}-${DEFAULT_WIND.gustKnots}|${target}`;
+// Each room needs its own heat: gusts make every room's wind different, and
+// room ids are never reused. rooms: championRooms(). take() hands out the
+// ready room, or null, and starts sailing the next one, so "Challenge again"
+// seldom has to wait.
+export function roomQueue(rooms, heatFor, log = () => {}) {
+  let ready = null;
+  const fill = async () => {
+    const { id, conditions } = rooms.next().value;
+    ready = { id, heat: await heatFor(conditions) };
+  };
+  return {
+    start: fill,
+    take() {
+      const room = ready;
+      if (!room) return null;
+      ready = null;
+      fill().catch((error) => log(`Couldn't get the next room ready: ${error.message}`));
+      return room;
+    },
+  };
+}
+
+// Sails the champion's heat for the first room, offers his challenge in the
+// lobby, and keeps the next room's heat sailing behind it.
+export async function startWeekly({ champion, game, now, ai, lobby, log }) {
+  const week = weekOf(champion, game.weekStart(now()));
+  const opponent = opponentFor(champion);
+  const heatFor = async (conditions) => {
+    const sailed = await ai.sail(conditions, opponent.target);
+    const { poses, settledAt } = await ai.poses(conditions, sailed.replay);
+    return { score: sailed.score, attempts: sailed.attempts, poses, settledAt };
+  };
   try {
-    const roomIds = roomIdsFor(game.roomConditions, DEFAULT_WIND, `super-final-${week.event.id}-${now()}`);
-    const firstRoom = roomIds.next().value;
-    const conditions = game.roomConditions(firstRoom);
-    let heat = aiHeats.data.heats[key];
-    if (!heat) {
-      const sailed = await ai.sail(conditions, target);
-      heat = { key, rider: opponent.id, pseudonym: opponent.nickname, conditions, target, score: sailed.score, attempts: sailed.attempts, replay: sailed.replay };
-      aiHeats.update((data) => void (data.heats[key] = heat));
-    }
-    const { poses, settledAt } = await ai.poses(conditions, heat.replay);
-    let next = firstRoom;
-    const nextRoomId = () => {
-      const id = next ?? roomIds.next().value;
-      next = null;
-      return id;
-    };
-    const ready = { score: heat.score, attempts: heat.attempts, poses, settledAt };
-    lobby.offer(opponent, () => ({ id: nextRoomId(), heat: ready }), { weekStart: week.weekStart, event: week.event.id, division: body.division });
+    const rooms = roomQueue(championRooms(game.roomConditions, week.event.id, now()), heatFor, log);
+    await rooms.start();
+    lobby.offer(opponent, rooms.take, { weekStart: week.weekStart, event: week.event.id });
   } catch (error) {
     return fail(500, `Couldn't get ${opponent.nickname} ready: ${error.message}`);
   }
-  return ok({ pseudonym: opponent.nickname, wind: DEFAULT_WIND });
+  return ok({ name: opponent.nickname, wind: WIND });
 }

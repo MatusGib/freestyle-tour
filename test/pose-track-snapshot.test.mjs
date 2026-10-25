@@ -6,7 +6,7 @@ import { createSailer } from "../lib/ai/sailer.mjs";
 import { sailHeat } from "../lib/ai/sail.mjs";
 import { loadGame, tryOpenSnapshot } from "../lib/snapshot.mjs";
 import { createRunner } from "../mods/lib/replay.js";
-import { DEFAULT_WIND, roomIdsFor } from "../server/weekly.mjs";
+import { championRooms } from "../server/weekly.mjs";
 import { ROOT } from "./helpers.mjs";
 
 const snapshot = tryOpenSnapshot(ROOT);
@@ -14,7 +14,7 @@ const skip = !snapshot && "no snapshot yet: run npm run snapshot";
 
 test("the pose track has a pose every 4 steps and when each attempt settled", { skip }, async (t) => {
   const engine = await loadGame(snapshot, ["engine", "wind", "controls", "week", "pose"]);
-  const conditions = engine.roomConditions(roomIdsFor(engine.roomConditions, DEFAULT_WIND, "probe").next().value);
+  const { conditions } = championRooms(engine.roomConditions, "probe", 0).next().value;
   const heat = sailHeat(engine, conditions, 40, { seconds: 20 });
   const sailer = createSailer({ root: ROOT });
   t.after(() => sailer.close());

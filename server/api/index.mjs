@@ -14,7 +14,8 @@ const HEAT_PATH = "/api/local/heats/";
 const EVENT_PATH = "/api/local/tour/events/";
 
 // request: { method, path, query: URLSearchParams, body, host }; ctx: { store,
-// game, now(), tour, ai, aiHeats, snapshot, lobby, relay, weekly }. POST
+// game, now(), tour, ai, aiHeats, snapshot, lobby, relay, weekly, champion,
+// log }. POST
 // /api/local/ai-heats and POST /api/local/weekly/start answer with a promise,
 // the rest straight away.
 export function handleApi({ method, path, query, body, host }, ctx) {
@@ -32,6 +33,6 @@ export function handleApi({ method, path, query, body, host }, ctx) {
   if (method === "GET" && path.startsWith(EVENT_PATH)) return eventRiders(ctx.tour, path.slice(EVENT_PATH.length));
   if (route === "POST /api/local/ai-heats") return aiHeat(body, ctx);
   if (route === "GET /api/local/weekly") return weeklyInfo(ctx);
-  if (route === "POST /api/local/weekly/start") return startWeekly(body, ctx);
+  if (route === "POST /api/local/weekly/start") return startWeekly(ctx);
   return { ...fail(404, "Not available in the local copy."), unknown: true };
 }

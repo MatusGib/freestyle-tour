@@ -40,18 +40,21 @@ const TYPES = {
 };
 const typeOf = (path) => TYPES[extname(path)] ?? "application/octet-stream";
 
-// Returns an http.Server that isn't listening yet. `game`, `now`, `tour` and
-// `ai` can be replaced in tests; by default the snapshot's engine, calendar and
-// wind are loaded, the tour data is read from tour/, and AI heats are sailed in
-// a worker thread.
-export async function createApp({ root, snapshot: name, mods, dataFile, modsDir = join(root, "mods"), game, now = Date.now, log = console.log, tour, ai }) {
+// Returns an http.Server that isn't listening yet. `game`, `now`, `tour`, `ai`
+// and `champion` can be replaced in tests; by default the snapshot's engine,
+// calendar and wind are loaded, the tour data is read from tour/, AI heats are
+// sailed in a worker thread, and the champion is server/champion.json.
+export async function createApp({ root, snapshot: name, mods, dataFile, modsDir = join(root, "mods"), game, now = Date.now, log = console.log, tour, ai, champion }) {
   const snapshot = openSnapshot(root, name);
   game ??= await loadGame(snapshot, ["engine", "week", "wind"]);
   tour ??= loadTour(join(root, "tour"));
   ai ??= createSailer({ root, snapshot: snapshot.name });
+  champion ??= JSON.parse(readFileSync(new URL("./champion.json", import.meta.url), "utf8"));
   const store = createStore(dataFile);
   const aiHeats = createStore(join(dirname(dataFile), "ai-heats.json"), { heats: {} });
-  const weekly = createStore(join(dirname(dataFile), "weekly.json"), { weeks: {}, prize: null });
+  // The Champion's challenge's results, apart from the super final's old
+  // weekly.json, so an old super final win doesn't count as beating him.
+  const weekly = createStore(join(dirname(dataFile), "champion.json"), { weeks: {}, prize: null });
   // A room usually finishes inside the relay's timer, where a thrown error would
   // stop the server: a result that can't be written is logged instead.
   const lobby = createLobby({
@@ -61,7 +64,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
       try {
         recordRoom(weekly, room, now());
       } catch (error) {
-        log(`Couldn't record the super final's result: ${error.stack ?? error}`);
+        log(`Couldn't record the Champion's challenge result: ${error.stack ?? error}`);
       }
     },
     log,
@@ -72,7 +75,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
   const config = JSON.stringify({ snapshot: snapshot.name, parts: snapshot.manifest.parts, mods });
   const files = new Set(snapshot.manifest.files.map((f) => f.path));
   const modsRoot = resolve(modsDir) + sep;
-  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly };
+  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, log };
 
   const send = (res, status, type, body) => {
     res.writeHead(status, { "content-type": type, "content-security-policy": CSP, "cache-control": "no-store" });

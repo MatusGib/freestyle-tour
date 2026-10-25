@@ -1,0 +1,51 @@
+{
+  "rider": "m:lennart-neubauer",
+  "name": "Lennart Neubauer",
+  "rating": 1946,
+  "target": 45.5,
+  "events": [
+    {
+      "id": "2023-sylt",
+      "tourId": 342,
+      "name": "2023 Sylt World Cup",
+      "when": "22 September – 1 October 2023",
+      "place": "Westerland, Sylt, Germany",
+      "podium": ["Lennart Neubauer", "Yentel Caers", "Steven Van Broeckhoven"],
+      "story": "His first win on the PWA World Tour. In a good sideshore wind he won the single elimination, then met Yentel Caers, who had just taken the world title, in the double-elimination final. Neubauer opened with a double culo, held off Caers's comeback to within a few tenths, and sealed it with a clean air funnel burner."
+    },
+    {
+      "id": "2024-fuerteventura",
+      "tourId": 359,
+      "name": "2024 Fuerteventura Grand Slam",
+      "when": "25 July – 3 August 2024",
+      "place": "Sotavento, Fuerteventura, Spain",
+      "podium": ["Lennart Neubauer", "Adrien Bosson", "Yentel Caers"],
+      "story": "Neubauer broke 40 points twice on his way through the single elimination, then lost its final to Adrien Bosson by 0.7, to a culo in the last seconds. He fought back through the double elimination to win the event, his second World Tour win in a row, and finished the year as world champion."
+    },
+    {
+      "id": "2025-sylt",
+      "tourId": 378,
+      "name": "2025 Sylt Grand Slam",
+      "when": "26 September – 5 October 2025",
+      "place": "Westerland, Sylt, Germany",
+      "podium": ["Lennart Neubauer", "Yentel Caers", "Jacopo Testa"],
+      "story": "A strong cross-offshore south-easterly sent the heats far out to sea, judged from drone footage for the first time. Neubauer landed the first triple culo ever seen in a World Cup heat, worth 48.2 points and the day's best score, and beat Yentel Caers in the final."
+    },
+    {
+      "id": "2026-fuerteventura",
+      "name": "2026 Fuerteventura Grand Slam",
+      "when": "July 2026",
+      "place": "Sotavento, Fuerteventura, Spain",
+      "podium": ["Lennart Neubauer", "Yentel Caers", "Balz Müller"],
+      "story": "Ten days of howling wind and head-high kickers. Neubauer won the single elimination, then met Yentel Caers in a double-elimination final called one of the best in freestyle history: 46.59 to 45.88, the two highest heat scores of the event, settled by a gliding Spock double culo."
+    },
+    {
+      "id": "2026-sylt",
+      "name": "2026 Sylt Grand Slam",
+      "when": "25 September – 4 October 2026",
+      "place": "Westerland, Sylt, Germany",
+      "podium": ["Lennart Neubauer", "Dieter Van der Eyken", "Takumi Moriya"],
+      "story": "An offshore easterly pushed the heats a long way out to sea. Neubauer showed a new Shaka into Shaka combo on his way through the single elimination, and beat Dieter Van der Eyken in the final with more than 38 points, the best score of the event, on the way to his second world title."
+    }
+  ]
+}
