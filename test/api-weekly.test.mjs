@@ -2,11 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { handleApi } from "../server/api/index.mjs";
-import { createLobby } from "../server/lagoon/lobby.mjs";
+import { HEAT_SECONDS, TIMES, createLobby } from "../server/lagoon/lobby.mjs";
 import { createRelay } from "../server/lagoon/relay.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { DEFAULT_WIND, weekOf } from "../server/weekly.mjs";
+import { DEFAULT_WIND, recordRoom, weekOf } from "../server/weekly.mjs";
 import { fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
 const NOW = Date.parse("2026-10-21T12:00:00Z");
@@ -33,7 +33,9 @@ function setup(t, { tour = true, ai, rooms = roomConditions } = {}) {
   const game = { ...fakeGame, roomConditions: rooms };
   let time = NOW;
   const now = () => time;
-  const lobby = createLobby({ now, score: (attempts) => fakeGame.heatTotals({ attempts }).total });
+  // Wired as server/app.mjs wires it.
+  const weekly = createStore(join(dir, "weekly.json"), { weeks: {}, prize: null });
+  const lobby = createLobby({ now, score: (attempts) => fakeGame.heatTotals({ attempts }).total, onResult: (room) => recordRoom(weekly, room, now()) });
   const ctx = {
     store,
     game,
@@ -41,7 +43,7 @@ function setup(t, { tour = true, ai, rooms = roomConditions } = {}) {
     tour: loadTour(join(dir, "tour")),
     ai,
     aiHeats: createStore(join(dir, "ai-heats.json"), { heats: {} }),
-    weekly: createStore(join(dir, "weekly.json"), { weeks: {}, prize: null }),
+    weekly,
     lobby,
     relay: createRelay({ lobby, now }),
     snapshot: "2026-10-24",
@@ -65,6 +67,8 @@ test("this week's super final names the event and each division's opponent, unde
     prize: false,
   });
   assert.ok(!JSON.stringify(body).includes("Yentel Caers") && !JSON.stringify(body).includes("Balz Müller"));
+  week.event.name += " ******";
+  assert.equal(call("GET", "/api/local/weekly").body.event.name, week.event.name.replace(" ******", ""), "the PWA's star rating isn't part of the name");
 });
 
 test("starting sails the winner's heat in a room with the default wind, offers the challenge, and reuses the heat", async (t) => {
@@ -84,6 +88,19 @@ test("starting sails the winner's heat in a room with the default wind, offers t
   assert.deepEqual(calls.map(([kind]) => kind), ["sail", "poses", "poses"], "a retry later in the week reuses the sailed heat");
   const retry = call("POST", "/api/lagoons", { playerKey: "k1" }).body.challenges[0];
   assert.equal(call("POST", "/api/lagoons", { playerKey: "k1", action: "accept", challengeId: retry.id }).body.room.id, `super-final-${week.event.id}-${NOW + 60 * 60 * 1000}-0`, "in a room never used before");
+});
+
+test("a win is recorded for the week and earns the prize", async (t) => {
+  const { ctx, call, later } = setup(t);
+  const division = Object.keys(weekOf(ctx.tour, fakeGame.weekStart(NOW)).event.divisions)[0];
+  await call("POST", "/api/local/weekly/start", { division });
+  const challenge = call("POST", "/api/lagoons", { playerKey: "k1" }).body.challenges[0];
+  const room = call("POST", "/api/lagoons", { playerKey: "k1", action: "accept", challengeId: challenge.id }).body.room;
+  later(TIMES.racingAfter + TIMES.countdown + HEAT_SECONDS * 1000);
+  const done = call("POST", "/api/lagoons", { playerKey: "k1", action: "finish", roomId: room.id, attempts: [attempt(9, 31)] }).body.room;
+  assert.equal(done.outcome, "1");
+  const info = call("GET", "/api/local/weekly").body;
+  assert.deepEqual([info.best, info.won, info.prize], [31, true, true]);
 });
 
 test("the 1v1 endpoints go to the lobby and relay: tickets, the AI's pose, and the old answers", (t) => {

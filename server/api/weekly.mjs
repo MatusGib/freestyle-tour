@@ -4,6 +4,8 @@ import { DEFAULT_WIND, opponentFor, roomIdsFor, weekOf } from "../weekly.mjs";
 import { fail, ok } from "./reply.mjs";
 
 const NO_TOUR = "No tour data on this computer: run npm run tour-data.";
+// The PWA's star rating, which some event names end with ("… Grand Slam ******").
+const STARS = /\s*\*+$/;
 
 // This week's event, its divisions' opponents, the wind, your best score,
 // whether you won, and whether the prize is earned.
@@ -19,7 +21,7 @@ export function weeklyInfo({ tour, game, now, weekly }) {
   const record = weekly.data.weeks[week.weekStart];
   return ok({
     weekStart: week.weekStart,
-    event: { id: event.id, name: event.name, start: event.start, location: event.location },
+    event: { id: event.id, name: event.name.replace(STARS, ""), start: event.start, location: event.location },
     divisions,
     wind: DEFAULT_WIND,
     best: record?.best ?? null,
