@@ -2,11 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the weekly super final with the "Champion's challenge": each week one of Lennart Neubauer's five most recent PWA wins, an intro card with its story, a 1v1 heat against him at his best in 19 kt gusting to 25, a Red Bull helmet as the prize with a congratulations screen; then push the project to a private GitHub repository.
+**Goal:** Replace the weekly super final with the "Champion's challenge": each week one of Lennart Neubauer's five most recent PWA wins, an intro card with its story, a 1v1 heat against him scoring around 45 in 21 kt gusting to 27, a Red Bull helmet as the prize with a congratulations screen; then push the project to a private GitHub repository.
 
 **Architecture:**
 - The super final's local 1v1 lobby and relay stay. The lobby now takes ready-made rooms, each with its own sailed heat, because gusts give every room its own wind; a room queue sails the next room's heat while you race.
-- A hand-written `server/champion.json` holds the five events (story, podium, dates) and Neubauer's rating.
+- A hand-written `server/champion.json` holds the five events (story, podium, dates), Neubauer's rating and the AI's target.
+- The game's own 1v1 rooms only go to 19 kt. `mods/champion/wind.js` gives the champion's rooms 21 kt with each room's own gusts; a serve-time patch applies it in the game, and the server sails his heat with it.
 - The Red Bull helmet enters the game through serve-time patches that import `mods/champion/helmet.js` into the game's look lists and 3D rider.
 - The `champion` mod draws the menu button, the intro card and the congratulations screen.
 
@@ -18,19 +19,21 @@
 
 ## Facts this plan relies on (verified 2026-10-25)
 
-- **The prototype:** every file in this plan was first run in a copy of the repo with the real snapshot. A dry run then applied the tasks one by one to a fresh copy of `main`; each task's failing run and test counts below come from it. The suite goes 224 → 225 → 226 → 227 → 231 → 227.
-- **The AI's top score:** in five rooms at 19 kt gusting to 25, aiming for 47.45, it scored 46.43–46.92, each heat sailed in 6–8 s.
+- **The prototype:** every file in this plan was first run in a copy of the repo with the real snapshot. Dry runs then applied the tasks one by one (Task 1 to a fresh copy of `main`, Tasks 2–5 to the branch after Task 1); each task's failing run and test counts below come from them. The suite goes 224 → 225 → 226 → 227 → 232 → 228.
+- **The user's change during execution:** his score lowered to around 45, and the wind raised to 21 kt (above the game's own 1v1 rooms, 15–19 kt). Task 1 was done before it and is unaffected.
+- **The AI's score at 21 kt** with each room's own 6 kt gusts: aiming for 45.5 it scored 44.73–45.10 (aiming for 45: 44.49–44.63), each heat sailed in about 6 s. So the target is 45.5.
 - **The browser run** (the prototype, the pane visible):
-  - the menu button: "Champion's challenge · This week: 2024 Fuerteventura Grand Slam · vs Lennart Neubauer · 19 kt, gusts 21–25 kt";
-  - the intro card, with the story, the podium, the helmet's picture, "Your heat: Lennart Neubauer at his best, aiming for about 47 points, in 19 kt, gusts 21–25 kt", and "Challenge Lennart Neubauer";
+  - the menu button: "Champion's challenge · This week: 2024 Fuerteventura Grand Slam · vs Lennart Neubauer · 21 kt, gusts 23–27 kt";
+  - the intro card, with the story, the podium, the helmet's picture, "Your heat: Lennart Neubauer at his best, scoring around 45 points, in 21 kt, gusts 23–27 kt.", and "Challenge Lennart Neubauer";
   - "Getting Lennart Neubauer ready…" for 8 s, then the game's challenge toast;
-  - the countdown with "Wind: 19 kt, gusts 21–25 kt";
-  - Neubauer scoring live (15.76 at 26 s, 46.36 at the end);
+  - the countdown and the HUD with "Wind: 21 kt, gusts 23–27 kt", all five mods loading with the patched main page;
+  - Neubauer scoring live, finishing on 44.76;
   - "Challenge again" opening the next room at once, its heat already sailed;
   - after a win was recorded by hand: "Congratulations! You beat Lennart Neubauer at the 2024 Fuerteventura Grand Slam, 48.10 to 46.36.";
   - "Wear it now" saving the helmet, the game reloading the rider on its own (revision 3, helmet `redbull`);
   - the look editor's Wear tab listing "Red Bull helmet" after the six headwear options, the rider wearing it in 3D with the logo legible, and the option gone again once the unlock flag was off.
 - **The game's code** (2026-10-24 snapshot):
+  - the game's 1v1 room wind is export `h` of `conditions-*.js`; only the main page imports it, as `p` (`import{_ as l,c as u,d,g as f,h as p,s as m,t as h,u as g,v as _}from"./conditions-C2esDKY1.js"`). Patching that import, not the conditions module, keeps the mod layer's identification of the wind module working;
   - the helmet list ends with `{value:`cap`,label:`Baseball cap`}]` in `appearance-*.js`;
   - its list function `f(e,t,n=!1)` returns `c[e]` for helmets, and its look check keeps only listed values;
   - the 3D helmet builder is `function vd(e)` in `dispose-model-*.js`, with the 3D library's `CanvasTexture` as `$i`.
@@ -44,12 +47,13 @@
 | File | Responsibility |
 |---|---|
 | `server/lagoon/lobby.mjs` (modify) | Rooms arrive ready with their own heats; a rematch waits for one |
-| `server/champion.json` (create) | The five events (name, dates, place, podium, story) and Neubauer's rating |
-| `server/weekly.mjs` (replace) | The week's event, the champion as the opponent, the wind, room ids, results with the last win |
+| `server/champion.json` (create) | The five events (name, dates, place, podium, story), Neubauer's rating, the AI's target |
+| `mods/champion/wind.js` (create) | The champion's wind: 21 kt in his rooms, with their own gusts; used by the server and the patched game |
+| `server/weekly.mjs` (replace) | The week's event, the champion as the opponent, his rooms, results with the last win |
 | `server/api/weekly.mjs` (replace) | `GET /api/local/weekly`, `POST /api/local/weekly/start`, the room queue |
 | `server/api/index.mjs`, `server/app.mjs` (modify) | Routing, the champion file, `data/champion.json` |
 | `mods/champion/helmet.js` (create) | The logo, the helmet's 3D parts, its picture, the unlock flag |
-| `mods/champion/patches.mjs` (create) | The helmet in the game's look lists and 3D rider |
+| `mods/champion/patches.mjs` (create) | The champion's wind in the game's 1v1 rooms; the helmet in the game's look lists and 3D rider |
 | `mods/champion/champion.js`, `mods/champion/index.js` (create) | The mod's texts, and its button, card and congratulations screen |
 | `mods/super-final/` (delete), `mods/enabled.json` (modify) | The super final goes |
 | `README.md`, `docs/roadmap.md` (modify) | Docs |
@@ -491,7 +495,7 @@ git commit -m "Give each 1v1 room its own heat, and let a rematch wait for one" 
 ### Task 2: Serve the Champion's challenge
 
 **Files:**
-- Create: `server/champion.json`
+- Create: `server/champion.json`, `mods/champion/wind.js`
 - Replace: `server/weekly.mjs`, `server/api/weekly.mjs`
 - Modify: `server/api/index.mjs`, `server/app.mjs`
 - Test: `test/weekly.test.mjs`, `test/api-weekly.test.mjs`, `test/room-wind-snapshot.test.mjs` (replace); `test/pose-track-snapshot.test.mjs` (modify)
@@ -503,15 +507,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { averageScore, seedOf } from "../lib/ai/score.mjs";
+import { seedOf } from "../lib/ai/score.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { LOOK, WIND, opponentFor, recordResult, recordRoom, roomIdsFor, weekOf } from "../server/weekly.mjs";
+import { LOOK, WIND, championRooms, opponentFor, recordResult, recordRoom, weekOf } from "../server/weekly.mjs";
 import { ROOT, WEEK, tempDir } from "./helpers.mjs";
 
 const WEEK_START = 1792360800000;
 const event = (id) => ({ id, name: `Event ${id}`, when: "July 2026", place: "Somewhere", podium: ["A", "B", "C"], story: `Story ${id}.` });
-const CHAMPION = { rider: "m:lennart-neubauer", name: "Lennart Neubauer", rating: 1946, events: [event("a"), event("b"), event("c")] };
+const CHAMPION = { rider: "m:lennart-neubauer", name: "Lennart Neubauer", rating: 1946, target: 45.5, events: [event("a"), event("b"), event("c")] };
 
 test("each week picks one of the champion's events, the same all week, in the order listed", () => {
   const week = weekOf(CHAMPION, WEEK_START);
@@ -521,25 +525,21 @@ test("each week picks one of the champion's events, the same all week, in the or
   assert.ok(picks.size > 1, "the event changes from week to week");
 });
 
-test("the opponent is the champion under his real name, aiming for his best form", () => {
-  assert.deepEqual(opponentFor(CHAMPION), {
-    id: "m:lennart-neubauer",
-    nickname: "Lennart Neubauer",
-    appearance: LOOK,
-    rating: 1946,
-    target: Math.round((averageScore(1946) + 6) * 100) / 100,
-  });
-  assert.equal(opponentFor(CHAMPION).target, 47.45);
-  assert.equal(opponentFor({ ...CHAMPION, rating: 2400 }).target, 50, "never above the planner's ceiling");
+test("the opponent is the champion under his real name, aiming for the champion's target", () => {
+  assert.deepEqual(opponentFor(CHAMPION), { id: "m:lennart-neubauer", nickname: "Lennart Neubauer", appearance: LOOK, rating: 1946, target: 45.5 });
 });
 
-test("room ids are those whose wind matches, in order, under the given prefix", () => {
+test("the champion's rooms are those with his gusts, in order, at 21 kt", () => {
   const roomConditions = (id) => {
     const n = Number(id.split("-").at(-1));
     return { seed: n, knots: 15 + (n % 5), gustKnots: n % 2 ? 6 : 0 };
   };
-  const ids = roomIdsFor(roomConditions, WIND, "champion-2025-sylt-99");
-  assert.deepEqual([ids.next().value, ids.next().value, ids.next().value], ["champion-2025-sylt-99-9", "champion-2025-sylt-99-19", "champion-2025-sylt-99-29"]);
+  const rooms = championRooms(roomConditions, "2025-sylt", 99);
+  assert.deepEqual([rooms.next().value, rooms.next().value], [
+    { id: "champion-2025-sylt-99-1", conditions: { seed: 1, knots: 21, gustKnots: 6 } },
+    { id: "champion-2025-sylt-99-3", conditions: { seed: 3, knots: 21, gustKnots: 6 } },
+  ]);
+  assert.deepEqual(WIND, { knots: 21, gustKnots: 6 });
 });
 
 test("results keep each week's best and whether you won; a win is your last win, and the first earns the prize", (t) => {
@@ -572,6 +572,7 @@ test("server/champion.json agrees with the tour data where the tour data has the
   const champion = JSON.parse(readFileSync(join(ROOT, "server", "champion.json"), "utf8"));
   const tour = loadTour(join(ROOT, "tour"));
   assert.equal(new Set(champion.events.map((e) => e.id)).size, champion.events.length, "event ids are unique");
+  assert.equal(champion.target, 45.5, "the AI lands about half a point under it: around 45");
   const inTour = champion.events.filter((e) => e.tourId);
   assert.ok(inTour.length >= 3);
   for (const e of inTour) {
@@ -602,13 +603,15 @@ const CHAMPION = {
   rider: "m:lennart-neubauer",
   name: "Lennart Neubauer",
   rating: 1946,
+  target: 45.5,
   events: ["2023-sylt", "2025-sylt"].map((id) => ({ id, name: `${id} event`, when: "September 2025", place: "Westerland, Sylt, Germany", podium: ["Lennart Neubauer", "Yentel Caers", "Jacopo Testa"], story: `What happened at ${id}.` })),
 };
-// Room ids ending in a multiple of 3 have the champion's wind; the rest don't.
-// Each id's number is its seed, so each room's wind is its own.
+// Room ids ending in a multiple of 3 have the champion's gusts; the rest don't.
+// Each id's number is its seed, so each room's wind is its own. (The game's
+// own knots don't matter: the champion's rooms get 21 kt.)
 const roomConditions = (id) => {
   const n = Number(id.split("-").at(-1));
-  return n % 3 ? { seed: n, knots: 15, gustKnots: 0 } : { seed: n, ...WIND };
+  return n % 3 ? { seed: n, knots: 15, gustKnots: 0 } : { seed: n, knots: 17, gustKnots: 6 };
 };
 const attempt = (id, score) => ({ id, status: "landed", score, tack: "port", label: "Culo" });
 const settle = () => new Promise((resolve) => setImmediate(resolve));
@@ -626,7 +629,7 @@ function fakeAi() {
       return release;
     },
     async sail(conditions, target) {
-      calls.push(["sail", conditions.seed, target]);
+      calls.push(["sail", conditions.seed, conditions.knots, target]);
       const wait = hold;
       hold = null;
       await wait;
@@ -664,7 +667,7 @@ test("this week's challenge names the event, its story and podium, and the champ
     weekStart: fakeGame.weekStart(NOW),
     event: { id: week.event.id, name: week.event.name, when: week.event.when, place: week.event.place, podium: week.event.podium },
     story: week.event.story,
-    opponent: { name: "Lennart Neubauer", target: 47.45 },
+    opponent: { name: "Lennart Neubauer", target: 45.5 },
     wind: WIND,
     best: null,
     won: false,
@@ -679,13 +682,13 @@ test("starting sails the champion's heat for the first room and offers his chall
   const { status, body } = await call("POST", "/api/local/weekly/start");
   assert.equal(status, 200);
   assert.deepEqual(body, { name: "Lennart Neubauer", wind: WIND });
-  assert.deepEqual(ai.calls, [["sail", 0, 47.45], ["poses", 0]]);
+  assert.deepEqual(ai.calls, [["sail", 0, 21, 45.5], ["poses", 0]], "sailed in the champion's 21 kt");
   const { challenges } = poll();
   assert.deepEqual([challenges[0].senderName, challenges[0].recipientName], ["Lennart Neubauer", "Tester"]);
   const { room } = poll({ action: "accept", challengeId: challenges[0].id });
   assert.equal(room.id, `champion-${week.event.id}-${NOW}-0`);
   await settle();
-  assert.deepEqual(ai.calls.slice(2), [["sail", 3, 47.45], ["poses", 3]], "the next room gets its own heat, in its own wind");
+  assert.deepEqual(ai.calls.slice(2), [["sail", 3, 21, 45.5], ["poses", 3]], "the next room gets its own heat, in its own wind");
 });
 
 test("challenging again waits for the next room's heat, then opens it", async (t) => {
@@ -724,13 +727,13 @@ test("the 1v1 endpoints go to the lobby and relay: tickets, the AI's pose, and t
   assert.deepEqual(call("POST", "/api/lagoons", { playerKey: "k1", action: "sync" }).body, { serverTime: NOW, room: null, riders: [], challenges: [], rankings: [] });
 });
 
-test("errors: a planner failure, and no room with the champion's wind", async (t) => {
+test("errors: a planner failure, and no room with the champion's gusts", async (t) => {
   const failing = setup(t, { ai: { sail: async () => { throw new Error("the planner fell over"); }, poses: async () => ({}) } });
   const { status, body } = await failing.call("POST", "/api/local/weekly/start");
   assert.deepEqual([status, body.error], [500, "Couldn't get Lennart Neubauer ready: the planner fell over"]);
   const windless = setup(t, { rooms: (id) => ({ seed: 1, knots: 15, gustKnots: 0 }) });
   const none = await windless.call("POST", "/api/local/weekly/start");
-  assert.deepEqual([none.status, none.body.error], [500, "Couldn't get Lennart Neubauer ready: no room id gives 19 kt with gusts of 6"]);
+  assert.deepEqual([none.status, none.body.error], [500, "Couldn't get Lennart Neubauer ready: no room id gives gusts of 6"]);
 });
 ```
 
@@ -742,39 +745,65 @@ Replace `test/room-wind-snapshot.test.mjs` with:
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadGame, tryOpenSnapshot } from "../lib/snapshot.mjs";
-import { WIND, roomIdsFor } from "../server/weekly.mjs";
+import { WIND, championRooms } from "../server/weekly.mjs";
 import { ROOT } from "./helpers.mjs";
 
 const snapshot = tryOpenSnapshot(ROOT);
 const skip = !snapshot && "no snapshot yet: run npm run snapshot";
 
-test("room ids with the champion's wind are found quickly, and each gives its own gusts", { skip }, async () => {
+test("the champion's rooms are found quickly, get 21 kt, and each has its own gusts", { skip }, async () => {
   const game = await loadGame(snapshot, ["wind"]);
-  const ids = roomIdsFor(game.roomConditions, WIND, "champion-2025-sylt-1792885000000");
-  const [a, b] = [ids.next().value, ids.next().value];
-  assert.match(a, /^champion-2025-sylt-1792885000000-\d+$/);
-  for (const id of [a, b]) assert.deepEqual({ ...game.roomConditions(id), seed: 0 }, { seed: 0, ...WIND });
-  const [ca, cb] = [game.roomConditions(a), game.roomConditions(b)];
+  const rooms = championRooms(game.roomConditions, "2025-sylt", 1792885000000);
+  const [a, b] = [rooms.next().value, rooms.next().value];
+  assert.match(a.id, /^champion-2025-sylt-1792885000000-\d+$/);
+  for (const { id, conditions } of [a, b]) assert.deepEqual({ ...conditions, seed: 0 }, { seed: 0, ...WIND }, id);
   let differ = 0;
-  for (let t = 0; t < 180; t += 1.3) if (game.wind(ca, 0, 0, t) !== game.wind(cb, 0, 0, t)) differ += 1;
+  for (let t = 0; t < 180; t += 1.3) if (game.wind(a.conditions, 0, 0, t) !== game.wind(b.conditions, 0, 0, t)) differ += 1;
   assert.ok(differ > 0, "gusts make every room's wind its own, so every room needs its own heat");
 });
 ```
 
-In `test/pose-track-snapshot.test.mjs`, replace `import { DEFAULT_WIND, roomIdsFor } from "../server/weekly.mjs";` with `import { WIND, roomIdsFor } from "../server/weekly.mjs";`, and `roomIdsFor(engine.roomConditions, DEFAULT_WIND, "probe")` with `roomIdsFor(engine.roomConditions, WIND, "probe")`.
+In `test/pose-track-snapshot.test.mjs`, replace `import { DEFAULT_WIND, roomIdsFor } from "../server/weekly.mjs";` with `import { championRooms } from "../server/weekly.mjs";`, and
+
+```js
+  const conditions = engine.roomConditions(roomIdsFor(engine.roomConditions, DEFAULT_WIND, "probe").next().value);
+```
+
+with
+
+```js
+  const { conditions } = championRooms(engine.roomConditions, "probe", 0).next().value;
+```
 
 - [ ] **Step 2: Run them to see them fail**
 
 Run: `node --test test/weekly.test.mjs test/api-weekly.test.mjs test/room-wind-snapshot.test.mjs test/pose-track-snapshot.test.mjs`
-Expected: 4 failing files with `SyntaxError: The requested module '../server/weekly.mjs' does not provide an export named 'LOOK'` (once) or `... named 'WIND'` (three times).
+Expected: 4 failing files with `SyntaxError: The requested module '../server/weekly.mjs' does not provide an export named ...`: `'LOOK'` once, `'WIND'` twice, `'championRooms'` once.
 
-- [ ] **Step 3: Write `server/champion.json`** (the stories are our own words from the event reports; the 2026 events were entered by hand, since the PWA site had no results tables for them when the tour data was crawled):
+- [ ] **Step 3: Write `mods/champion/wind.js`** (pure, so the server imports it too; Task 3's patch uses it in the game):
+
+```js
+// The Champion's challenge's wind: 21 kt, above the game's own 1v1 rooms
+// (15–19 kt), with each room's own 6 kt gusts. The game gives a 1v1 room its
+// wind from the room's id; a patch (patches.mjs) passes the champion's rooms
+// through roomWind, and the server sails his heat in the same wind. Pure, so
+// the server imports it too.
+
+export const ROOM_PREFIX = "champion-";
+export const WIND = { knots: 21, gustKnots: 6 };
+
+// conditions: the game's own wind for the room id.
+export const roomWind = (id, conditions) => (id.startsWith(ROOM_PREFIX) ? { ...conditions, knots: WIND.knots } : conditions);
+```
+
+- [ ] **Step 4: Write `server/champion.json`** (the stories are our own words from the event reports; the 2026 events were entered by hand, since the PWA site had no results tables for them when the tour data was crawled):
 
 ```json
 {
   "rider": "m:lennart-neubauer",
   "name": "Lennart Neubauer",
   "rating": 1946,
+  "target": 45.5,
   "events": [
     {
       "id": "2023-sylt",
@@ -823,18 +852,18 @@ Expected: 4 failing files with `SyntaxError: The requested module '../server/wee
 }
 ```
 
-- [ ] **Step 4: Replace `server/weekly.mjs`** with:
+- [ ] **Step 5: Replace `server/weekly.mjs`** with:
 
 ```js
 // The Champion's challenge: one of the champion's recent wins each week,
-// seeded by the week, with the champion himself as the opponent at his best
-// form. His heat is sailed by the AI riders in the game's windiest 1v1 wind.
+// seeded by the week, with the champion himself as the opponent. His heat is
+// sailed by the AI riders in the champion's wind, 21 kt with each room's own
+// gusts (mods/champion/wind.js, shared with the patched game).
 // champion: server/champion.json.
-import { averageScore, CEILING, SPREAD, seedOf } from "../lib/ai/score.mjs";
+import { seedOf } from "../lib/ai/score.mjs";
+import { WIND, roomWind } from "../mods/champion/wind.js";
 
-// The game's windiest 1v1 room: 19 kt, gusting 21–25 kt.
-export const WIND = { knots: 19, gustKnots: 6 };
-const round = (value) => Math.round(value * 100) / 100;
+export { WIND };
 
 // The game's default look, so the lobby and result screens have a full
 // appearance to draw, but with an orange sail and board (the default is teal)
@@ -846,30 +875,25 @@ export function weekOf(champion, weekStart) {
   return { weekStart, event: champion.events[seedOf("weekly", weekStart) % champion.events.length] };
 }
 
-// The champion as the opponent, aiming for his best form: his average score
-// plus the spread, at most the planner's ceiling.
+// The champion as the opponent, aiming for champion.target (the AI lands about
+// half a point under it in this wind).
 export function opponentFor(champion) {
-  return {
-    id: champion.rider,
-    nickname: champion.name,
-    appearance: LOOK,
-    rating: champion.rating,
-    target: round(Math.min(CEILING, averageScore(champion.rating) + SPREAD)),
-  };
+  return { id: champion.rider, nickname: champion.name, appearance: LOOK, rating: champion.rating, target: champion.target };
 }
 
-// Room ids ("<prefix>-<n>") whose wind (by the game's own roomConditions)
-// matches, in order. Every room needs an id never used before: the game ignores
-// ids it has dismissed, and resumes an unfinished heat it kept for an id. So
-// the prefix should carry the time the challenge was started. With gusts, each
-// id gives its own gusts.
-export function* roomIdsFor(roomConditions, wind, prefix) {
+// The champion's rooms for an event, in order: ids "champion-<event>-<at>-<n>"
+// whose gusts (by the game's own roomConditions) are the champion's, with the
+// wind the patched game gives them. Every room needs an id never used before:
+// the game ignores ids it has dismissed, and resumes an unfinished heat it kept
+// for an id, so the ids carry the time the challenge was started (at). Each
+// room has its own gusts.
+export function* championRooms(roomConditions, eventId, at) {
   for (let n = 0; n < 100_000; n++) {
-    const id = `${prefix}-${n}`;
-    const c = roomConditions(id);
-    if (c.knots === wind.knots && c.gustKnots === wind.gustKnots) yield id;
+    const id = `champion-${eventId}-${at}-${n}`;
+    const conditions = roomWind(id, roomConditions(id));
+    if (conditions.gustKnots === WIND.gustKnots) yield { id, conditions };
   }
-  throw new Error(`no room id gives ${wind.knots} kt with gusts of ${wind.gustKnots}`);
+  throw new Error(`no room id gives gusts of ${WIND.gustKnots}`);
 }
 
 // Keeps each week's best score and whether you won, your last win (so the mod
@@ -895,13 +919,13 @@ export function recordRoom(store, room, at) {
 }
 ```
 
-- [ ] **Step 5: Replace `server/api/weekly.mjs`** with:
+- [ ] **Step 6: Replace `server/api/weekly.mjs`** with:
 
 ```js
 // Endpoints for the Champion's challenge mod: this week's event, and getting the
 // champion ready in the local 1v1 lobby. Real names: the champion and the
 // podiums are named as they are.
-import { WIND, opponentFor, roomIdsFor, weekOf } from "../weekly.mjs";
+import { WIND, championRooms, opponentFor, weekOf } from "../weekly.mjs";
 import { fail, ok } from "./reply.mjs";
 
 // This week's event and its story, the champion, the wind, your best score,
@@ -924,14 +948,15 @@ export function weeklyInfo({ champion, game, now, weekly }) {
   });
 }
 
-// Each room needs its own heat: gusts make every room id's wind different, and
-// room ids are never reused. take() hands out the ready room, or null, and
-// starts sailing the next one, so "Challenge again" seldom has to wait.
-export function roomQueue(ids, heatFor, log = () => {}) {
+// Each room needs its own heat: gusts make every room's wind different, and
+// room ids are never reused. rooms: championRooms(). take() hands out the
+// ready room, or null, and starts sailing the next one, so "Challenge again"
+// seldom has to wait.
+export function roomQueue(rooms, heatFor, log = () => {}) {
   let ready = null;
   const fill = async () => {
-    const id = ids.next().value;
-    ready = { id, heat: await heatFor(id) };
+    const { id, conditions } = rooms.next().value;
+    ready = { id, heat: await heatFor(conditions) };
   };
   return {
     start: fill,
@@ -950,14 +975,13 @@ export function roomQueue(ids, heatFor, log = () => {}) {
 export async function startWeekly({ champion, game, now, ai, lobby, log }) {
   const week = weekOf(champion, game.weekStart(now()));
   const opponent = opponentFor(champion);
-  const heatFor = async (id) => {
-    const conditions = game.roomConditions(id);
+  const heatFor = async (conditions) => {
     const sailed = await ai.sail(conditions, opponent.target);
     const { poses, settledAt } = await ai.poses(conditions, sailed.replay);
     return { score: sailed.score, attempts: sailed.attempts, poses, settledAt };
   };
   try {
-    const rooms = roomQueue(roomIdsFor(game.roomConditions, WIND, `champion-${week.event.id}-${now()}`), heatFor, log);
+    const rooms = roomQueue(championRooms(game.roomConditions, week.event.id, now()), heatFor, log);
     await rooms.start();
     lobby.offer(opponent, rooms.take, { weekStart: week.weekStart, event: week.event.id });
   } catch (error) {
@@ -967,7 +991,7 @@ export async function startWeekly({ champion, game, now, ai, lobby, log }) {
 }
 ```
 
-- [ ] **Step 6: Route it.** In `server/api/index.mjs`:
+- [ ] **Step 7: Route it.** In `server/api/index.mjs`:
   - replace `// game, now(), tour, ai, aiHeats, snapshot, lobby, relay, weekly }. POST` with
 
     ```js
@@ -977,7 +1001,7 @@ export async function startWeekly({ champion, game, now, ai, lobby, log }) {
 
   - replace `  if (route === "POST /api/local/weekly/start") return startWeekly(body, ctx);` with `  if (route === "POST /api/local/weekly/start") return startWeekly(ctx);`.
 
-- [ ] **Step 7: Wire it into the server.** In `server/app.mjs`:
+- [ ] **Step 8: Wire it into the server.** In `server/app.mjs`:
   - Replace
 
     ```js
@@ -1015,7 +1039,7 @@ export async function startWeekly({ champion, game, now, ai, lobby, log }) {
   - Replace ``        log(`Couldn't record the super final's result: ${error.stack ?? error}`);`` with ``        log(`Couldn't record the Champion's challenge result: ${error.stack ?? error}`);``.
   - Replace `  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly };` with `  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, log };`.
 
-- [ ] **Step 8: Run the tests, then the suite**
+- [ ] **Step 9: Run the tests, then the suite**
 
 Run: `node --test test/weekly.test.mjs test/api-weekly.test.mjs test/room-wind-snapshot.test.mjs test/pose-track-snapshot.test.mjs test/api-router.test.mjs test/server.test.mjs`
 Expected: PASS, 26 tests (6 + 6 + 1 + 1 + 6 + 6).
@@ -1023,14 +1047,14 @@ Expected: PASS, 26 tests (6 + 6 + 1 + 1 + 6 + 6).
 Run: `npm test`
 Expected: PASS, 226 tests, 0 failures. (The super final mod still loads but no longer matches the endpoint; Task 5 replaces it.)
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
-git add server/champion.json server/weekly.mjs server/api/weekly.mjs server/api/index.mjs server/app.mjs test/weekly.test.mjs test/api-weekly.test.mjs test/room-wind-snapshot.test.mjs test/pose-track-snapshot.test.mjs
-git commit -m "Serve the Champion's challenge: Neubauer's recent wins, at his best, in gusty rooms" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add server/champion.json mods/champion/wind.js server/weekly.mjs server/api/weekly.mjs server/api/index.mjs server/app.mjs test/weekly.test.mjs test/api-weekly.test.mjs test/room-wind-snapshot.test.mjs test/pose-track-snapshot.test.mjs
+git commit -m "Serve the Champion's challenge: Neubauer's recent wins, around 45, in 21 kt" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
-### Task 3: The Red Bull helmet in the game
+### Task 3: The champion's wind and the Red Bull helmet in the game
 
 **Files:**
 - Create: `mods/champion/helmet.js`, `mods/champion/patches.mjs`
@@ -1039,8 +1063,8 @@ git commit -m "Serve the Champion's challenge: Neubauer's recent wins, at his be
 - [ ] **Step 1: Write the failing test** in `test/champion-patch-snapshot.test.mjs`:
 
 ```js
-// The Red Bull helmet's patches apply to the game's snapshot, and the patched
-// modules still parse. Skipped when no snapshot has been taken yet.
+// The Champion's challenge patches apply to the game's snapshot, and the
+// patched modules still parse. Skipped when no snapshot has been taken yet.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -1053,19 +1077,21 @@ import { ROOT, tempDir } from "./helpers.mjs";
 const snapshot = tryOpenSnapshot(ROOT);
 const skip = !snapshot && "no snapshot yet: run npm run snapshot";
 
-test("the Red Bull helmet's patches change the look editor's lists and the 3D rider, and both still parse", { skip }, async (t) => {
+test("the Champion's challenge patches change the 1v1 room wind, the look editor's lists and the 3D rider, and all still parse", { skip }, async (t) => {
   const errors = [];
   const patched = patchSnapshot(snapshot, await loadPatches(join(ROOT, "mods"), ["champion"]), (line) => errors.push(line));
   assert.deepEqual(errors, []);
   const texts = [...patched.values()].map((p) => p.text);
-  assert.equal(texts.length, 2);
+  assert.equal(texts.length, 3);
+  const page = texts.find((text) => text.includes("function p(e){return __championRoomWind(e,__championRoomConditions(e))}"));
   const appearance = texts.find((text) => text.includes("{value:`redbull`,label:`Red Bull helmet`}"));
   const rider = texts.find((text) => text.includes("if(e===`redbull`)__championParts(t,"));
+  assert.ok(page.includes('import{roomWind as __championRoomWind}from"/__mods/champion/wind.js"'), "the champion's rooms get his wind");
   assert.ok(appearance.includes("e===`helmet`&&!__championHelmetWon()?c.helmet.filter("), "the editor lists it only once won");
   assert.ok(rider.includes("e===`redbull`?__championNavy:2438200"), "the shell is navy");
   const dir = tempDir(t);
-  for (const [name, text] of [["appearance.mjs", appearance], ["rider.mjs", rider]]) {
-    assert.ok(text.includes('from"/__mods/champion/helmet.js"'));
+  for (const [name, text] of [["page.mjs", page], ["appearance.mjs", appearance], ["rider.mjs", rider]]) {
+    assert.ok(text.includes('from"/__mods/champion/'));
     writeFileSync(join(dir, name), text);
     const check = spawnSync(process.execPath, ["--check", join(dir, name)], { encoding: "utf8" });
     assert.equal(check.status, 0, `${name}: ${check.stderr}`);
@@ -1076,7 +1102,7 @@ test("the Red Bull helmet's patches change the look editor's lists and the 3D ri
 - [ ] **Step 2: Run it to see it fail**
 
 Run: `node --test test/champion-patch-snapshot.test.mjs`
-Expected: FAIL, `AssertionError`, actual `0`, expected `2` (no patches yet, so no module changes).
+Expected: FAIL, `AssertionError`, actual `0`, expected `3` (no patches yet, so no module changes).
 
 - [ ] **Step 3: Write `mods/champion/helmet.js`:**
 
@@ -1225,18 +1251,28 @@ export function drawHelmetPicture(canvas) {
 - [ ] **Step 4: Write `mods/champion/patches.mjs`:**
 
 ```js
-// Puts the Red Bull helmet into the game. The look editor lists it once the
-// Champion's challenge is won, the game's look check keeps it on a rider (it
-// keeps only values in the lists), and the 3D rider draws it: the water
-// helmet's shell in navy, then the visor and logo from helmet.js. The minified
-// names (c, f, vd, Z, ko, Ho, $i) are the 2026-10-24 snapshot's; a game update
-// that changes them makes these patches fail loudly.
+// Gives the Champion's challenge its wind and its prize in the game.
+// - The wind: the main page imports the game's 1v1 room wind as p; it gets a
+//   p that passes the champion's rooms through wind.js (21 kt).
+// - The Red Bull helmet: the look editor lists it once the Champion's challenge
+//   is won, the game's look check keeps it on a rider (it keeps only values in
+//   the lists), and the 3D rider draws it: the water helmet's shell in navy,
+//   then the visor and logo from helmet.js.
+// The minified names (p, c, f, vd, Z, ko, Ho, $i) are the 2026-10-24
+// snapshot's; a game update that changes them makes these patches fail loudly.
 const FROM = `from"/__mods/champion/helmet.js";`;
+const PAGE = 'import{_ as l,c as u,d,g as f,h as p,s as m,t as h,u as g,v as _}from"./conditions-C2esDKY1.js"';
 const APPEARANCE = "label:`Baseball cap`";
 const RIDER = "t.name=`Helmet`";
 const VISOR = "if(e===`red`){let e=new Z(new ko(1,20,10),n);e.name=`Helmet visor`,e.position.set(0,.095,.163),e.scale.set(.208,.018,.11),t.add(e)}";
 
 export const patches = [
+  {
+    marker: PAGE,
+    find: PAGE,
+    replace: `${PAGE.replace("h as p,", "h as __championRoomConditions,")};import{roomWind as __championRoomWind}from"/__mods/champion/wind.js";function p(e){return __championRoomWind(e,__championRoomConditions(e))}`,
+    expect: 1,
+  },
   {
     marker: APPEARANCE,
     find: "{value:`cap`,label:`Baseball cap`}]",
@@ -1288,7 +1324,7 @@ Expected: PASS, 227 tests, 0 failures.
 
 ```bash
 git add mods/champion/helmet.js mods/champion/patches.mjs test/champion-patch-snapshot.test.mjs
-git commit -m "Add a Red Bull helmet to the game's look editor and 3D rider" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "Give the champion's rooms 21 kt, and add a Red Bull helmet to the game" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 ### Task 4: Mod helpers
@@ -1302,12 +1338,13 @@ git commit -m "Add a Red Bull helmet to the game's look editor and 3D rider" -m 
 ```js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TITLE, bestText, doneText, failedText, menuLine, newWin, prizeDue, readyText, winText } from "../mods/champion/champion.js";
+import { TITLE, bestText, doneText, failedText, heatText, menuLine, newWin, prizeDue, readyText, winText } from "../mods/champion/champion.js";
+import { WIND, roomWind } from "../mods/champion/wind.js";
 
 const info = {
   event: { id: "2025-sylt", name: "2025 Sylt Grand Slam" },
-  opponent: { name: "Lennart Neubauer", target: 47.45 },
-  wind: { knots: 19, gustKnots: 6 },
+  opponent: { name: "Lennart Neubauer", target: 45.5 },
+  wind: WIND,
   best: null,
   won: false,
   lastWin: null,
@@ -1316,14 +1353,21 @@ const info = {
 
 test("the menu line names the event, the champion and the wind, as the game writes gusts", () => {
   assert.equal(TITLE, "Champion's challenge");
-  assert.equal(menuLine(info), "This week: 2025 Sylt Grand Slam · vs Lennart Neubauer · 19 kt, gusts 21–25 kt");
+  assert.equal(menuLine(info), "This week: 2025 Sylt Grand Slam · vs Lennart Neubauer · 21 kt, gusts 23–27 kt");
   assert.equal(menuLine({ ...info, wind: { knots: 17, gustKnots: 0 } }), "This week: 2025 Sylt Grand Slam · vs Lennart Neubauer · 17 kt");
+});
+
+test("the champion's rooms get 21 kt with their own gusts; other rooms keep the game's wind", () => {
+  const game = { seed: 7, knots: 16, gustKnots: 6 };
+  assert.deepEqual(roomWind("champion-2025-sylt-1-3", game), { seed: 7, knots: 21, gustKnots: 6 });
+  assert.deepEqual(roomWind("a-real-1v1-room", game), game);
 });
 
 test("the button's and card's other lines", () => {
   assert.equal(readyText("Lennart Neubauer"), "Getting Lennart Neubauer ready…");
   assert.equal(doneText("Lennart Neubauer"), "Lennart Neubauer has challenged you: accept to start the heat");
   assert.equal(failedText("Lennart Neubauer"), "Couldn't get Lennart Neubauer ready. Press to try again.");
+  assert.equal(heatText(info), "Your heat: Lennart Neubauer at his best, scoring around 45 points, in 21 kt, gusts 23–27 kt.");
   assert.equal(bestText(info), "No heat against him this week yet.");
   assert.equal(bestText({ ...info, best: 41.5 }), "Your best this week: 41.50.");
   assert.equal(bestText({ ...info, best: 48.1, won: true }), "Your best this week: 48.10, and you beat him.");
@@ -1366,6 +1410,8 @@ export const menuLine = (info) => `This week: ${info.event.name} · vs ${info.op
 export const readyText = (name) => `Getting ${name} ready…`;
 export const failedText = (name) => `Couldn't get ${name} ready. Press to try again.`;
 export const doneText = (name) => `${name} has challenged you: accept to start the heat`;
+// The AI lands about half a point under its target in the champion's wind.
+export const heatText = ({ opponent, wind }) => `Your heat: ${opponent.name} at his best, scoring around ${Math.round(opponent.target - 0.5)} points, in ${windText(wind)}.`;
 export const bestText = (info) => (info.best === null ? "No heat against him this week yet." : `Your best this week: ${info.best.toFixed(2)}${info.won ? ", and you beat him" : ""}.`);
 
 // A win the mod hasn't congratulated you on yet.
@@ -1383,10 +1429,10 @@ export const prizeDue = (info, setting) => info.prize && setting !== "true";
 - [ ] **Step 4: Run the test, then the suite**
 
 Run: `node --test test/champion.test.mjs`
-Expected: PASS, 4 tests.
+Expected: PASS, 5 tests.
 
 Run: `npm test`
-Expected: PASS, 231 tests, 0 failures.
+Expected: PASS, 232 tests, 0 failures.
 
 - [ ] **Step 5: Commit**
 
@@ -1411,7 +1457,7 @@ git commit -m "Add the Champion's challenge mod's helpers" -m "Co-Authored-By: C
 // gets him ready (his heat sailed by the AI riders, at his best) and challenges
 // you in the game's own 1v1 lobby. Beating him wins the Red Bull helmet, with a
 // congratulations screen.
-import { SEEN_KEY, TITLE, bestText, doneText, failedText, menuLine, newWin, prizeDue, readyText, winText, windText } from "./champion.js";
+import { SEEN_KEY, TITLE, bestText, doneText, failedText, heatText, menuLine, newWin, prizeDue, readyText, winText } from "./champion.js";
 import { HELMET, WON_KEY, drawHelmetPicture } from "./helmet.js";
 
 const PLAYER_KEY = "fristajlo-player-v3"; // the game's own record of your rider
@@ -1574,7 +1620,7 @@ export default {
             el("div", { style: MUTED, textContent: read(WON_KEY) === "true" ? "Yours already: it's in the look editor." : `Beat ${info.opponent.name} to win it for your rider.` }),
           ]),
         ]),
-        el("p", { style: `margin:0;${MUTED}`, textContent: `Your heat: ${info.opponent.name} at his best, aiming for about ${Math.round(info.opponent.target)} points, in ${windText(info.wind)}.` }),
+        el("p", { style: `margin:0;${MUTED}`, textContent: heatText(info) }),
         el("p", { style: `margin:4px 0 0;${MUTED}`, textContent: bestText(info) }),
         buttons(go, close),
         statusLine,
@@ -1639,15 +1685,15 @@ git rm -r mods/super-final test/super-final.test.mjs
 - [ ] **Step 3: Run the suite**
 
 Run: `npm test`
-Expected: PASS, 227 tests, 0 failures.
+Expected: PASS, 228 tests, 0 failures.
 
 - [ ] **Step 4: Check it in the browser.** The game only runs at full speed while the Browser pane is visible; if it's hidden, show it with the view tool.
   1. **Back up.** Copy `data/` to the scratchpad. In the page at http://localhost:5180, save `localStorage["fristajlo-player-v3"]` (your rider).
   2. **Start.** Start the server with the preview tool (`local-copy` in `.claude/launch.json`).
-  3. **The menu** has "Champion's challenge" under "1v1 Lobby", naming this week's event, Lennart Neubauer and "19 kt, gusts 21–25 kt".
-  4. **The card.** Press the button: the card shows the event, the dates and place, the story, the podium, the helmet's picture, the heat you'll face, your best, and "Challenge Lennart Neubauer".
+  3. **The menu** has "Champion's challenge" under "1v1 Lobby", naming this week's event, Lennart Neubauer and "21 kt, gusts 23–27 kt".
+  4. **The card.** Press the button: the card shows the event, the dates and place, the story, the podium, the helmet's picture, "Your heat: Lennart Neubauer at his best, scoring around 45 points, in 21 kt, gusts 23–27 kt.", your best, and "Challenge Lennart Neubauer".
   5. **The challenge.** Press it: "Getting Lennart Neubauer ready…" (about 8 s), the card closes, and the game's challenge toast appears. Accept.
-  6. **The heat.** The countdown says "Wind: 19 kt, gusts 21–25 kt", and his HUD score rises toward about 47.
+  6. **The heat.** The countdown and the HUD say "Wind: 21 kt, gusts 23–27 kt", and his HUD score finishes around 45.
   7. **The rematch.** After the heat, "Challenge again" starts a new heat at once.
   8. **The forfeit.** "Forfeit · back to lobby" isn't recorded: `data/champion.json` doesn't change.
   9. **The win and the prize:**
@@ -1682,10 +1728,11 @@ git commit -m "Replace the super final with the Champion's challenge mod" -m "Co
     ```markdown
     - `champion`: the "Champion's challenge" button in the main menu. Each week it
       offers one of Lennart Neubauer's recent PWA wins: a card tells the event's
-      story, and you race him at his best in the game's own 1v1 heat, at 19 kt
-      gusting to 25. The local server plays the other side of the 1v1 lobby, and
-      the AI riders sail his heat. Beating him wins a Red Bull helmet, which the
-      mod's patches add to the game's look editor. It uses real names, unlike the
+      story, and you race him in the game's own 1v1 heat, where he scores around
+      45, at 21 kt gusting to 27 (the mod's patches give its rooms more wind than
+      the game's own). The local server plays the other side of the 1v1 lobby,
+      and the AI riders sail his heat. Beating him wins a Red Bull helmet, which
+      the patches add to the game's look editor. It uses real names, unlike the
       rest of the game. If a game update changes the menu, the button doesn't
       appear.
     ```
@@ -1705,8 +1752,8 @@ git commit -m "Replace the super final with the Champion's challenge mod" -m "Co
 
 ```markdown
      Then made harder as the **Champion's challenge (done):** Lennart Neubauer
-     at his five most recent wins, in the game's windiest room, with each
-     event's story and a Red Bull helmet as the prize.
+     at his five most recent wins, in 21 kt, with each event's story and a Red
+     Bull helmet as the prize.
      Spec: `docs/superpowers/specs/2026-10-25-champions-challenge-design.md`.
      Plan: `docs/superpowers/plans/2026-10-25-champions-challenge.md`.
 ```
@@ -1714,7 +1761,7 @@ git commit -m "Replace the super final with the Champion's challenge mod" -m "Co
 - [ ] **Step 3: Run the suite and commit**
 
 Run: `npm test`
-Expected: PASS, 227 tests, 0 failures.
+Expected: PASS, 228 tests, 0 failures.
 
 ```bash
 git add README.md docs/roadmap.md

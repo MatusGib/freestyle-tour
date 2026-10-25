@@ -5,7 +5,7 @@ Part of the roadmap in `docs/roadmap.md`. It replaces the weekly super final
 version, after trying it out:
 
 - always against Lennart Neubauer, at his five most recent wins;
-- in the game's windiest 1v1 room;
+- in 21 kt, more wind than the game's own 1v1 rooms;
 - an intro card with the event's story;
 - a Red Bull helmet as the prize;
 - a congratulations screen when you beat him.
@@ -18,8 +18,8 @@ repository, so it can be shared with the game's creator.
 
 A "Champion's challenge" in the game's main menu. Each week it offers one of
 Lennart Neubauer's recent PWA wins, tells its story, and lets you race him in
-the game's own 1v1 heat at his best, in 19 kt gusting to 25. Beating him wins a
-Red Bull helmet for your rider.
+the game's own 1v1 heat, scoring around 45, in 21 kt gusting to 27. Beating him
+wins a Red Bull helmet for your rider.
 
 ## Decisions
 
@@ -28,8 +28,8 @@ Red Bull helmet for your rider.
 | Name | "Champion's challenge" (the solo heat's menu entry already says "Weekly challenge") |
 | Events | Neubauer's five most recent wins: 2023 Sylt, 2024 Fuerteventura and 2025 Sylt, from the PWA results data, and 2026 Fuerteventura and 2026 Sylt, whose results weren't on the PWA site when it was crawled (their podiums and stories come from the event reports, entered by hand). One a week, seeded by the week |
 | Opponent | Lennart Neubauer, always |
-| Difficulty | The AI aims for his best form at his latest rating in the tour data, the one going into 2025 Sylt (1946), at all five events: his average plus the spread (6), at most 50. That is 47.45, against 41.45 on an average day |
-| Wind | 19 kt with gusts to 25 kt (`gustKnots` 6), the game's windiest 1v1 room |
+| Difficulty | He scores around 45 (lowered by the user from his best form, 47.45): the AI aims for 45.5 and lands about half a point under it in this wind. His rating going into 2025 Sylt (1946) is what the lobby shows |
+| Wind | 21 kt with each room's own gusts to 27 kt (`gustKnots` 6). The game's own 1v1 rooms only go to 19 kt, so a serve-time patch gives the champion's rooms 21 kt, and the server sails his heat in the same wind (`mods/champion/wind.js`, shared by both) |
 | Opponent's heat | Gusts make every room's wind different, so each room gets its own sailed heat. Rooms are never reused, so heats aren't cached; the next room's heat is sailed while you race |
 | Intro card | Opens when you press the button: the event, a short story of it, the podium, the prize with a picture, the heat you'll face, your best this week, and "Challenge Lennart Neubauer" |
 | Story | Written in our own words from the event reports: the conditions and how the final went |
@@ -43,13 +43,13 @@ Red Bull helmet for your rider.
 ## Success criteria
 
 1. The main menu has a "Champion's challenge" button under "1v1 Lobby",
-   naming this week's event, Lennart Neubauer and "19 kt, gusts 21–25 kt".
+   naming this week's event, Lennart Neubauer and "21 kt, gusts 23–27 kt".
 2. Pressing it opens the intro card: the event (name, dates, place), its
    story, the podium with real names, the Red Bull helmet with a picture, and
    your best this week. Its button gets Neubauer ready, and the game's own
    challenge toast appears.
-3. The heat is the game's 1v1 at 19 kt with gusts 21–25 kt, against "Lennart
-   Neubauer". His score lands within 2 points of the target.
+3. The heat is the game's 1v1 at 21 kt with gusts 23–27 kt, against "Lennart
+   Neubauer". He scores around 45.
 4. "Challenge again" starts a new heat within a few seconds.
 5. A win shows the congratulations screen. The Red Bull helmet then appears in
    the look editor, and "Wear it now" puts it on your rider, where it shows in
@@ -110,18 +110,27 @@ screens (not a real prize).
 
 ### Champion data (`server/champion.json`, new)
 
-`{ rider, name, rating, events: [{ id, tourId?, name, when, place, podium,
-story }] }` for the five events, oldest first. It holds everything the card
-shows, so the challenge needs no tour data at runtime. A test checks the
+`{ rider, name, rating, target, events: [{ id, tourId?, name, when, place,
+podium, story }] }` for the five events, oldest first. It holds everything the
+card shows, so the challenge needs no tour data at runtime. A test checks the
 podiums and the rating against the tour data where it has the event.
+
+### The wind (`mods/champion/wind.js`, new)
+
+`WIND = { knots: 21, gustKnots: 6 }`, and `roomWind(id, conditions)`: a room
+whose id starts with `champion-` gets 21 kt with the game's own gusts for that
+id; any other room keeps the game's wind. Pure, so both the patched game and
+the server use it.
 
 ### Weekly picker (`server/weekly.mjs`)
 
 - **`weekOf(champion, weekStart)`:** one of the champion's events, in the order
   listed, seeded by the week.
-- **`opponentFor(champion)`:** Lennart Neubauer, with his real name. The target
-  is his best form: `min(50, averageScore(rating) + 6)`.
-- **The wind:** `WIND = { knots: 19, gustKnots: 6 }`.
+- **`opponentFor(champion)`:** Lennart Neubauer, with his real name, aiming for
+  `champion.target`.
+- **`championRooms(roomConditions, event, at)`:** the room ids
+  `champion-<event>-<at>-<n>` whose game gusts are 6 kt, each with its wind
+  from `roomWind`.
 - **Results:** each week's best and whether you won, your last win (with both
   scores, so the mod can congratulate you once), and the prize on the first
   win.
@@ -134,12 +143,15 @@ podiums and the rating against the tour data where it has the event.
   before the next heat is ready, your challenge stays pending, and the room
   opens as soon as it is.
 
-### The helmet (`mods/champion/helmet.js` and `mods/champion/patches.mjs`, new)
+### The helmet and the wind in the game (`mods/champion/helmet.js` and `mods/champion/patches.mjs`, new)
 
 - **`helmet.js`** draws the logo (two red bulls charging at a yellow sun, and
   the name) on a canvas, adds the visor and the logo to the game's helmet
   group, and draws a picture of the helmet for the mod's screens.
 - **The patches:**
+  - give the game's main page, which imports the game's room wind for its 1v1
+    heats, a room wind that passes through `roomWind` (the module that exports
+    the room wind is left alone, so the mod layer still identifies it);
   - add "Red Bull helmet" (`redbull`) to the game's helmet list, so the look
     check keeps it;
   - make the look editor's list leave it out until the prize is won in this
@@ -176,7 +188,7 @@ podiums and the rating against the tour data where it has the event.
 
 - **Planning the opponent's heat fails, or no room has the wind:** the card
   shows "Couldn't get Lennart Neubauer ready. Press to try again."
-- **A game update breaks the helmet patches:** the patched module answers 500
+- **A game update breaks the patches:** the patched module answers 500
   with the patch's message and the server logs it; switch the mod off until the
   patches are updated.
 - **A rematch before the next heat is ready:** the challenge opens when it is.
@@ -190,19 +202,23 @@ podiums and the rating against the tour data where it has the event.
 - **Endpoints:** this week's info, starting, the next room sailed behind the
   first, a rematch waiting for its heat, a win recorded with the prize, errors.
 - **Lobby:** a rematch waits for its heat.
-- **Patches** (snapshot test): each replacement matches exactly once, and both
-  patched modules still parse.
-- **Room winds** (snapshot test): rooms with the champion's wind each give
-  their own gusts.
-- **Mod helpers:** the button's and card's texts.
+- **Patches** (snapshot test): each replacement matches exactly once, and the
+  three patched modules (the main page, the look lists, the 3D rider) still
+  parse.
+- **Room winds** (snapshot test): the champion's rooms get 21 kt, and each
+  gives its own gusts.
+- **Mod helpers:** the button's and card's texts, and the room wind rule.
 - **In the browser** (the pane visible): the seven success criteria, with the
   helmet seen in the look editor and on the rider.
 
 ## Risks
 
-- **The AI's best score in gusty wind:** settled while planning. In five
-  rooms at 19 kt gusting to 25 it scored 46.43 to 46.92 against 47.45, each heat
-  sailed in 6 to 8 seconds.
+- **The AI's score in 21 kt:** settled while building. In five rooms at 21 kt
+  with their own 6 kt gusts it scored 44.73 to 45.10 aiming for 45.5 (44.49 to
+  44.63 aiming for 45), each heat sailed in about 6 seconds; in the game it
+  finished on 44.76.
+- **Wind beyond the game's own rooms:** the game's physics took 21 kt without
+  trouble in the prototype, for the player and the AI alike.
 - **The logo** has to read on a small helmet: it is drawn large across the
   front, and reads at the look editor's size.
 - **The hand-entered 2026 events** rest on the event reports; when the PWA
