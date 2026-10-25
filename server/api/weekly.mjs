@@ -58,7 +58,8 @@ export async function startWeekly(body, { tour, game, now, ai, aiHeats, lobby, s
       next = null;
       return id;
     };
-    lobby.offer(opponent, { score: heat.score, attempts: heat.attempts, poses, settledAt }, nextRoomId, { weekStart: week.weekStart, event: week.event.id, division: body.division });
+    const ready = { score: heat.score, attempts: heat.attempts, poses, settledAt };
+    lobby.offer(opponent, () => ({ id: nextRoomId(), heat: ready }), { weekStart: week.weekStart, event: week.event.id, division: body.division });
   } catch (error) {
     return fail(500, `Couldn't get ${opponent.nickname} ready: ${error.message}`);
   }

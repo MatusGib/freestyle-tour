@@ -15,24 +15,35 @@ const QUIET = new Set(["sync", "exit", "offline", "presence"]);
 // score(attempts): the heat total, by the game's own rules. onResult(room) is
 // called once when a room finishes with a result (not when it's cancelled).
 export function createLobby({ now, score, onResult = () => {}, log = () => {} }) {
-  let offer = null; // { challenge, opponent, heat, nextRoomId, meta }
+  let offer = null; // { challenge, opponent, takeRoom, meta }
   let room = null;
 
   const clock = () => (now() - room.startsAt) / 1000;
 
-  function openRoom() {
+  // A room from offer.takeRoom(): { id, heat }.
+  function openRoom({ id, heat }) {
     const racingAt = now() + TIMES.racingAfter;
     room = {
-      id: offer.nextRoomId(),
+      id,
+      heat,
       status: "pending",
       racingAt,
       startsAt: racingAt + TIMES.countdown,
       outcome: null,
       dismissed: false,
       you: { attempts: [], score: 0, submitted: false, forfeited: false },
-      ai: { attempts: offer.heat.attempts, score: offer.heat.score, submitted: false, forfeited: false },
+      ai: { attempts: heat.attempts, score: heat.score, submitted: false, forfeited: false },
       meta: offer.meta,
     };
+  }
+
+  // Opens a room for the challenge if one is ready; otherwise the challenge
+  // stays pending until one is.
+  function startIfReady() {
+    const next = offer.takeRoom();
+    if (!next) return;
+    offer.challenge.status = "accepted";
+    openRoom(next);
   }
 
   function finishRoom() {
@@ -45,6 +56,7 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   // Moves the challenge and room along with the clock.
   function tick() {
     if (offer?.challenge.status === "pending" && now() >= offer.challenge.expiresAt) offer.challenge.status = "expired";
+    if (offer?.challenge.status === "pending" && !offer.challenge.incoming) startIfReady();
     if (!room) return;
     if (room.status === "pending" && now() >= room.racingAt) room.status = "racing";
     if (room.status !== "racing") return;
@@ -57,7 +69,7 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   function aiNow() {
     if (room.ai.submitted) return room.ai;
     if (room.status !== "racing") return { ...room.ai, attempts: [], score: 0 };
-    const attempts = room.ai.attempts.filter((a) => offer.heat.settledAt[a.id] <= clock());
+    const attempts = room.ai.attempts.filter((a) => room.heat.settledAt[a.id] <= clock());
     return { ...room.ai, attempts, score: score(attempts) };
   }
 
@@ -96,9 +108,7 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
 
   const ACTIONS = {
     accept({ challengeId }) {
-      if (offer?.challenge.id !== challengeId || offer.challenge.status !== "pending") return;
-      offer.challenge.status = "accepted";
-      openRoom();
+      if (offer?.challenge.id === challengeId && offer.challenge.status === "pending") startIfReady();
     },
     reject({ challengeId }) {
       if (offer?.challenge.id === challengeId && offer.challenge.status === "pending") offer.challenge.status = "rejected";
@@ -106,11 +116,12 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
     cancel({ challengeId }) {
       if (offer?.challenge.id === challengeId && offer.challenge.status === "pending") offer.challenge.status = "cancelled";
     },
-    // "Challenge again" after a heat: the AI accepts at once, in a new room.
+    // "Challenge again" after a heat: the AI accepts in a new room as soon as
+    // its heat is ready, at once if it already is.
     challenge({ challengeId, riderId }) {
       if (!offer || riderId !== offer.opponent.id || (room && room.status !== "finished")) return;
-      offer.challenge = { id: challengeId, status: "accepted", incoming: false, expiresAt: now() + TIMES.offerFor };
-      openRoom();
+      offer.challenge = { id: challengeId, status: "pending", incoming: false, expiresAt: now() + TIMES.offerFor };
+      startIfReady();
     },
     progress({ roomId, attempts }) {
       if (room?.id === roomId && room.status === "racing") room.you.attempts = attempts;
@@ -145,19 +156,19 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
       else if (body.action && !QUIET.has(body.action)) log(`lobby: unknown action ${body.action}`);
       return snapshot(player);
     },
-    // opponent: { id, nickname, appearance, rating }; heat: { score, attempts,
-    // poses, settledAt }; nextRoomId(): a new room id with the heat's wind for
-    // every room (the game ignores room ids it has dismissed); meta: what
-    // onResult gets back with the room.
-    offer(opponent, heat, nextRoomId, meta = null) {
-      offer = { challenge: { id: randomUUID(), status: "pending", incoming: true, expiresAt: now() + TIMES.offerFor }, opponent, heat, nextRoomId, meta };
+    // opponent: { id, nickname, appearance, rating }; takeRoom(): the next room,
+    // { id, heat: { score, attempts, poses, settledAt } }, or null while it
+    // isn't ready (every room needs a new id: the game ignores room ids it has
+    // dismissed); meta: what onResult gets back with the room.
+    offer(opponent, takeRoom, meta = null) {
+      offer = { challenge: { id: randomUUID(), status: "pending", incoming: true, expiresAt: now() + TIMES.offerFor }, opponent, takeRoom, meta };
       room = null;
     },
     // The AI's pose at the room's clock while it races, or null.
     racingPose() {
       tick();
       if (room?.status !== "racing") return null;
-      const { poses } = offer.heat;
+      const { poses } = room.heat;
       const i = Math.max(0, Math.min(poses.length - 1, Math.floor(clock() * POSES_PER_SECOND)));
       return { roomId: room.id, pose: poses[i] };
     },

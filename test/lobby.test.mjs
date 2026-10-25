@@ -14,6 +14,7 @@ function setup() {
   const results = [];
   const logs = [];
   let n = 0;
+  let isReady = true;
   const lobby = createLobby({ now: () => time, score: total, onResult: (room) => results.push(room), log: (m) => logs.push(m) });
   return {
     lobby,
@@ -23,7 +24,9 @@ function setup() {
     get time() {
       return time;
     },
-    offer: (meta = { weekStart: 1, event: 291, division: "men" }) => lobby.offer(OPPONENT, HEAT, () => `room-${n++}`, meta),
+    // Whether the next room's heat is ready.
+    ready: (value) => void (isReady = value),
+    offer: (meta = { weekStart: 1, event: 291, division: "men" }) => lobby.offer(OPPONENT, () => (isReady ? { id: `room-${n++}`, heat: HEAT } : null), meta),
     poll: (body = {}) => lobby.act(body, PLAYER),
   };
 }
@@ -161,6 +164,20 @@ test("the game's own order, challenge again and then dismiss the old room, keeps
   s.poll({ action: "finish", roomId: "room-0", attempts: [] });
   assert.equal(s.poll({ action: "challenge", challengeId: "c2", riderId: "m:balz-muller" }).room.id, "room-1");
   assert.equal(s.poll({ action: "dismiss", roomId: "room-0" }).room.id, "room-1");
+});
+
+test("challenging again before the next room's heat is ready leaves the challenge pending until it is", () => {
+  const s = setup();
+  s.offer();
+  race(s);
+  s.later(HEAT_SECONDS * 1000);
+  s.poll({ action: "finish", roomId: "room-0", attempts: [] });
+  s.ready(false);
+  const waiting = s.poll({ action: "challenge", challengeId: "c2", riderId: "m:balz-muller" });
+  assert.deepEqual([waiting.challenges[0].status, waiting.challenges[0].incoming, waiting.room.id], ["pending", false, "room-0"]);
+  s.ready(true);
+  const opened = s.poll();
+  assert.deepEqual([opened.challenges[0].status, opened.room.id, opened.room.status], ["accepted", "room-1", "pending"]);
 });
 
 test("unknown actions are logged and answered with the snapshot", () => {
