@@ -95,10 +95,11 @@ Built in three pieces, each with its own spec, in this order:
 - **3c. Weekly challenge:** each week you relive a past PWA event against the
   real riders who sailed it, in the game's own 1v1 heats, with the AI riders'
   heats following what really happened. Built in parts:
-  1. **Weekly super final:** you against the event's winner in one real 1v1
+  1. **Weekly super final (done):** you against the event's winner in one real 1v1
      heat (the local server plays the 1v1 lobby and relay), with the game's
      hidden gear as the prize.
      Spec: `docs/superpowers/specs/2026-10-25-weekly-super-final-design.md`.
+     Plan: `docs/superpowers/plans/2026-10-25-weekly-super-final.md`.
   2. **Event winds:** each event's wind from its PWA reports, mapped into the
      game's 1v1 range (15–19 kt, gusts) through the room id.
   3. **Full bracket:** your slot in the event's real ladder, with AI-vs-AI
