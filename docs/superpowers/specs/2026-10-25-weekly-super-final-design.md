@@ -123,33 +123,58 @@ challenge mod's overlay (no 1v1 look and no event wind, the point of the idea).
 
 ## Components
 
-### Probe (first task of the plan)
+### Probe (done while planning, 2026-10-25)
 
-A minimal hard-coded room against the real game, before anything else is
-built:
+A prototype of the lobby, relay and weekly picker ran against the real game.
+It sailed the whole flow:
 
-- an incoming challenge;
-- `accept`;
-- `racing` with `startsAt`;
-- a few seconds of poses over the relay, then over the HTTP fallback;
-- `finish`, and a finished room.
+- the challenge toast;
+- the game's own countdown ("Heat starts in 5 · … Wind: 17 kt, steady wind");
+- the AI on the water;
+- the result screen ("Amada Vryeswijk won the heat!");
+- "Challenge again";
+- a forfeit;
+- the hidden gear in the look editor.
 
-It confirms the exact request and reply shapes (fields the game requires,
-the relay's subprotocol and message fields). The spec's components are then
-built to what the probe found.
+What it found, and what the components below do about it:
+
+- **Challenges appear anywhere.** A pending incoming challenge shows as the
+  game's own challenge toast, over the menu as well as in the lobby, so the mod
+  doesn't need to open the lobby.
+- **Every room needs a never-used id.**
+  - The game ignores rooms whose id it has dismissed.
+  - It keeps a checkpoint of an unfinished 1v1 heat per room id and resumes it.
+    A reused id after a server restart resumed an old heat near its end.
+  - So room ids carry the time the super final was started, and every room
+    (each rematch too) takes the next id with the same wind.
+  - Without gusts, all room ids with the same knots give exactly the same wind,
+    so the AI's heat is reused. With gusts the wind depends on the id's seed;
+    that's for the event winds part.
+- **The live score.** During the heat, the HUD shows the rival seat's `score`
+  and per-tack scores from its `attempts`. So the AI's seat reveals the attempts
+  it has settled so far.
+- **"Challenge again"** on the result screen sends `challenge` with the AI's
+  `riderId`, then `dismiss`. The AI accepts at once, in a new room.
+- **The relay** must send `{ type: "ready" }` as soon as the socket opens. The
+  game sends no message first.
 
 ### Lobby (`server/lagoon/lobby.mjs`)
 
 A plain state machine with an injected clock, so it can be tested without a
 browser.
 
-- **`offer({ opponent, heat, roomId })`:**
-  - puts the opponent in `riders`, under their pseudonym, with their
-    appearance and their rating going into the event;
-  - adds an incoming challenge, which expires after 10 minutes.
-- **`accept(challengeId)`:** opens a `pending` room with the AI in seat 2.
+- **`offer(opponent, heat, nextRoomId, meta)`:**
+  - puts the opponent in `riders` (and you, as the real lobby does), under
+    their pseudonym, with their appearance and their rating going into the
+    event;
+  - adds an incoming challenge, which expires after 10 minutes;
+  - `nextRoomId()` gives a new room id for every room.
+- **`accept`:** opens a `pending` room with the AI in seat 2.
   - About 2 seconds later it goes `racing`, with `startsAt` 5 seconds after
     that.
+- **`challenge`** (after a heat, for the same rider): a new room at once.
+- **The AI's seat during the heat** shows only the attempts it has settled by
+  the room's clock, and their total.
 - **`progress` and `finish`:** keep your attempts. At `finish`, your score
   comes from the game's own `heatTotals`, as the server does for solo heats.
 - **The AI's seat** is `submitted`, with its score, once the room's clock
@@ -177,25 +202,32 @@ browser.
 
 ### AI pose track (`lib/ai/worker.mjs`)
 
-- **A second job:** the worker replays a stored recording and returns its poses
-  every 1/30 s, `[{ t, pose }]`, using the game's pose builder (`riderPose`).
+- **A second job:** the worker replays a stored recording and returns
+  `{ poses, settledAt }`.
+  - `poses` is the rider's pose every 1/30 s, from the game's pose builder
+    (`riderPose`).
+  - `settledAt` is the heat time at which each attempt stopped being pending,
+    by attempt id.
 - **The `pose` part:** the worker loads it as well.
 - **When:** the server asks for the track when a room starts. A replay takes
   well under a second.
 
 ### Weekly picker (`server/weekly.mjs`)
 
-- **`weekOf(now)`:** `{ weekStart, event, divisions }`.
+- **`weekOf(tour, weekStart)`:** `{ weekStart, event }`.
   - The event is `events[seedOf("weekly", weekStart) % events.length]`, over
     the tour's events in id order.
-- **`opponentFor(week, division)`:**
+- **`opponentFor(tour, week, division)`:**
   - the division's winner (place 1, first in place order);
   - their rating going into the event;
   - the target `heatTarget(rating, seedOf(rider, event, weekStart, "super-final"))`.
-- **`roomIdFor(wind, weekStart, event)`:** the first id
-  `super-final-<event>-<weekStart>-<n>` whose conditions match the wind
-  (knots and gusts). It uses the game's own room-conditions function, which
-  the mod layer will identify as a new signature (`roomConditions`).
+- **`roomIdsFor(roomConditions, wind, prefix)`:** the ids `<prefix>-<n>`
+  whose conditions match the wind (knots and gusts), in order.
+  - The prefix is `super-final-<event>-<time of the start>`.
+  - It uses the game's own room-conditions function, which the mod layer
+    identifies as a new signature (`roomConditions`).
+- **`recordRoom(store, room, at)`:** records a finished room's result. A
+  forfeit isn't recorded.
 - **Results:** kept in `data/weekly.json`, as
   `{ weeks: { "<weekStart>": { event, division, best, won } }, prize: { earnedAt } }`.
 
@@ -219,18 +251,21 @@ browser.
 ### Super final mod (`mods/super-final/`)
 
 - **The menu button.** It adds a "Super final" button after the game's "1v1
-  Lobby" button, copying that button's classes so it looks native.
+  Lobby" button, copying that button's classes so it looks native. It puts
+  the button back whenever the game redraws the menu.
   - Its second line is "This week: <event> · vs <pseudonym> · <knots> kt".
   - When the event had both divisions, it shows a small Men/Women switch.
-  - If the menu's structure isn't found, it falls back to a button in the mod
-    overlay.
-- **Pressing it:** the button says "Getting <pseudonym> ready…", calls
-  `/api/local/weekly/start`, then opens the game's 1v1 lobby by clicking the
-  game's own "1v1 Lobby" button.
-- **The prize.** When `/api/local/weekly` says the prize is earned, the mod
-  sets `fristajlo.hidden-gear` and fires the change event. It shows
-  "Unlocked: Severne Freek CC1 sail and Severne Psycho board" the first time.
-  It checks on every load.
+  - If a game update changes the menu, the button doesn't appear. An overlay
+    fallback was tried in the probe, but it couldn't tell a changed menu from
+    the result and lobby screens.
+- **Pressing it:** the button says "Getting <pseudonym> ready…" and calls
+  `/api/local/weekly/start`. It then says "<pseudonym> has challenged you:
+  accept to start the heat", and the game's challenge toast appears on its next
+  lobby poll.
+- **The prize.** Each time the menu comes back, the mod checks
+  `/api/local/weekly`. When the prize is earned, it sets `fristajlo.hidden-gear`
+  and fires the change event. The button then says "Unlocked: Severne Freek CC1
+  sail and Severne Psycho board" until it's pressed again.
 
 ## Errors
 
@@ -274,15 +309,19 @@ browser.
      countdown, then the opponent sails under their pseudonym.
   3. The result screen names the winner with both scores.
   4. A retry faces the same heat.
-  5. A win switches on the hidden gear. The win path is unit-tested; in the
-     browser it's checked by temporarily lowering the opponent's target
-     through a test-only server option.
+  5. A win switches on the hidden gear. The win path is unit-tested. In the
+     browser, a win is recorded in `data/weekly.json` by hand; after a restart
+     the Severne items must appear in the look editor. (An idle rider scores 0,
+     so lowering the opponent's target wouldn't produce a win.)
   6. The plain 1v1 lobby, solo heats, ghosts and the challenge mod still behave.
 
 ## Risks
 
-- **The 1v1 protocol is undocumented.** The probe comes first, and the plan
-  stops and reports if the game won't accept a local room.
+- **The 1v1 protocol is undocumented.** The probe showed the game accepts a
+  local room. A game update could still change it.
+- **Gusty winds (the next part)** make each room id's wind different. So a
+  rematch in a gusty wind will need the AI's heat sailed again for the new room
+  (about 20 seconds).
 - **A game update** can change the protocol, the menu or the hidden-gear
   switch. Each part fails visibly (the lobby stays empty, the button falls back
   to the overlay).
