@@ -100,6 +100,11 @@ Built in three pieces, each with its own spec, in this order:
      hidden gear as the prize.
      Spec: `docs/superpowers/specs/2026-10-25-weekly-super-final-design.md`.
      Plan: `docs/superpowers/plans/2026-10-25-weekly-super-final.md`.
+     Then made harder as the **Champion's challenge (done):** Lennart Neubauer
+     at his five most recent wins, in 21 kt, with each event's story and a Red
+     Bull helmet as the prize.
+     Spec: `docs/superpowers/specs/2026-10-25-champions-challenge-design.md`.
+     Plan: `docs/superpowers/plans/2026-10-25-champions-challenge.md`.
   2. **Event winds:** each event's wind from its PWA reports, mapped into the
      game's 1v1 range (15–19 kt, gusts) through the room id.
   3. **Full bracket:** your slot in the event's real ladder, with AI-vs-AI

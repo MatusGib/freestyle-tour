@@ -20,7 +20,7 @@ npm test
   and makes it current; run `npm test` to see which mods need updating.
 
 The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
-`data/db.json` (never committed). The 1v1 lobby stays empty unless a super final is waiting.
+`data/db.json` (never committed). The 1v1 lobby stays empty unless a Champion's challenge is waiting.
 
 ## Mods
 
@@ -33,12 +33,15 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
   them. The local server sails their heat first (about 20 seconds) with the
   Freestajlo planner, aiming for the score their rating says. Needs the tour
   data (`npm run tour-data`).
-- `super-final`: a "Super final" button in the main menu. Each week it offers
-  one past PWA event's final against that event's winner, sailed as the game's
-  own 1v1 heat: the local server plays the other side of the 1v1 lobby, and the
-  AI riders sail the winner's heat. Your first win switches on the game's hidden
-  gear (the Severne Freek CC1 sail and Severne Psycho board). If a game update
-  changes the menu, the button doesn't appear.
+- `champion`: the "Champion's challenge" button in the main menu. Each week it
+  offers one of Lennart Neubauer's recent PWA wins: a card tells the event's
+  story, and you race him in the game's own 1v1 heat, where he scores around
+  45, at 21 kt gusting to 27 (the mod's patches give its rooms more wind than
+  the game's own). The local server plays the other side of the 1v1 lobby,
+  and the AI riders sail his heat. Beating him wins a Red Bull helmet, which
+  the patches add to the game's look editor. It uses real names, unlike the
+  rest of the game. If a game update changes the menu, the button doesn't
+  appear.
 
 `node tools/demo-heat.mjs` stores a short demo heat with real moves for the
 current week, so replays and ghosts can be shown without playing first.
@@ -52,10 +55,12 @@ are cached in `data/ai-heats.json`. `node tools/ai-check.mjs` sails 25 heats
 at several targets in five weeks' winds and checks that the AI lands within
 1.0 of its target on average.
 
-The super final uses `GET /api/local/weekly` and `POST /api/local/weekly/start`,
-and the game's own 1v1 endpoints (`/api/lagoons`, `/api/lagoons/connect`, a
-WebSocket at `/__relay`, `/api/lagoons/opponent`), which stay an empty lobby
-until a super final is waiting. Results are kept in `data/weekly.json`.
+The Champion's challenge uses `GET /api/local/weekly` and
+`POST /api/local/weekly/start`, and the game's own 1v1 endpoints
+(`/api/lagoons`, `/api/lagoons/connect`, a WebSocket at `/__relay`,
+`/api/lagoons/opponent`), which stay an empty lobby until a challenge is
+waiting. Its events are in `server/champion.json`, and results are kept in
+`data/champion.json`.
 
 ## Tour data
 
