@@ -193,7 +193,8 @@ browser.
   allows it.
 - **Authorizing:** `POST /api/lagoons/connect` answers a short-lived ticket and
   the socket's URL.
-- **Messages:** the relay answers `auth` and `ping` the way the game expects.
+- **Messages:** the relay answers `ping`, and ignores ticket renewals (`auth`)
+  and the game's own poses.
   While the room is racing, it sends a `pose` about 30 times a second: the AI's
   pose at the room's clock.
 - **HTTP fallback:** `POST /api/lagoons/opponent` answers the same pose.
@@ -209,14 +210,15 @@ browser.
   - `settledAt` is the heat time at which each attempt stopped being pending,
     by attempt id.
 - **The `pose` part:** the worker loads it as well.
-- **When:** the server asks for the track when a room starts. A replay takes
-  well under a second.
+- **When:** the server asks for the track when it offers the challenge, and
+  keeps it for rematches in the same wind. A replay takes well under a second.
 
 ### Weekly picker (`server/weekly.mjs`)
 
 - **`weekOf(tour, weekStart)`:** `{ weekStart, event }`.
   - The event is `events[seedOf("weekly", weekStart) % events.length]`, over
-    the tour's events in id order.
+    the tour's events with a single winner in each division, in id order. (An
+    event whose final was never sailed lists several riders at place 1.)
 - **`opponentFor(tour, week, division)`:**
   - the division's winner (place 1, first in place order);
   - their rating going into the event;
@@ -251,7 +253,7 @@ browser.
 ### Super final mod (`mods/super-final/`)
 
 - **The menu button.** It adds a "Super final" button after the game's "1v1
-  Lobby" button, copying that button's classes so it looks native. It puts
+  Lobby" button, with the game's menu-button class so it looks native. It puts
   the button back whenever the game redraws the menu.
   - Its second line is "This week: <event> · vs <pseudonym> · <knots> kt".
   - When the event had both divisions, it shows a small Men/Women switch.
@@ -323,8 +325,8 @@ browser.
   rematch in a gusty wind will need the AI's heat sailed again for the new room
   (about 20 seconds).
 - **A game update** can change the protocol, the menu or the hidden-gear
-  switch. Each part fails visibly (the lobby stays empty, the button falls back
-  to the overlay).
+  switch. Each part fails visibly (the lobby stays empty, the button doesn't
+  appear).
 - **Poses at 30 a second** may look less smooth than a live player. The game's
   own opponent playback smooths them, as it does for real opponents.
 - **The hidden gear can also be switched by the game's secret gesture,** so the

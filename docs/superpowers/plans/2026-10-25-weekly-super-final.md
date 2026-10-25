@@ -1684,3 +1684,27 @@ Expected: PASS, 220 tests, 0 failures.
 git add README.md docs/roadmap.md
 git commit -m "Document the weekly super final" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
+
+---
+
+## Changes during execution (2026-10-25)
+
+Reviews after each task changed a few things from the code above:
+
+- **Task 1:** events where a division lists more than one rider at place 1 (a
+  final never sailed, such as 2024 Sylt) are left out of the weekly pool. The
+  picker's tests also cover the id-order sort, draws, a forfeit into an empty
+  store, and the average.
+- **Task 4:** leaving during the countdown voids the room (the game calls it a
+  cancel), and a cancelled room doesn't show the AI's heat.
+- **Task 5:** a refused relay socket gets an error listener, so a client
+  resetting the connection can't stop the server.
+- **Task 6:** a result that can't be written is logged instead of thrown (it
+  can run inside the relay's timer). A missing room wind answers the usual
+  JSON 500, and the retry test retries an hour later in the week.
+- **Task 7:** gusts are written as the game writes them ("19 kt, gusts
+  21–24 kt").
+- **Task 8:** the button loop starts once the game runs (`whenGame()`), the
+  button is off whenever the game's lobby button is, and the Men/Women switch
+  is sorted, with the chosen division in bold.
+- The suite has 223 tests, not 220.
