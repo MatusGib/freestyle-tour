@@ -10,7 +10,7 @@ export const windText = (wind) => (wind.gustKnots ? `${wind.knots} kt, gusts ${w
 export const menuLine = (info) => `This week: ${info.event.name} · vs ${info.opponent.name} · ${windText(info.wind)}`;
 export const readyText = (name) => `Getting ${name} ready…`;
 export const failedText = (name) => `Couldn't get ${name} ready. Press to try again.`;
-export const doneText = (name) => `${name} has challenged you: accept to start the heat`;
+export const raceText = (name) => `Race ${name}`;
 // The AI lands about half a point under its target in the champion's wind.
 export const heatText = ({ opponent, wind }) => `Your heat: ${opponent.name} at his best, scoring around ${Math.round(opponent.target - 0.5)} points, in ${windText(wind)}.`;
 export const bestText = (info) => (info.best === null ? "No heat against him this week yet." : `Your best this week: ${info.best.toFixed(2)}${info.won ? ", and you beat him" : ""}.`);

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { handleApi } from "../server/api/index.mjs";
+import { createWeekRooms } from "../server/api/weekly.mjs";
 import { HEAT_SECONDS, TIMES, createLobby } from "../server/lagoon/lobby.mjs";
 import { createRelay } from "../server/lagoon/relay.mjs";
 import { createStore } from "../server/store.mjs";
@@ -27,10 +28,11 @@ const attempt = (id, score) => ({ id, status: "landed", score, tack: "port", lab
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 // A stand-in for the AI riders. holdNext() makes the next sail wait until the
-// function it returns is called.
+// function it returns is called; failNext(message) makes it fail.
 function fakeAi() {
   const calls = [];
   let hold = null;
+  let failure = null;
   return {
     calls,
     holdNext() {
@@ -38,11 +40,17 @@ function fakeAi() {
       hold = new Promise((resolve) => (release = resolve));
       return release;
     },
+    failNext(message) {
+      failure = new Error(message);
+    },
     async sail(conditions, target) {
       calls.push(["sail", conditions.seed, conditions.knots, target]);
       const wait = hold;
       hold = null;
       await wait;
+      const error = failure;
+      failure = null;
+      if (error) throw error;
       return { replay: { format: 1, steps: 10, events: "" }, score: 30, attempts: [attempt(1, 30)], tricks: [], steps: 10 };
     },
     async poses(conditions) {
@@ -62,7 +70,10 @@ function setup(t, { ai = fakeAi(), rooms = roomConditions } = {}) {
   const weekly = createStore(join(dir, "champion.json"), { weeks: {}, prize: null });
   const lobby = createLobby({ now, score: (attempts) => fakeGame.heatTotals({ attempts }).total, onResult: (room) => recordRoom(weekly, room, now()) });
   const logs = [];
-  const ctx = { store, game: { ...fakeGame, roomConditions: rooms }, now, ai, weekly, lobby, relay: createRelay({ lobby, now }), champion: CHAMPION, log: (line) => logs.push(line), snapshot: "2026-10-24" };
+  const game = { ...fakeGame, roomConditions: rooms };
+  const log = (line) => logs.push(line);
+  const weekRooms = createWeekRooms({ champion: CHAMPION, game, now, ai, log });
+  const ctx = { store, game, now, ai, weekly, lobby, relay: createRelay({ lobby, now }), champion: CHAMPION, weekRooms, log, snapshot: "2026-10-24" };
   const call = (method, path, body = {}) => handleApi({ method, path, query: new URLSearchParams(), body, host: "localhost:5180" }, ctx);
   const poll = (body = {}) => call("POST", "/api/lagoons", { playerKey: "k1", ...body }).body;
   return { ctx, call, poll, ai, logs, later: (ms) => void (time += ms) };
@@ -86,46 +97,83 @@ test("this week's challenge names the event, its story and podium, and the champ
   });
 });
 
-test("starting sails the champion's heat for the first room and offers his challenge; taking the room starts sailing the next", async (t) => {
+test("asking for this week's challenge sails the champion's first heat ahead, once, in his 21 kt", async (t) => {
+  const { call, ai } = setup(t);
+  call("GET", "/api/local/weekly");
+  call("GET", "/api/local/weekly");
+  await settle();
+  call("GET", "/api/local/weekly");
+  await settle();
+  assert.deepEqual(ai.calls, [["sail", 0, 21, 45.5], ["poses", 0]], "once, however often the menu asks");
+});
+
+test("starting opens a room with the champion at once, with no challenge to accept; taking it starts sailing the next room", async (t) => {
   const { call, poll, ai } = setup(t);
   const week = weekOf(CHAMPION, fakeGame.weekStart(NOW));
+  call("GET", "/api/local/weekly");
+  await settle();
   const { status, body } = await call("POST", "/api/local/weekly/start");
   assert.equal(status, 200);
   assert.deepEqual(body, { name: "Lennart Neubauer", wind: WIND });
-  assert.deepEqual(ai.calls, [["sail", 0, 21, 45.5], ["poses", 0]], "sailed in the champion's 21 kt");
-  const { challenges } = poll();
-  assert.deepEqual([challenges[0].senderName, challenges[0].recipientName], ["Lennart Neubauer", "Tester"]);
-  const { room } = poll({ action: "accept", challengeId: challenges[0].id });
-  assert.equal(room.id, `champion-${week.event.id}-${NOW}-0`);
+  const { room, challenges } = poll();
+  assert.deepEqual([room.id, room.status, room.seats[1].nickname], [`champion-${week.event.id}-${NOW}-0`, "racing", "Lennart Neubauer"]);
+  assert.deepEqual([challenges[0].status, challenges[0].incoming], ["accepted", false]);
   await settle();
   assert.deepEqual(ai.calls.slice(2), [["sail", 3, 21, 45.5], ["poses", 3]], "the next room gets its own heat, in its own wind");
+});
+
+test("starting waits for a heat that is still sailing, without sailing it twice", async (t) => {
+  const { call, poll, ai } = setup(t);
+  const release = ai.holdNext();
+  call("GET", "/api/local/weekly");
+  let started = false;
+  const start = call("POST", "/api/local/weekly/start").then((reply) => ((started = true), reply));
+  await settle();
+  assert.deepEqual([started, poll().room], [false, null]);
+  release();
+  assert.equal((await start).status, 200);
+  assert.equal(poll().room.status, "racing");
+  assert.equal(ai.calls.filter(([what, seed]) => what === "sail" && seed === 0).length, 1);
+});
+
+test("a heat that failed to sail ahead is logged, and sailed again on starting", async (t) => {
+  const { call, poll, ai, logs } = setup(t);
+  const week = weekOf(CHAMPION, fakeGame.weekStart(NOW));
+  ai.failNext("the planner fell over");
+  call("GET", "/api/local/weekly");
+  await settle();
+  assert.deepEqual(logs, ["Couldn't get the next room ready: the planner fell over"]);
+  assert.equal((await call("POST", "/api/local/weekly/start")).status, 200);
+  assert.equal(poll().room.id, `champion-${week.event.id}-${NOW}-3`, "in a new room");
 });
 
 test("challenging again waits for the next room's heat, then opens it", async (t) => {
   const { call, poll, ai, later } = setup(t);
   const week = weekOf(CHAMPION, fakeGame.weekStart(NOW));
-  await call("POST", "/api/local/weekly/start");
+  call("GET", "/api/local/weekly");
+  await settle();
   const release = ai.holdNext();
-  const first = poll({ action: "accept", challengeId: poll().challenges[0].id }).room;
-  later(TIMES.racingAfter + TIMES.countdown + HEAT_SECONDS * 1000);
+  await call("POST", "/api/local/weekly/start");
+  const first = poll().room;
+  later(TIMES.countdown + HEAT_SECONDS * 1000);
   poll({ action: "finish", roomId: first.id, attempts: [attempt(9, 10)] });
   const waiting = poll({ action: "challenge", challengeId: "c2", riderId: "m:lennart-neubauer" });
   assert.deepEqual([waiting.challenges[0].status, waiting.room.id], ["pending", first.id], "the old room stays until the new one opens");
   release();
   await settle();
   const ready = poll();
-  assert.deepEqual([ready.challenges[0].status, ready.room.id, ready.room.status], ["accepted", `champion-${week.event.id}-${NOW}-3`, "pending"]);
+  assert.deepEqual([ready.challenges[0].status, ready.room.id, ready.room.status], ["accepted", `champion-${week.event.id}-${NOW}-3`, "racing"]);
 });
 
 test("a win is recorded with both scores, as your last win, and earns the prize", async (t) => {
   const { call, poll, later } = setup(t);
   await call("POST", "/api/local/weekly/start");
-  const room = poll({ action: "accept", challengeId: poll().challenges[0].id }).room;
-  later(TIMES.racingAfter + TIMES.countdown + HEAT_SECONDS * 1000);
+  const room = poll().room;
+  later(TIMES.countdown + HEAT_SECONDS * 1000);
   assert.equal(poll({ action: "finish", roomId: room.id, attempts: [attempt(9, 31)] }).room.outcome, "1");
   const info = call("GET", "/api/local/weekly").body;
   assert.deepEqual([info.best, info.won, info.prize], [31, true, true]);
-  assert.deepEqual(info.lastWin, { at: NOW + TIMES.racingAfter + TIMES.countdown + HEAT_SECONDS * 1000, event: info.event.id, score: 31, opponentScore: 30 });
+  assert.deepEqual(info.lastWin, { at: NOW + TIMES.countdown + HEAT_SECONDS * 1000, event: info.event.id, score: 31, opponentScore: 30 });
 });
 
 test("the 1v1 endpoints go to the lobby and relay: tickets, the AI's pose, and the old answers", (t) => {

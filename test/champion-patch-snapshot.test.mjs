@@ -5,8 +5,10 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { tryOpenSnapshot } from "../lib/snapshot.mjs";
 import { loadPatches, patchSnapshot } from "../server/patches.mjs";
+import { LOOK } from "../server/weekly.mjs";
 import { ROOT, tempDir } from "./helpers.mjs";
 
 const snapshot = tryOpenSnapshot(ROOT);
@@ -31,4 +33,15 @@ test("the Champion's challenge patches change the 1v1 room wind, the look editor
     const check = spawnSync(process.execPath, ["--check", join(dir, name)], { encoding: "utf8" });
     assert.equal(check.status, 0, `${name}: ${check.stderr}`);
   }
+});
+
+test("the champion's look survives the patched game's look check, helmet and sail included", { skip }, async (t) => {
+  const patched = patchSnapshot(snapshot, await loadPatches(join(ROOT, "mods"), ["champion"]), () => {});
+  const appearance = [...patched.values()].map((p) => p.text).find((text) => text.includes("{value:`redbull`,label:`Red Bull helmet`}"));
+  // The module imports the helmet from where the game finds the mods; here it
+  // comes from the mod's folder.
+  const file = join(tempDir(t), "appearance.mjs");
+  writeFileSync(file, appearance.replace('from"/__mods/champion/helmet.js"', `from${JSON.stringify(pathToFileURL(join(ROOT, "mods", "champion", "helmet.js")).href)}`));
+  const { d: lookCheck } = await import(pathToFileURL(file).href);
+  assert.deepEqual(lookCheck(LOOK), LOOK);
 });

@@ -20,7 +20,7 @@ npm test
   and makes it current; run `npm test` to see which mods need updating.
 
 The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
-`data/db.json` (never committed). The 1v1 lobby stays empty unless a Champion's challenge is waiting.
+`data/db.json` (never committed). The 1v1 lobby stays empty until you start a Champion's challenge heat.
 
 ## Mods
 
@@ -33,15 +33,9 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
   them. The local server sails their heat first (about 20 seconds) with the
   Freestajlo planner, aiming for the score their rating says. Needs the tour
   data (`npm run tour-data`).
-- `champion`: the "Champion's challenge" button in the main menu. Each week it
-  offers one of Lennart Neubauer's recent PWA wins: a card tells the event's
-  story, and you race him in the game's own 1v1 heat, where he scores around
-  45, at 21 kt gusting to 27 (the mod's patches give its rooms more wind than
-  the game's own). The local server plays the other side of the 1v1 lobby,
-  and the AI riders sail his heat. Beating him wins a Red Bull helmet, which
-  the patches add to the game's look editor. It uses real names, unlike the
-  rest of the game. If a game update changes the menu, the button doesn't
-  appear.
+- `champion`: the Champion's challenge. Race Lennart Neubauer at one of his
+  PWA wins in the game's own 1v1 heat, for a Red Bull helmet. See
+  [the Champion's challenge](#the-champions-challenge) below.
 
 `node tools/demo-heat.mjs` stores a short demo heat with real moves for the
 current week, so replays and ghosts can be shown without playing first.
@@ -55,12 +49,48 @@ are cached in `data/ai-heats.json`. `node tools/ai-check.mjs` sails 25 heats
 at several targets in five weeks' winds and checks that the AI lands within
 1.0 of its target on average.
 
-The Champion's challenge uses `GET /api/local/weekly` and
-`POST /api/local/weekly/start`, and the game's own 1v1 endpoints
-(`/api/lagoons`, `/api/lagoons/connect`, a WebSocket at `/__relay`,
-`/api/lagoons/opponent`), which stay an empty lobby until a challenge is
-waiting. Its events are in `server/champion.json`, and results are kept in
+## The Champion's challenge
+
+The `champion` mod lets you race Lennart Neubauer at one of his real PWA wins,
+in the game's own 1v1 heat.
+
+- **The button:** "Champion's challenge", under "1v1 Lobby" in the main menu,
+  names this week's event, him and the wind. Like the lobby button, it is off
+  until you have a rider.
+- **The event:** one of his five most recent PWA wins (2023 Sylt, 2024
+  Fuerteventura, 2025 Sylt, 2026 Fuerteventura and 2026 Sylt), the same all
+  week. The button opens a card with the event's story, its podium, the prize
+  and your best score this week.
+- **The heat:** "Race Lennart Neubauer" on the card starts the 1v1 heat
+  straight away, with the game's usual countdown. There is no challenge to send
+  or accept. "Challenge again" on the result screen starts the next heat
+  within a few seconds.
+- **Him:** he wears the Red Bull helmet and sails a Severne Freek (the game's
+  hidden sail). He rides Starboard boards, which the game doesn't have, so his
+  board is a plain orange one. The AI riders sail his heat with the Freestajlo
+  planner, scoring around 45, in 21 kt gusting 23–27 kt: more wind than the
+  game's own 1v1 rooms (15–19 kt). The server sails his next heat ahead of
+  time, so you don't wait for it.
+- **The prize:** beat him and a congratulations screen shows both scores and
+  the Red Bull helmet. The helmet then appears in the look editor, and "Wear
+  it now" puts it on your rider.
+- **Real names:** the challenge names him and the podiums as they are. The
+  rest of the game keeps pseudonyms. The Red Bull logo is a trademark, so the
+  repository stays private.
+
+How it works: the local server plays the other side of the game's 1v1, with
+the lobby, the room and his poses over a relay socket. Serve-time patches
+(`mods/champion/patches.mjs`) give the challenge's rooms 21 kt and add the
+helmet to the game. The mod uses `GET /api/local/weekly` (which also starts
+sailing his first heat) and `POST /api/local/weekly/start`, and the game uses
+its own 1v1 endpoints (`/api/lagoons`, `/api/lagoons/connect`, a WebSocket at
+`/__relay`, `/api/lagoons/opponent`), which answer an empty lobby until a
+heat starts. Its events are in `server/champion.json`, and results are kept in
 `data/champion.json`.
+
+After a game update: if the menu changes, the button doesn't appear. If the
+patches no longer match, the patched modules answer 500 and the server log
+names the mod. Leave `champion` out of `--mods` until it is updated.
 
 ## Tour data
 

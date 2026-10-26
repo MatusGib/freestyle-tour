@@ -1,5 +1,5 @@
 // The game's 1v1 endpoints. Lobby polls and actions go to the local lobby
-// (server/lagoon/lobby.mjs), which is empty until a super final is offered;
+// (server/lagoon/lobby.mjs), which is empty until a Champion's challenge starts;
 // the relay hands out tickets for its socket, and the HTTP pose exchange gets
 // the AI's latest pose. The lobby socket is told there is no relay, which
 // keeps the lobby itself on HTTP polling, and WebRTC signaling is unavailable.

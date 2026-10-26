@@ -27,11 +27,12 @@ wins a Red Bull helmet for your rider.
 |---|---|
 | Name | "Champion's challenge" (the solo heat's menu entry already says "Weekly challenge") |
 | Events | Neubauer's five most recent wins: 2023 Sylt, 2024 Fuerteventura and 2025 Sylt, from the PWA results data, and 2026 Fuerteventura and 2026 Sylt, whose results weren't on the PWA site when it was crawled (their podiums and stories come from the event reports, entered by hand). One a week, seeded by the week |
-| Opponent | Lennart Neubauer, always |
+| Opponent | Lennart Neubauer, always, in the Red Bull helmet and a Severne Freek CC1 (the game's hidden sail; he sails Severne). He rides Starboard, which the game doesn't have, so his board is plain orange (revised 2026-10-26) |
 | Difficulty | He scores around 45 (lowered by the user from his best form, 47.45): the AI aims for 45.5 and lands about half a point under it in this wind. His rating going into 2025 Sylt (1946) is what the lobby shows |
 | Wind | 21 kt with each room's own gusts to 27 kt (`gustKnots` 6). The game's own 1v1 rooms only go to 19 kt, so a serve-time patch gives the champion's rooms 21 kt, and the server sails his heat in the same wind (`mods/champion/wind.js`, shared by both) |
-| Opponent's heat | Gusts make every room's wind different, so each room gets its own sailed heat. Rooms are never reused, so heats aren't cached; the next room's heat is sailed while you race |
-| Intro card | Opens when you press the button: the event, a short story of it, the podium, the prize with a picture, the heat you'll face, your best this week, and "Challenge Lennart Neubauer" |
+| Opponent's heat | Gusts make every room's wind different, so each room gets its own sailed heat. Rooms are never reused, so heats aren't cached. The first room's heat is sailed when the menu first asks for this week's challenge, and the next room's while you race (revised 2026-10-26) |
+| Intro card | Opens when you press the button: the event, a short story of it, the podium, the prize with a picture, the heat you'll face, your best this week, and "Race Lennart Neubauer" |
+| Starting the heat | "Race Lennart Neubauer" starts the game's 1v1 heat at once, with its countdown: no challenge to send or accept, and no toast (revised 2026-10-26, after trying it: the challenge and the wait for it felt odd) |
 | Story | Written in our own words from the event reports: the conditions and how the final went |
 | Prize | A Red Bull helmet: a new helmet in the game (navy shell, silver visor, the Red Bull logo drawn as a decal), added by serve-time patches. It appears in the look editor once won |
 | After a win | A congratulations screen over the game's result screen: who you beat, where, both scores, the helmet, and "Wear it now" |
@@ -46,10 +47,11 @@ wins a Red Bull helmet for your rider.
    naming this week's event, Lennart Neubauer and "21 kt, gusts 23–27 kt".
 2. Pressing it opens the intro card: the event (name, dates, place), its
    story, the podium with real names, the Red Bull helmet with a picture, and
-   your best this week. Its button gets Neubauer ready, and the game's own
-   challenge toast appears.
+   your best this week. Its button starts the game's 1v1 heat within a second
+   or two, with the game's countdown and no challenge to accept.
 3. The heat is the game's 1v1 at 21 kt with gusts 23–27 kt, against "Lennart
-   Neubauer". He scores around 45.
+   Neubauer" in the Red Bull helmet and a Severne Freek sail. He scores around
+   45.
 4. "Challenge again" starts a new heat within a few seconds.
 5. A win shows the congratulations screen. The Red Bull helmet then appears in
    the look editor, and "Wear it now" puts it on your rider, where it shows in
@@ -137,11 +139,18 @@ the server use it.
 
 ### Heats per room (`server/api/weekly.mjs`, `server/lagoon/lobby.mjs`)
 
-- **A room queue:** starting sails the heat for the first room; handing that
-  room to the lobby starts sailing the next one.
-- **The lobby** takes rooms with their heats ready. If you ask for a rematch
-  before the next heat is ready, your challenge stays pending, and the room
-  opens as soon as it is.
+- **A room queue** per week, one heat sailing at a time: the menu asking for
+  this week's challenge starts sailing the first room's heat; starting waits
+  for it if it's still sailing (and sails it again if sailing failed); handing
+  a room to the lobby starts sailing the next one.
+- **The lobby** opens a room with him at once when you start, as your
+  challenge he has accepted. The room opens racing, its countdown running to
+  `startsAt`: the game counts down only while a room races or a challenge is
+  pending, so a pending room would show "Starting in" a meaningless number.
+  The mod then fires `pageshow`, which makes the game poll its lobby at once
+  instead of within 10 seconds, and the game starts the heat itself. If you ask
+  for a rematch before the next heat is ready, your challenge stays pending,
+  and the room opens as soon as it is.
 
 ### The helmet and the wind in the game (`mods/champion/helmet.js` and `mods/champion/patches.mjs`, new)
 
@@ -163,7 +172,7 @@ the server use it.
 - **The button** after "1v1 Lobby", following that button's state, as now.
 - **The intro card:** the event, the story, the podium, the prize with a
   picture of the helmet, the heat you'll face, your best this week, and
-  "Challenge Lennart Neubauer".
+  "Race Lennart Neubauer", which starts the heat.
 - **The congratulations screen:** after a challenge starts, the mod checks this
   week's info every few seconds, and shows the screen for a win it hasn't shown
   before. It names him and the event, shows both scores and the helmet. "Wear it
@@ -176,8 +185,9 @@ the server use it.
 
 - `GET /api/local/weekly`: the event (with its podium), the story, the
   opponent and target, the wind, your best, whether you won, your last win and
-  the prize.
-- `POST /api/local/weekly/start` takes no body.
+  the prize. It also starts sailing his first heat.
+- `POST /api/local/weekly/start` takes no body, and answers once his room is
+  open.
 
 ### Sharing
 
@@ -199,9 +209,14 @@ the server use it.
 
 - **Weekly picker:** the events by week, Neubauer as the opponent, the target,
   results with the last win, and the champion file against the tour data.
-- **Endpoints:** this week's info, starting, the next room sailed behind the
-  first, a rematch waiting for its heat, a win recorded with the prize, errors.
-- **Lobby:** a rematch waits for its heat.
+- **Endpoints:** this week's info, his first heat sailed ahead once, starting
+  opening a room at once, starting waiting for a heat still sailing, a failed
+  heat sailed again, the next room sailed behind the first, a rematch waiting
+  for its heat, a win recorded with the prize, errors.
+- **Lobby:** starting opens a racing room at once, or as soon as its heat is
+  ready; a rematch waits for its heat.
+- **His look** (snapshot test): the patched game's look check keeps his helmet
+  and sail.
 - **Patches** (snapshot test): each replacement matches exactly once, and the
   three patched modules (the main page, the look lists, the 3D rider) still
   parse.
