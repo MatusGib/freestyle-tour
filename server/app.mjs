@@ -7,6 +7,7 @@ import { dirname, extname, join, resolve, sep } from "node:path";
 import { createSailer } from "../lib/ai/sailer.mjs";
 import { fileFor, loadGame, openSnapshot } from "../lib/snapshot.mjs";
 import { handleApi } from "./api/index.mjs";
+import { createWeekRooms } from "./api/weekly.mjs";
 import { prepareHtml } from "./html.mjs";
 import { loadPatches, patchSnapshot } from "./patches.mjs";
 import { createLobby } from "./lagoon/lobby.mjs";
@@ -70,12 +71,13 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
     log,
   });
   const relay = createRelay({ lobby, now });
+  const weekRooms = createWeekRooms({ champion, game, now, ai, log });
   const patched = patchSnapshot(snapshot, await loadPatches(modsDir, mods), log);
   const page = prepareHtml(readFileSync(join(snapshot.dir, "index.html"), "utf8"));
   const config = JSON.stringify({ snapshot: snapshot.name, parts: snapshot.manifest.parts, mods });
   const files = new Set(snapshot.manifest.files.map((f) => f.path));
   const modsRoot = resolve(modsDir) + sep;
-  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, log };
+  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, weekRooms, log };
 
   const send = (res, status, type, body) => {
     res.writeHead(status, { "content-type": type, "content-security-policy": CSP, "cache-control": "no-store" });

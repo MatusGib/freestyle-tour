@@ -24,6 +24,10 @@ test("the opponent is the champion under his real name, aiming for the champion'
   assert.deepEqual(opponentFor(CHAMPION), { id: "m:lennart-neubauer", nickname: "Lennart Neubauer", appearance: LOOK, rating: 1946, target: 45.5 });
 });
 
+test("the champion wears the Red Bull helmet and sails a Severne Freek, on a plain board", () => {
+  assert.deepEqual([LOOK.helmet, LOOK.sail, LOOK.board], ["redbull", "severne-freek-cc1", "orange"]);
+});
+
 test("the champion's rooms are those with his gusts, in order, at 21 kt", () => {
   const roomConditions = (id) => {
     const n = Number(id.split("-").at(-1));

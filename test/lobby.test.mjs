@@ -26,54 +26,50 @@ function setup() {
     },
     // Whether the next room's heat is ready.
     ready: (value) => void (isReady = value),
-    offer: (meta = { weekStart: 1, event: 291, division: "men" }) => lobby.offer(OPPONENT, () => (isReady ? { id: `room-${n++}`, heat: HEAT } : null), meta),
+    start: (meta = { weekStart: 1, event: 291, division: "men" }) => lobby.start(OPPONENT, () => (isReady ? { id: `room-${n++}`, heat: HEAT } : null), meta),
     poll: (body = {}) => lobby.act(body, PLAYER),
   };
 }
 
-// Accepts the offered challenge and runs the clock to the start of the heat.
+// Starts a heat and runs the clock to its start.
 function race(s) {
-  const challengeId = s.poll().challenges[0].id;
-  s.poll({ action: "accept", challengeId });
-  s.later(TIMES.racingAfter + TIMES.countdown);
+  s.start();
+  s.later(TIMES.countdown);
 }
 
-test("the lobby answers the old empty lobby until an opponent is offered", () => {
+test("the lobby answers the old empty lobby until a heat is started", () => {
   const s = setup();
   assert.deepEqual(s.poll({ action: "sync" }), { serverTime: s.time, room: null, riders: [], challenges: [], rankings: [] });
   assert.deepEqual(s.logs, [], "quiet actions aren't logged");
 });
 
-test("an offer puts the opponent online with an incoming challenge", () => {
+test("starting puts the opponent online and opens a room at once, racing from a countdown, as your challenge he accepted", () => {
   const s = setup();
-  s.offer();
+  s.start();
   const { riders, challenges, room } = s.poll();
   assert.deepEqual(riders, [
-    { id: "m:balz-muller", nickname: "Balt Möller", appearance: { sail: "orange" }, rating: 1757, activity: "lobby", status: "available", you: false },
-    { id: "you", nickname: "Tester", appearance: { sail: "teal" }, rating: 1500, activity: "lobby", status: "available", you: true },
+    { id: "m:balz-muller", nickname: "Balt Möller", appearance: { sail: "orange" }, rating: 1757, activity: "match", status: "in-heat", you: false },
+    { id: "you", nickname: "Tester", appearance: { sail: "teal" }, rating: 1500, activity: "match", status: "available", you: true },
   ]);
   assert.equal(challenges.length, 1);
-  assert.deepEqual({ ...challenges[0], id: "id" }, { id: "id", status: "pending", incoming: true, expiresAt: s.time + TIMES.offerFor, senderName: "Balt Möller", recipientName: "Tester" });
-  assert.equal(room, null);
+  assert.deepEqual({ ...challenges[0], id: "id" }, { id: "id", status: "accepted", incoming: false, expiresAt: s.time + TIMES.offerFor, senderName: "Balt Möller", recipientName: "Tester" });
+  assert.deepEqual([room.id, room.status, room.startsAt - s.time, room.yourSeat], ["room-0", "racing", TIMES.countdown, 1]);
+  assert.deepEqual(room.seats.map((seat) => [seat.seat, seat.riderId, seat.nickname, seat.score, seat.ratingDelta]), [[1, "you", "Tester", null, null], [2, "m:balz-muller", "Balt Möller", 0, null]]);
 });
 
-test("accepting opens a pending room that races with a countdown to startsAt", () => {
+test("starting before the heat is ready leaves the challenge pending until it is", () => {
   const s = setup();
-  s.offer();
-  const challengeId = s.poll().challenges[0].id;
-  const pending = s.poll({ action: "accept", challengeId }).room;
-  assert.deepEqual([pending.id, pending.status, pending.startsAt - s.time, pending.yourSeat], ["room-0", "pending", TIMES.racingAfter + TIMES.countdown, 1]);
-  assert.deepEqual(pending.seats.map((seat) => [seat.seat, seat.riderId, seat.nickname, seat.score, seat.ratingDelta]), [[1, "you", "Tester", null, null], [2, "m:balz-muller", "Balt Möller", 0, null]]);
-  s.later(TIMES.racingAfter);
-  const { room, challenges, riders } = s.poll();
-  assert.equal(room.status, "racing");
-  assert.equal(challenges[0].status, "accepted");
-  assert.deepEqual(riders.map((r) => r.activity), ["match", "match"]);
+  s.ready(false);
+  s.start();
+  const waiting = s.poll();
+  assert.deepEqual([waiting.challenges[0].status, waiting.challenges[0].incoming, waiting.room], ["pending", false, null]);
+  s.ready(true);
+  const opened = s.poll();
+  assert.deepEqual([opened.challenges[0].status, opened.room.id, opened.room.status], ["accepted", "room-0", "racing"]);
 });
 
 test("during the heat the AI's seat shows only its settled attempts and their total", () => {
   const s = setup();
-  s.offer();
   race(s);
   s.later(30_000);
   const seat = s.poll().room.seats[1];
@@ -85,7 +81,6 @@ test("during the heat the AI's seat shows only its settled attempts and their to
 test("the AI submits at the end of the heat; your finish decides the outcome", () => {
   for (const [yours, outcome] of [[[attempt(9, 31)], "1"], [[attempt(9, 20)], "2"], [[attempt(9, 30)], "draw"]]) {
     const s = setup();
-    s.offer();
     race(s);
     s.later(HEAT_SECONDS * 1000);
     assert.equal(s.poll().room.seats[1].submitted, true);
@@ -98,7 +93,6 @@ test("the AI submits at the end of the heat; your finish decides the outcome", (
 
 test("finishing first waits for the AI, and the result is reported once", () => {
   const s = setup();
-  s.offer();
   race(s);
   s.later(179_000);
   assert.equal(s.poll({ action: "finish", roomId: "room-0", attempts: [attempt(9, 40)] }).room.status, "racing");
@@ -108,57 +102,50 @@ test("finishing first waits for the AI, and the result is reported once", () => 
   assert.equal(s.results.length, 1);
 });
 
-test("leaving before the start, even in the countdown, voids the room; leaving during the heat forfeits it", () => {
-  const before = setup();
-  before.offer();
-  before.poll({ action: "accept", challengeId: before.poll().challenges[0].id });
-  assert.deepEqual(before.poll({ action: "leave", roomId: "room-0" }).room.outcome, "void");
-  assert.equal(before.results.length, 0);
+test("leaving in the countdown voids the room; leaving during the heat forfeits it", () => {
   const countdown = setup();
-  countdown.offer();
-  countdown.poll({ action: "accept", challengeId: countdown.poll().challenges[0].id });
-  countdown.later(TIMES.racingAfter + 1000);
+  countdown.start();
+  countdown.later(1000);
   const cancelled = countdown.poll({ action: "leave", roomId: "room-0" }).room;
   assert.deepEqual([cancelled.outcome, cancelled.seats[1].attempts, cancelled.seats[1].score], ["void", [], 0], "a cancelled room doesn't show the AI's heat");
   assert.equal(countdown.results.length, 0);
   const during = setup();
-  during.offer();
   race(during);
   const room = during.poll({ action: "leave", roomId: "room-0" }).room;
   assert.deepEqual([room.status, room.outcome, room.seats[0].forfeited], ["finished", "2", true]);
   assert.equal(during.results[0].you.forfeited, true);
 });
 
-test("a challenge can be rejected, cancelled or left to expire", () => {
-  for (const [action, status] of [["reject", "rejected"], ["cancel", "cancelled"]]) {
-    const s = setup();
-    s.offer();
-    const challengeId = s.poll().challenges[0].id;
-    assert.equal(s.poll({ action, challengeId }).challenges[0].status, status);
-  }
-  const s = setup();
-  s.offer();
-  s.later(TIMES.offerFor);
-  const { challenges } = s.poll();
-  assert.equal(challenges[0].status, "expired");
-  assert.equal(s.poll({ action: "accept", challengeId: challenges[0].id }).room, null);
+test("a challenge waiting for its heat can be cancelled or left to expire", () => {
+  const cancelled = setup();
+  cancelled.ready(false);
+  cancelled.start();
+  const challengeId = cancelled.poll().challenges[0].id;
+  assert.equal(cancelled.poll({ action: "cancel", challengeId }).challenges[0].status, "cancelled");
+  cancelled.ready(true);
+  assert.equal(cancelled.poll().room, null);
+  const expired = setup();
+  expired.ready(false);
+  expired.start();
+  expired.later(TIMES.offerFor);
+  assert.equal(expired.poll().challenges[0].status, "expired");
+  expired.ready(true);
+  assert.equal(expired.poll().room, null);
 });
 
 test("challenging again after a heat opens a new room at once, and dismissing hides the old one", () => {
   const s = setup();
-  s.offer();
   race(s);
   s.later(HEAT_SECONDS * 1000);
   s.poll({ action: "finish", roomId: "room-0", attempts: [] });
   assert.equal(s.poll({ action: "dismiss", roomId: "room-0" }).room, null);
   const again = s.poll({ action: "challenge", challengeId: "c2", riderId: "m:balz-muller" });
-  assert.deepEqual([again.room.id, again.room.status, again.challenges[0].status, again.challenges[0].incoming], ["room-1", "pending", "accepted", false]);
+  assert.deepEqual([again.room.id, again.room.status, again.challenges[0].status, again.challenges[0].incoming], ["room-1", "racing", "accepted", false]);
   assert.equal(s.poll({ action: "challenge", challengeId: "c3", riderId: "m:balz-muller" }).room.id, "room-1", "not while a room runs");
 });
 
 test("the game's own order, challenge again and then dismiss the old room, keeps the new room", () => {
   const s = setup();
-  s.offer();
   race(s);
   s.later(HEAT_SECONDS * 1000);
   s.poll({ action: "finish", roomId: "room-0", attempts: [] });
@@ -168,7 +155,6 @@ test("the game's own order, challenge again and then dismiss the old room, keeps
 
 test("challenging again before the next room's heat is ready leaves the challenge pending until it is", () => {
   const s = setup();
-  s.offer();
   race(s);
   s.later(HEAT_SECONDS * 1000);
   s.poll({ action: "finish", roomId: "room-0", attempts: [] });
@@ -177,21 +163,22 @@ test("challenging again before the next room's heat is ready leaves the challeng
   assert.deepEqual([waiting.challenges[0].status, waiting.challenges[0].incoming, waiting.room.id], ["pending", false, "room-0"]);
   s.ready(true);
   const opened = s.poll();
-  assert.deepEqual([opened.challenges[0].status, opened.room.id, opened.room.status], ["accepted", "room-1", "pending"]);
+  assert.deepEqual([opened.challenges[0].status, opened.room.id, opened.room.status], ["accepted", "room-1", "racing"]);
 });
 
 test("unknown actions are logged and answered with the snapshot", () => {
   const s = setup();
-  s.offer();
+  s.start();
   assert.equal(s.poll({ action: "teleport" }).challenges.length, 1);
   assert.deepEqual(s.logs, ["lobby: unknown action teleport"]);
 });
 
 test("the racing pose follows the room's clock, 30 a second", () => {
   const s = setup();
-  s.offer();
-  assert.equal(s.lobby.racingPose(), null);
-  race(s);
+  assert.equal(s.lobby.racingPose(), null, "no room, no pose");
+  s.start();
+  assert.deepEqual(s.lobby.racingPose(), { roomId: "room-0", pose: { x: 0 } }, "the first pose through the countdown");
+  s.later(TIMES.countdown);
   assert.deepEqual(s.lobby.racingPose(), { roomId: "room-0", pose: { x: 0 } });
   s.later(40);
   assert.deepEqual(s.lobby.racingPose().pose, { x: 1 });

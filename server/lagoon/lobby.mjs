@@ -1,13 +1,16 @@
 // The local 1v1 lobby: plays the multiplayer side of the game's 1v1 for one AI
-// opponent at a time. offer() puts the opponent online with a challenge for
-// you; the game accepts it (or, after a heat, challenges again), and each room
-// goes through pending, racing (with a countdown to startsAt) and finished, the
-// way the real lobby's rooms do. A plain state machine on an injected clock, so
-// it can be tested without a browser.
+// opponent at a time. start() puts the opponent online and opens a room with
+// him at once, as if you had challenged him and he had accepted (after a heat,
+// the game challenges again), and each room races (from a countdown to
+// startsAt) and then finishes, the way the real lobby's rooms do once both
+// riders are in. A room opens racing rather than pending: the game counts down
+// only while a room races or a challenge is pending, so a pending room would
+// show "Starting in" a meaningless number. A plain state machine on an
+// injected clock, so it can be tested without a browser.
 import { randomUUID } from "node:crypto";
 
 export const HEAT_SECONDS = 180;
-export const TIMES = { racingAfter: 2000, countdown: 5000, offerFor: 10 * 60 * 1000 };
+export const TIMES = { countdown: 5000, offerFor: 10 * 60 * 1000 };
 export const POSES_PER_SECOND = 30;
 const YOU = "you";
 const QUIET = new Set(["sync", "exit", "offline", "presence"]);
@@ -19,16 +22,16 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   let room = null;
 
   const clock = () => (now() - room.startsAt) / 1000;
+  // Your challenge to the opponent, waiting for him to accept.
+  const challengeOf = (id) => ({ id, status: "pending", incoming: false, expiresAt: now() + TIMES.offerFor });
 
   // A room from offer.takeRoom(): { id, heat }.
   function openRoom({ id, heat }) {
-    const racingAt = now() + TIMES.racingAfter;
     room = {
       id,
       heat,
-      status: "pending",
-      racingAt,
-      startsAt: racingAt + TIMES.countdown,
+      status: "racing",
+      startsAt: now() + TIMES.countdown,
       outcome: null,
       dismissed: false,
       you: { attempts: [], score: 0, submitted: false, forfeited: false },
@@ -56,10 +59,8 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   // Moves the challenge and room along with the clock.
   function tick() {
     if (offer?.challenge.status === "pending" && now() >= offer.challenge.expiresAt) offer.challenge.status = "expired";
-    if (offer?.challenge.status === "pending" && !offer.challenge.incoming) startIfReady();
-    if (!room) return;
-    if (room.status === "pending" && now() >= room.racingAt) room.status = "racing";
-    if (room.status !== "racing") return;
+    if (offer?.challenge.status === "pending") startIfReady();
+    if (room?.status !== "racing") return;
     if (!room.ai.submitted && clock() >= HEAT_SECONDS) room.ai.submitted = true;
     if (room.ai.submitted && (room.you.submitted || room.you.forfeited)) finishRoom();
   }
@@ -93,7 +94,7 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   }
 
   // The reply to any lobby poll: the empty lobby the local copy has always
-  // answered, until an opponent is offered. player: { nickname, appearance }.
+  // answered, until a heat is started. player: { nickname, appearance }.
   function snapshot(player) {
     tick();
     if (!offer) return { serverTime: now(), room: null, riders: [], challenges: [], rankings: [] };
@@ -107,12 +108,6 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
   }
 
   const ACTIONS = {
-    accept({ challengeId }) {
-      if (offer?.challenge.id === challengeId && offer.challenge.status === "pending") startIfReady();
-    },
-    reject({ challengeId }) {
-      if (offer?.challenge.id === challengeId && offer.challenge.status === "pending") offer.challenge.status = "rejected";
-    },
     cancel({ challengeId }) {
       if (offer?.challenge.id === challengeId && offer.challenge.status === "pending") offer.challenge.status = "cancelled";
     },
@@ -120,7 +115,7 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
     // its heat is ready, at once if it already is.
     challenge({ challengeId, riderId }) {
       if (!offer || riderId !== offer.opponent.id || (room && room.status !== "finished")) return;
-      offer.challenge = { id: challengeId, status: "pending", incoming: false, expiresAt: now() + TIMES.offerFor };
+      offer.challenge = challengeOf(challengeId);
       startIfReady();
     },
     progress({ roomId, attempts }) {
@@ -156,13 +151,17 @@ export function createLobby({ now, score, onResult = () => {}, log = () => {} })
       else if (body.action && !QUIET.has(body.action)) log(`lobby: unknown action ${body.action}`);
       return snapshot(player);
     },
-    // opponent: { id, nickname, appearance, rating }; takeRoom(): the next room,
-    // { id, heat: { score, attempts, poses, settledAt } }, or null while it
-    // isn't ready (every room needs a new id: the game ignores room ids it has
-    // dismissed); meta: what onResult gets back with the room.
-    offer(opponent, takeRoom, meta = null) {
-      offer = { challenge: { id: randomUUID(), status: "pending", incoming: true, expiresAt: now() + TIMES.offerFor }, opponent, takeRoom, meta };
+    // Opens a room with the opponent now, or, while takeRoom has none ready,
+    // as soon as it has. The game starts the heat when its next lobby poll
+    // sees the room. opponent: { id, nickname, appearance, rating };
+    // takeRoom(): the next room, { id, heat: { score, attempts, poses,
+    // settledAt } }, or null while it isn't ready (every room needs a new id:
+    // the game ignores room ids it has dismissed); meta: what onResult gets
+    // back with the room.
+    start(opponent, takeRoom, meta = null) {
+      offer = { challenge: challengeOf(randomUUID()), opponent, takeRoom, meta };
       room = null;
+      startIfReady();
     },
     // The AI's pose at the room's clock while it races, or null.
     racingPose() {

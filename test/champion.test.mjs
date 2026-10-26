@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TITLE, bestText, doneText, failedText, heatText, menuLine, newWin, prizeDue, readyText, winText } from "../mods/champion/champion.js";
+import { TITLE, bestText, failedText, heatText, menuLine, newWin, prizeDue, raceText, readyText, winText } from "../mods/champion/champion.js";
 import { WIND, roomWind } from "../mods/champion/wind.js";
 
 const info = {
@@ -26,8 +26,8 @@ test("the champion's rooms get 21 kt with their own gusts; other rooms keep the 
 });
 
 test("the button's and card's other lines", () => {
+  assert.equal(raceText("Lennart Neubauer"), "Race Lennart Neubauer");
   assert.equal(readyText("Lennart Neubauer"), "Getting Lennart Neubauer ready…");
-  assert.equal(doneText("Lennart Neubauer"), "Lennart Neubauer has challenged you: accept to start the heat");
   assert.equal(failedText("Lennart Neubauer"), "Couldn't get Lennart Neubauer ready. Press to try again.");
   assert.equal(heatText(info), "Your heat: Lennart Neubauer at his best, scoring around 45 points, in 21 kt, gusts 23–27 kt.");
   assert.equal(bestText(info), "No heat against him this week yet.");

@@ -9,9 +9,11 @@ import { WIND, roomWind } from "../mods/champion/wind.js";
 export { WIND };
 
 // The game's default look, so the lobby and result screens have a full
-// appearance to draw, but with an orange sail and board (the default is teal)
-// so the opponent stands apart from a default-look player.
-export const LOOK = { country: "", skinColor: "warm", hair: "short", glasses: "sunglasses", helmet: "none", facialHair: "none", hairColor: "brown", facialHairColor: "brown", bodyType: "male", outfit: "wetsuit", harness: "black", sail: "orange", board: "orange" };
+// appearance to draw, but in his own gear: the Red Bull helmet (the prize,
+// mods/champion/helmet.js) and a Severne Freek, the game's hidden sail (he
+// sails Severne). He rides Starboard, which the game doesn't have, so the
+// board is a plain orange one (the default is teal).
+export const LOOK = { country: "", skinColor: "warm", hair: "short", glasses: "sunglasses", helmet: "redbull", facialHair: "none", hairColor: "brown", facialHairColor: "brown", bodyType: "male", outfit: "wetsuit", harness: "black", sail: "severne-freek-cc1", board: "orange" };
 
 // The week's event, from the champion's events in the order listed.
 export function weekOf(champion, weekStart) {

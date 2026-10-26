@@ -1,10 +1,10 @@
 // The Champion's challenge: a button in the game's main menu that offers, each
 // week, one of Lennart Neubauer's recent wins. Pressing it opens a card with
-// the event's story, its podium and the prize; from there the local server
-// gets him ready (his heat sailed by the AI riders, at his best) and challenges
-// you in the game's own 1v1 lobby. Beating him wins the Red Bull helmet, with a
-// congratulations screen.
-import { SEEN_KEY, TITLE, bestText, doneText, failedText, heatText, menuLine, newWin, prizeDue, readyText, winText } from "./champion.js";
+// the event's story, its podium and the prize; its "Race" button starts the
+// game's own 1v1 heat against him at once (the local server sails his heat
+// with the AI riders, at his best, ahead of time). Beating him wins the Red
+// Bull helmet, with a congratulations screen.
+import { SEEN_KEY, TITLE, bestText, failedText, heatText, menuLine, newWin, prizeDue, raceText, readyText, winText } from "./champion.js";
 import { HELMET, WON_KEY, drawHelmetPicture } from "./helmet.js";
 
 const PLAYER_KEY = "fristajlo-player-v3"; // the game's own record of your rider
@@ -131,6 +131,9 @@ export default {
       render();
     }
 
+    // Opens his room in the local lobby, then has the game poll its lobby now
+    // (it polls on pageshow) rather than within 10 seconds: the game starts the
+    // heat itself, with its countdown.
     async function start() {
       const { name } = info.opponent;
       busy = true;
@@ -138,7 +141,8 @@ export default {
       try {
         await postJson("/api/local/weekly/start");
         watching = true;
-        setStatus(doneText(name));
+        setStatus("");
+        window.dispatchEvent(new Event("pageshow"));
         return true;
       } catch (error) {
         log("could not get the champion ready", error);
@@ -150,7 +154,7 @@ export default {
     }
 
     function showCard() {
-      const go = el("button", { type: "button", textContent: `Challenge ${info.opponent.name}`, style: PRIMARY });
+      const go = el("button", { type: "button", textContent: raceText(info.opponent.name), style: PRIMARY });
       const close = el("button", { type: "button", textContent: "Close", style: SECONDARY });
       statusLine = el("p", { style: `margin:10px 0 0;${MUTED}`, textContent: status });
       const box = dialog([
