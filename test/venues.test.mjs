@@ -11,7 +11,7 @@ import { loadTour } from "../server/tour.mjs";
 import { loadVenueCatalog, publicVenue, venueForLocation } from "../server/venues.mjs";
 import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
 import { resolveVenueCollision } from "../mods/venues/scenery.js";
-import { rememberPlannedHeat, takePlannedHeat, venueConditions } from "../mods/venues/venue.js";
+import { rememberPlannedHeat, takePlannedHeat, takePlannedHeatFor, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS } from "../mods/venues/water.js";
 import { setKnots, setSea, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
 import { zoneKnots, zonesFor } from "../mods/venues/zones.js";
@@ -102,6 +102,14 @@ test("a planned challenge heat is taken once", () => {
   rememberPlannedHeat({ conditions, venue: { id: SOTAVENTO } });
   assert.deepEqual(takePlannedHeat(), { conditions, venue: { id: SOTAVENTO } });
   assert.equal(takePlannedHeat(), null);
+});
+
+test("a planned challenge heat waits through practice, such as the game's tutorial, for the next solo heat", () => {
+  const conditions = { seed: 3, knots: 23, gustKnots: 6 };
+  rememberPlannedHeat({ conditions, venue: { id: SYLT } });
+  assert.equal(takePlannedHeatFor(false), null, "a practice start leaves it waiting");
+  assert.deepEqual(takePlannedHeatFor(true), { conditions, venue: { id: SYLT } }, "the solo heat takes it");
+  assert.equal(takePlannedHeatFor(true), null, "once");
 });
 
 // The fixture tour, with its 2025 Fuerteventura event moved to Sotavento.

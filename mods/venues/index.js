@@ -2,7 +2,7 @@ import {
   peekPlannedHeat,
   saveSelectedVenue,
   selectedVenueId,
-  takePlannedHeat,
+  takePlannedHeatFor,
   venueConditions,
   venueRoomId,
   venueZones,
@@ -158,7 +158,8 @@ export default {
         const chosen = decided;
         decided = null;
 
-        const planned = takePlannedHeat();
+        // heat: true for a solo heat, false for practice and the tutorial.
+        const planned = takePlannedHeatFor(heat);
         if (planned) {
           setVenueStatus(planned.venue);
           showVenue(found, planned.venue);

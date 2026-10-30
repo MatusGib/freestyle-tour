@@ -81,6 +81,10 @@ export function takePlannedHeat() {
   return planned;
 }
 
+// The planned challenge heat, taken only by the solo heat it was planned for;
+// a practice start (the game's tutorial starts one) leaves it waiting.
+export const takePlannedHeatFor = (soloHeat) => (soloHeat ? takePlannedHeat() : null);
+
 // The wind as the game writes it.
 export const windText = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt, gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt, steady wind`);
 
