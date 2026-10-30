@@ -24,8 +24,8 @@ matching conditions in tour challenges.
 
 ## Deferred work
 
-- [ ] Refresh and reconcile 2026 tour records when local network access is
-  available.
+- [ ] Refresh and reconcile 2026 tour records once PWA publishes 2026
+  freestyle results (none on 2026-10-30).
 - [ ] Inventory and map every 2006–2026 freestyle event location.
 - [ ] Add distinct supported scene profiles and connect venues to tournament
   events.

@@ -46,9 +46,11 @@ centre, and the ridge, about 400 m out, crosses the seaward part of the
 heat.
 
 The committed tour data currently has 55 events across 2006–2025 and 13 raw
-location strings. It has no `2026.json` season file. A refresh of 2026 failed
-with a local network error, so 2026 locations are not included in event-to-
-venue matching yet. The manually maintained Champion's challenge events stay
+location strings. It has no `2026.json` season file: a refresh on 2026-10-30
+reached the PWA site, but its 2026 Fuerteventura and Sylt events (and a
+Shanghai foil freestyle invitational) have no results published yet, so 2026
+locations are not included in event-to-venue matching yet. The manually
+maintained Champion's challenge events stay
 available through their existing feature.
 
 Scene layout references:
