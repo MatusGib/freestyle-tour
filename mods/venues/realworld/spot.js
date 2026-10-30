@@ -65,6 +65,7 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
     manifest, features, images: { ground, horizonColour, depth, horizonDepth, groundType },
     grids: { terrain, horizon },
     isLand,
+    isMangrove: (x, z) => (landAt(x, z) & 2) !== 0,
     heightAt,
     depthAt: (x, z) => (isLand(x, z) ? 0 : Math.max(rawDepth(x, z), inDetail(x, z) ? LAGOON_FLOOR : 0)),
     groundAt: (x, z) => {

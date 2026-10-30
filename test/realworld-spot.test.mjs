@@ -45,6 +45,7 @@ test("on a 5 m grid the waterline still falls where the map's shoreline is, not 
 
 test("mangroves standing in the water count as land, so they stop a board too", () => {
   assert.ok(spot.isLand(465, -297), "a mangrove beyond the mapped shoreline");
+  assert.ok(spot.isMangrove(465, -297) && !spot.isMangrove(240, -330) && !spot.isMangrove(0, 0));
   assert.equal(spot.depthAt(465, -297), 0);
 });
 
