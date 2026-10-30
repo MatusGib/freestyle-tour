@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "sorobon-bonaire",
+  "name": "Sorobon, Bonaire",
+  "centre": {
+    "lat": 12.096,
+    "lon": -68.2342
+  },
+  "windFrom": 90,
+  "detail": {
+    "half": 2500,
+    "step": 5,
+    "n": 1001,
+    "image": 512
+  },
+  "horizon": {
+    "half": 12500,
+    "step": 50,
+    "n": 501,
+    "image": 1024
+  },
+  "depth": {
+    "max": 20,
+    "slope": 129.94132871811252,
+    "intercept": -126.199788926178
+  },
+  "ground": {
+    "water": 0,
+    "drySand": 1,
+    "wetSand": 2,
+    "coralRubble": 3,
+    "scrubSoil": 4,
+    "rock": 5,
+    "mangrove": 6,
+    "builtUp": 7
+  }
+}
