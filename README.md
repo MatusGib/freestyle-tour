@@ -42,6 +42,10 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
 - `champion`: the Champion's challenge. Race Lennart Neubauer at one of his
   PWA wins in the game's own 1v1 heat, for a Red Bull helmet. See
   [the Champion's challenge](#the-champions-challenge) below.
+- `dev`: the developer panel. Try event winds, venues' usual winds and wind
+  zones, the champion's wind and target, and an offset on every challenge
+  rider's AI target, as a draft used from the next heat; then discard it or
+  write it into the data files. See [the developer panel](#the-developer-panel).
 
 `node tools/demo-heat.mjs` stores a short demo heat with real moves for the
 current week, so replays and ghosts can be shown without playing first.
@@ -93,6 +97,21 @@ server stores each solo heat's conditions so replays and ghosts match. The plan 
 The mods share one look, the game's own (`mods/lib/ui.js`): their chips sit
 in a tray under the wordmark (one Mods chip on a phone), and their panels open
 as popovers under it.
+
+## The developer panel
+
+The `dev` mod's Dev chip opens a panel with four tabs: Events (each event's
+wind, gusts, confidence and note), Venues (usual wind and wind zones),
+Champion (his wind and target) and AI (points added to every challenge
+rider's target). A change is checked by the same rules as the files, shown
+next to its field when refused, and kept as a draft in `data/dev-draft.json`
+(git-ignored), which the local server lays over `tour/event-winds.json`,
+`tour/venues.json`, `server/champion.json` and `server/tuning.json`. It
+applies from the next heat; the champion's next room is sailed again.
+"Discard" drops the draft; "Write to repo" writes it into those files, in the
+layout they are kept in, so `git diff` shows only the changed values. It
+doesn't commit. Endpoints: `GET /api/local/dev`, `POST /api/local/dev/draft`,
+`POST /api/local/dev/discard` and `POST /api/local/dev/write`.
 
 ## The Champion's challenge
 
