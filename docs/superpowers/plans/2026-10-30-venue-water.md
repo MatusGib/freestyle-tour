@@ -107,7 +107,9 @@ they share the local leaderboard as before.
 ## Phase 6: every venue's look
 
 Give each mapped venue its look once the location mapping (roadmap step 1) is
-done. Starting points only, each to be checked against photos and PWA reports:
+done. The scenery outline, `2026-10-30-venue-scenery.md`, has the order and
+the pieces. Starting points only, each to be checked against photos and PWA
+reports:
 
 | Venue | Water | Wind setup |
 |---|---|---|
