@@ -11,10 +11,14 @@ export const ZONE_VERSION = 1;
 
 // windZones (from tour/venues.json): { gain, from, over, lee }. gain knots
 // more from `from` metres out from the beach, ramping in over `over` metres;
-// lee knots less within 90 m of the beach.
-export function zonesFor(windZones, coast) {
+// lee knots less within 90 m of the beach. knots: the heat's wind; the lee is
+// cut so it never takes the local wind under the game's lightest, 12 kt.
+// There is no cap on top: 28 kt plus a 4 kt zone is under the 34 kt the
+// game's own strongest gusts reach.
+export function zonesFor(windZones, coast, knots = Infinity) {
   if (!windZones || !coast) return null;
-  const { gain, from, over, lee } = windZones;
+  const { gain, from, over } = windZones;
+  const lee = Math.min(windZones.lee, Math.max(0, knots - 12));
   return { inX: coast.inX, inZ: coast.inZ, shoreline: coast.shoreline, curve: coast.curve, gain, from, over, lee };
 }
 

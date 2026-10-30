@@ -14,7 +14,7 @@ import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS } from "../mods/venues/water.js";
 import { setKnots, setSea, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
-import { ZONE_VERSION, zoneKnots } from "../mods/venues/zones.js";
+import { ZONE_VERSION, zoneKnots, zonesFor } from "../mods/venues/zones.js";
 import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
@@ -77,6 +77,24 @@ test("only venues with a coast are marked as having scenery", () => {
 test("a venue heat keeps the room's seed and takes the venue's wind", () => {
   const room = (id) => ({ seed: id.length, knots: 15, gustKnots: 0 });
   assert.deepEqual(venueConditions(room, { gameConditions: { knots: 19, gustKnots: 6 } }, "event:375"), { seed: 9, knots: 19, gustKnots: 6 });
+});
+
+const ZONED = { id: SOTAVENTO, gameConditions: { knots: 19, gustKnots: 6 }, windZones: { gain: 4, from: 300, over: 120, lee: 3 } };
+
+test("the calm strip by the beach never takes the wind under 12 kt", () => {
+  const coast = coastFor(SOTAVENTO);
+  assert.equal(zonesFor(ZONED.windZones, coast, 19).lee, 3);
+  assert.equal(zonesFor(ZONED.windZones, coast, 13).lee, 1);
+  assert.equal(zonesFor(ZONED.windZones, coast, 12).lee, 0);
+  assert.equal(zonesFor(ZONED.windZones, coast, 28).gain, 4, "no cap on top: 32 kt is under the game's own 34 kt gusts");
+  assert.equal(zonesFor(ZONED.windZones, coast).lee, 3, "without a wind the lee stays");
+});
+
+test("an event's wind replaces the venue's usual one, with the venue's zones", () => {
+  const room = () => ({ seed: 5, knots: 16, gustKnots: 0 });
+  const pick = ({ seed, knots, gustKnots, zones }) => ({ seed, knots, gustKnots, lee: zones.lee });
+  assert.deepEqual(pick(venueConditions(room, ZONED, "r")), { seed: 5, knots: 19, gustKnots: 6, lee: 3 });
+  assert.deepEqual(pick(venueConditions(room, ZONED, "r", { knots: 12, gustKnots: 0 })), { seed: 5, knots: 12, gustKnots: 0, lee: 0 });
 });
 
 test("a planned challenge heat is taken once", () => {

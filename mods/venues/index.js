@@ -175,7 +175,7 @@ export default {
       // The practice wind the game's own panel sets keeps the venue's zones.
       const setPractice = found.setPracticeConditions;
       found.setPracticeConditions = function (conditions, beast) {
-        const zones = conditions && !conditions.zones && venueZones(selected());
+        const zones = conditions && !conditions.zones && venueZones(selected(), conditions.knots);
         return setPractice.call(this, zones ? { ...conditions, zones } : conditions, beast);
       };
     }
