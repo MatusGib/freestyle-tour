@@ -1,5 +1,6 @@
 // Routes /api/* requests to the fake APIs, plus the /api/local/* endpoints our
 // mods use. Anything else gets a 404 marked `unknown`, which the server logs.
+import { devState, discardDraft, setDraft, writeDraft } from "./dev.mjs";
 import { feedback } from "./feedback.mjs";
 import { startHeat } from "./heats.mjs";
 import { lagoons } from "./lagoons.mjs";
@@ -15,7 +16,7 @@ const EVENT_PATH = "/api/local/tour/events/";
 
 // request: { method, path, query: URLSearchParams, body, host }; ctx: { store,
 // game, now(), tour, venues, eventWinds, mods, ai, aiHeats, snapshot, lobby, relay,
-// weekly, champion, weekRooms, log }. POST
+// weekly, champion, weekRooms, data, log }. POST
 // /api/local/ai-heats and POST /api/local/weekly/start answer with a promise,
 // the rest straight away.
 export function handleApi({ method, path, query, body, host }, ctx) {
@@ -35,5 +36,12 @@ export function handleApi({ method, path, query, body, host }, ctx) {
   if (route === "POST /api/local/ai-heats") return aiHeat(body, ctx);
   if (route === "GET /api/local/weekly") return weeklyInfo(ctx);
   if (route === "POST /api/local/weekly/start") return startWeekly(ctx);
+  if (path === "/api/local/dev" || path.startsWith("/api/local/dev/")) {
+    if (!ctx.mods?.includes("dev")) return fail(404, "The developer panel's mod is off.");
+    if (route === "GET /api/local/dev") return devState(ctx);
+    if (route === "POST /api/local/dev/draft") return setDraft(body, ctx);
+    if (route === "POST /api/local/dev/discard") return discardDraft(ctx);
+    if (route === "POST /api/local/dev/write") return writeDraft(ctx);
+  }
   return { ...fail(404, "Not available in the local copy."), unknown: true };
 }
