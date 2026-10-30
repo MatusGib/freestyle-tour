@@ -24,6 +24,11 @@ export function loadVenueCatalog(file) {
     if (!Number.isInteger(knots) || knots < 15 || knots > 19 || !Number.isInteger(gustKnots) || (gustKnots !== 0 && gustKnots < 2) || gustKnots > 6) {
       throw new Error(`${file} has unsupported conditions for ${venue.id}`);
     }
+    const zones = venue.windZones;
+    const between = (value, low, high) => typeof value === "number" && value >= low && value <= high;
+    if (zones && !(between(zones.gain, 0, 8) && between(zones.from, 0, 1000) && between(zones.over, 1, 1000) && between(zones.lee, 0, 6))) {
+      throw new Error(`${file} has unsupported wind zones for ${venue.id}`);
+    }
     if (byId.has(venue.id)) throw new Error(`${file} repeats venue id ${venue.id}`);
     byId.set(venue.id, venue);
     for (const location of venue.locations) {
@@ -42,6 +47,6 @@ export function venueForLocation(catalog, location) {
 
 export function publicVenue(venue) {
   if (!venue) return null;
-  const { id, name, place, gameConditions, character, confidence, profileNote, courseNote, landmarks, waterZones, sources } = venue;
-  return { id, name, place, gameConditions, character, confidence, profileNote, courseNote, landmarks, waterZones, sources };
+  const { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources } = venue;
+  return { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources };
 }

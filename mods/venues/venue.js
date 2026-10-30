@@ -1,3 +1,6 @@
+import { coastFor } from "./coast.js";
+import { zonesFor } from "./zones.js";
+
 export const SELECTED_VENUE_KEY = "freestyle-tour.venue.selected.v1";
 export const PENDING_HEAT_KEY = "freestyle-tour.venue.pending.v1";
 
@@ -60,9 +63,9 @@ export function clearPlannedHeat() {
   }
 }
 
-export function takePlannedHeat() {
+// The planned challenge heat, if any, left in place for takePlannedHeat.
+export function peekPlannedHeat() {
   const saved = readPending();
-  clearPlannedHeat();
   if (!saved) return null;
   try {
     const value = JSON.parse(saved);
@@ -72,11 +75,22 @@ export function takePlannedHeat() {
   }
 }
 
+export function takePlannedHeat() {
+  const planned = peekPlannedHeat();
+  clearPlannedHeat();
+  return planned;
+}
+
 // The wind as the game writes it.
 export const windText = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt, gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt, steady wind`);
 
+// A venue's wind zones, placed on its coast, or null.
+export const venueZones = (venue) => zonesFor(venue?.windZones, coastFor(venue?.id));
+
+// A heat at a venue: the room's seed, the venue's wind, and its wind zones.
 export function venueConditions(roomConditions, venue, roomId) {
-  return { ...roomConditions(roomId), ...venue.gameConditions };
+  const zones = venueZones(venue);
+  return { ...roomConditions(roomId), ...venue.gameConditions, ...(zones ? { zones } : {}) };
 }
 
 export function venueRoomId(venueId, id = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)) {

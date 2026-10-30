@@ -75,25 +75,34 @@ foam.
 Built so far: clouds in the sky dome (fair-weather at Sotavento, broken at
 Sylt) and per-venue haze, so the Jandía ridges and Westerland show.
 
-## Phase 5: where the wind is stronger (decision needed)
+## Phase 5: where the wind is stronger (built: real zones)
 
 Real venues have wind zones: at Sotavento the trades blow harder further out
 and gustier near the beach; at Pozo an acceleration zone; inland lakes like
 Podersdorf are gusty and shifty. Two ways:
 
-- **Visual only (recommended to start).** Keep drawing the game's own gust
-  field, which already is the wind the rider feels. Phase 1 makes it easier to
-  read.
-- **Preview (built, off by default).** Each venue has a zone profile in
-  `water.js` (Sotavento: 5 kt more from 220 m out, 3 kt less near the beach;
-  Sylt: 2 kt more over the sand ridge). With localStorage
-  `freestyle-tour.venue.zones-preview` set to `1`, the water draws it: darker,
-  rougher water with more whitecaps where it blows harder, calmer water in the
-  lee. It is looks only; the rider doesn't feel it.
-- **Real wind zones.** Make the wind stronger or gustier by place at each
-  venue. This changes the physics: the server's AI must sail the same zones,
-  weekly scores stop being comparable across venues, and the patch must run in
-  the browser and in the Node sailer alike.
+The user chose real zones (2026-10-30), and they are built:
+
+- Each venue's `windZones` in `tour/venues.json` (catalog version 2), with a
+  note: Sotavento 4 kt more over the outer half of the heat (from 300 m out)
+  and 3 kt less within 90 m of the beach; Sylt 2 kt more out over the sand
+  ridge (from 380 m out).
+- `mods/venues/zones.js` places them on the coast and carries them in the
+  heat's conditions (`conditions.zones`). A patch adds `zoneKnots` to the
+  game's own wind function, so the rider feels them and the wind gauge shows
+  them. The water draws the same zones: darker and rougher, with more
+  whitecaps, where it blows harder.
+- The AI worker loads the engine through a Node module hook that applies the
+  same patches the browser gets (`patchImports` in `server/patches.mjs`), so
+  the AI sails the same wind; cached AI heats are keyed by `ZONE_VERSION`.
+- The venues mod sends the heat's conditions with the game's request to
+  start a solo heat, and the local server stores them, so replays and ghosts
+  rebuild the wind the heat was sailed in. (Before, every stored heat had this
+  week's wind, so replays of venue heats were wrong.)
+- Practice keeps the zones when the wind is changed in the game's own panel.
+
+Weekly scores sailed at a venue are not comparable with the weekly wind's;
+they share the local leaderboard as before.
 
 ## Phase 6: every venue's look
 
@@ -124,4 +133,4 @@ values.
 3. Phase 2 breaking waves.
 4. Phase 4.
 5. Phase 6 as each venue is mapped.
-6. Phase 5 only after the user chooses.
+6. Tune the zones' strength and position with the user after playing them.

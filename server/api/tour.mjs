@@ -4,6 +4,7 @@
 import { averageScore, heatTarget, seedOf } from "../../lib/ai/score.mjs";
 import { publicVenue, venueForLocation } from "../venues.mjs";
 import { venueConditions } from "../../mods/venues/venue.js";
+import { ZONE_VERSION } from "../../mods/venues/zones.js";
 import { fail, ok } from "./reply.mjs";
 
 const NO_TOUR = "No tour data on this computer: run npm run tour-data.";
@@ -54,7 +55,7 @@ export async function aiHeat(body, { tour, venues, mods, game, now, ai, aiHeats,
   if (!division) return fail(404, `${body.rider} didn't sail at ${event.name}.`);
   const weekStart = game.weekStart(now());
   const venue = mods?.includes("venues") ? venueForLocation(venues, event.location) : null;
-  const venueKey = venue ? `|${venues.version}|${venue.id}` : "";
+  const venueKey = venue ? `|${venues.version}|${venue.id}|z${ZONE_VERSION}` : "";
   const key = `${snapshot}|${weekStart}|${body.rider}|${event.id}${venueKey}`;
   const cached = aiHeats.data.heats[key];
   if (cached) return ok(cached);

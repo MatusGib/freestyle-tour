@@ -51,7 +51,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
   game ??= await loadGame(snapshot, ["engine", "week", "wind"]);
   tour ??= loadTour(join(root, "tour"));
   const venues = mods?.includes("venues") ? loadVenueCatalog(join(root, "tour", "venues.json")) : null;
-  ai ??= createSailer({ root, snapshot: snapshot.name });
+  ai ??= createSailer({ root, snapshot: snapshot.name, mods, modsDir });
   champion ??= JSON.parse(readFileSync(new URL("./champion.json", import.meta.url), "utf8"));
   const store = createStore(dataFile);
   const aiHeats = createStore(join(dirname(dataFile), "ai-heats.json"), { heats: {} });

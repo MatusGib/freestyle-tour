@@ -14,11 +14,13 @@ import { ROOT, tempDir } from "./helpers.mjs";
 const snapshot = tryOpenSnapshot(ROOT);
 const skip = !snapshot && "no snapshot yet: run npm run snapshot";
 
-test("the venues patches give the water and sky uniforms, add the venue's waves, hand over CanvasTexture, and all three modules still parse", { skip }, async (t) => {
+test("the venues patches give the water and sky uniforms, add the venue's waves and wind zones, hand over CanvasTexture, and all four modules still parse", { skip }, async (t) => {
   const errors = [];
   const patched = patchSnapshot(snapshot, await loadPatches(join(ROOT, "mods"), ["venues"]), (line) => errors.push(line));
   assert.deepEqual(errors, []);
-  assert.equal(patched.size, 3);
+  assert.equal(patched.size, 4);
+  const wind = patched.get(snapshot.manifest.parts.wind).text;
+  assert.ok(wind.includes("+E(e,t,n,r)+__venueZoneKnots(e.zones,t,n)}"), "the game's wind adds the heat's wind zones");
   const water = [...patched.values()].find((p) => p.text.includes("uniform vec3 uDeep;")).text;
   const heights = [...patched.values()].find((p) => p.text.includes("__venueWater")).text;
   const scene = patched.get(snapshot.manifest.parts.scene).text;
@@ -31,7 +33,7 @@ test("the venues patches give the water and sky uniforms, add the venue's waves,
   assert.ok(heights.includes("return __venueWater(e,t,n,O.reduce(") && heights.includes("world.y=venueWater(world.xz,world.y);"), "the rider's height and the drawn mesh add the same waves");
   assert.ok(water.includes("uSkyLow:{value:") && water.includes('e.name="sky"'), "the sky can be found and tinted");
   const dir = tempDir(t);
-  for (const [name, text] of [["water.mjs", water], ["scene.mjs", scene], ["heights.mjs", heights]]) {
+  for (const [name, text] of [["water.mjs", water], ["scene.mjs", scene], ["heights.mjs", heights], ["wind.mjs", wind]]) {
     writeFileSync(join(dir, name), text);
     const check = spawnSync(process.execPath, ["--check", join(dir, name)], { encoding: "utf8" });
     assert.equal(check.status, 0, `${name}: ${check.stderr}`);

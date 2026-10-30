@@ -10,13 +10,17 @@
 // - The sky dome's two colours become uniforms, it can draw clouds, and the
 //   dome gets a name to find. The water's haze rate becomes a uniform too.
 // - The Game class carries the CanvasTexture class, for the beach's sand.
-// The minified names (f, ve, r, n, j, k, h, O) are the 2026-10-24 snapshot's;
+// - The game's wind function adds the venue's wind zones (zones.js) carried in
+//   the heat's conditions, and the water shows them. The local server applies
+//   these patches to the AI's engine too, so it feels the same wind.
+// The minified names (f, ve, r, n, j, k, h, O, E) are the 2026-10-24 snapshot's;
 // a game update that changes them makes these patches fail loudly.
 import { SHORE_GLSL, WAVE_GLSL } from "./waves.js";
 
 const WATER = "uniform float uGustDrift;";
 const HEIGHTS = "function j(e,t,n){return O.reduce(";
 const FROM = 'from"/__mods/venues/waves.js";';
+const ZONES = 'from"/__mods/venues/zones.js";';
 const SKY = "varying vec3 vP;void main(){float h=normalize(vP).y;vec3 col=mix(vec3(.77,.87,.78),vec3(.91,.94,.81),smoothstep(0.,.65,h));gl_FragColor=vec4(col,1.);}";
 
 // The sky's gradient as uniforms, and cloud drawn with fractal noise on a
@@ -71,10 +75,10 @@ const SHALLOWS = `
  float shelter=coast*uBar.w*(1.-smoothstep(uBar.x-40.,uBar.x+5.,off));
  col=mix(col,uShallow*(.92+.16*n),clamp(max(shallow*.9,bar*.65),0.,1.));`;
 
-// The local wind, gusts included, drives the chop and the whitecaps. uZone,
-// a looks-only preview of a venue's wind zones (water.js), adds uZone.x knots
-// from uZone.y m out over uZone.z m, and takes uZone.w knots off near the
-// beach; stronger zones darken like a gust.
+// The local wind, gusts included, drives the chop and the whitecaps. uZone is
+// the heat's wind zones (zones.js zoneKnots, which the rider feels): uZone.x
+// knots more from uZone.y m out over uZone.z m, and uZone.w knots less near
+// the beach; stronger zones darken like a gust.
 const LOCAL_WIND = `
  float zoneKnots=coast*(uZone.x*smoothstep(uZone.y,uZone.y+uZone.z+1.,off)-uZone.w*(1.-smoothstep(0.,90.,off)));
  gust=clamp(gust+max(0.,zoneKnots)/9.*mottle,0.,1.);
@@ -135,8 +139,8 @@ export const patches = [
   { marker: WATER, find: "col=mix(col,vec3(.73,.85,.76),fog);", replace: "col=mix(col,uHaze,fog);", expect: 1 },
   { marker: WATER, find: "float fog=1.-exp(-dist*.0026);", replace: "float fog=1.-exp(-dist*uFogRate);", expect: 1 },
   { marker: WATER, find: "uGustPhase:{value:Array.from({length:e},()=>0)}}", replace: `uGustPhase:{value:Array.from({length:e},()=>0)},${DEFAULTS}}`, expect: 1 },
-  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots),r.uGustKnots.value=n.gustKnots", expect: 1 },
-  { marker: WATER, find: "function Z(e,n){", replace: `import{setKnots as __venueSetKnots}${FROM}function Z(e,n){`, expect: 1 },
+  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots),r.uZone.value=__venueZoneUniform(n.zones),r.uGustKnots.value=n.gustKnots", expect: 1 },
+  { marker: WATER, find: "function Z(e,n){", replace: `import{setKnots as __venueSetKnots}${FROM}import{zoneUniform as __venueZoneUniform}${ZONES}function Z(e,n){`, expect: 1 },
   { marker: WATER, find: "new h(O,O,180,180)", replace: "new h(O,O,360,360)", expect: 1 },
   {
     marker: HEIGHTS,
@@ -166,4 +170,10 @@ export const patches = [
   },
   { marker: SKY, find: "e.renderOrder=-1,e.frustumCulled=!1", replace: 'e.name="sky",e.renderOrder=-1,e.frustumCulled=!1', expect: 1 },
   { part: "scene", find: "export{ve as Game}", replace: "ve.three={CanvasTexture:f};export{ve as Game}", expect: 1 },
+  {
+    part: "wind",
+    find: "function O(e,t,n,r){return e.knots+Math.sin(r*.17)*1.7+Math.sin(r*.63)*.6+E(e,t,n,r)}",
+    replace: `import{zoneKnots as __venueZoneKnots}${ZONES}function O(e,t,n,r){return e.knots+Math.sin(r*.17)*1.7+Math.sin(r*.63)*.6+E(e,t,n,r)+__venueZoneKnots(e.zones,t,n)}`,
+    expect: 1,
+  },
 ];

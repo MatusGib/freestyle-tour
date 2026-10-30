@@ -71,7 +71,14 @@ sand ridge and shorebreak at Sylt. Venues add wind waves and swell (visual
 only: the physics never read the waves) that die on the beach without
 flooding it, clouds and their own haze; the beaches are built with three.js
 r185's geometry and simplex noise, vendored in `mods/venues/lib`. Without a
-venue the water looks as before. The plan for more is
+venue the water looks as before.
+
+Venues also have wind zones the rider really feels: at Sotavento about 4 kt
+more over the outer half of the heat and 3 kt less near the beach, at Sylt a
+little more out over the sand ridge. They travel in the heat's conditions;
+the game's wind function adds them (patched in the browser and, through a
+Node module hook, in the AI's engine), the water shows them, and the local
+server stores each solo heat's conditions so replays and ghosts match. The plan for more is
 `docs/superpowers/plans/2026-10-30-venue-water.md`.
 
 The mods share one look, the game's own (`mods/lib/ui.js`): their chips sit

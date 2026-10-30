@@ -9,10 +9,13 @@ import { handleApi } from "../server/api/index.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
 import { loadVenueCatalog, venueForLocation } from "../server/venues.mjs";
-import { SITE_LAYOUTS, coastFor, resolveVenueCollision, shorelineAt } from "../mods/venues/scenery.js";
+import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
+import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS } from "../mods/venues/water.js";
 import { setKnots, setSea, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
+import { ZONE_VERSION, zoneKnots } from "../mods/venues/zones.js";
+import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
 const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
@@ -44,6 +47,7 @@ test("a catalog with a missing file, an unsupported wind, a repeated id or a sha
   refused([venue("a", ["A"], { knots: 17, gustKnots: 1 })]);
   refused([venue("a", ["A"]), venue("a", ["B"])]);
   refused([venue("a", ["A"]), venue("b", ["a"])]);
+  refused([{ ...venue("a", ["A"]), windZones: { gain: 12, from: 300, over: 120, lee: 0 } }]);
 });
 
 test("a venue heat keeps the room's seed and takes the venue's wind", () => {
@@ -92,11 +96,12 @@ test("with the venues mod, an event at a venue names it, and its AI heat sails i
   assert.equal(call("GET", "/api/local/tour/events/378").body.venue, null, "an event elsewhere has none");
   const { body } = await call("POST", "/api/local/ai-heats", { rider: "m:yentel-caers", event: 375 });
   const weekStart = fakeGame.weekStart(Date.parse("2026-10-21T12:00:00Z"));
-  const expected = { seed: `event:375:week:${weekStart}`.length, knots: 19, gustKnots: 6 };
-  assert.deepEqual(calls, [expected]);
-  assert.deepEqual(body.conditions, expected);
+  const { zones, ...wind } = calls[0];
+  assert.deepEqual(wind, { seed: `event:375:week:${weekStart}`.length, knots: 19, gustKnots: 6 });
+  assert.deepEqual({ gain: zones.gain, from: zones.from, over: zones.over, lee: zones.lee }, { gain: 4, from: 300, over: 120, lee: 3 }, "the AI sails in Sotavento's wind zones");
+  assert.deepEqual(body.conditions, calls[0], "and the player gets the same conditions");
   assert.equal(body.venue.id, SOTAVENTO);
-  assert.equal(body.key, `2026-10-24|${weekStart}|m:yentel-caers|375|${catalog.version}|${SOTAVENTO}`, "the cache keeps venue heats apart");
+  assert.equal(body.key, `2026-10-24|${weekStart}|m:yentel-caers|375|${catalog.version}|${SOTAVENTO}|z${ZONE_VERSION}`, "the cache keeps venue heats apart");
 });
 
 test("without the venues mod, events name no venue and AI heats sail this week's solo wind", async (t) => {
@@ -242,4 +247,31 @@ test("Sotavento's lagoon stays calm and Sylt's open sea doesn't", () => {
   setKnots(17);
   assert.ok(range(SYLT, 150) > 1, "Sylt's sea is over a metre from trough to crest");
   setSea(null);
+});
+
+test("Sotavento's wind is lighter by the beach and stronger over the outer half of the heat", () => {
+  const { zones } = venueConditions(() => ({ seed: 1, knots: 15, gustKnots: 0 }), catalog.byId.get(SOTAVENTO), "room");
+  const { inX, inZ, shoreline } = coastFor(SOTAVENTO);
+  const at = (off) => zoneKnots(zones, inX * (shoreline - off), inZ * (shoreline - off));
+  assert.ok(at(20) < -2.5, `${at(20)} near the beach`);
+  assert.ok(Math.abs(at(shoreline)) < .5, `${at(shoreline)} at the course centre`);
+  assert.ok(at(shoreline + 220) > 3.9, `${at(shoreline + 220)} at the course's outer edge`);
+  assert.equal(zoneKnots(undefined, 0, 0), 0, "a heat without zones is the game's own wind");
+});
+
+test("a solo heat stores the wind it is sailed in, if the game can sail it, or else this week's", (t) => {
+  const store = createStore(join(tempDir(t), "db.json"));
+  store.update((d) => void d.riders.push({ key: "k", nickname: "rider" }));
+  const { zones } = venueConditions(() => ({ seed: 7, knots: 15, gustKnots: 0 }), catalog.byId.get(SYLT), "room");
+  const venue = { seed: 7, knots: 17, gustKnots: 4, zones };
+  const stored = (conditions) => {
+    const { heatId } = startHeat({ playerKey: "k", conditions }, store, fakeGame, Date.parse("2026-10-21T12:00:00Z")).body;
+    return store.data.heats.find((h) => h.heatId === heatId).conditions;
+  };
+  assert.deepEqual(stored(venue), venue);
+  assert.deepEqual(stored(undefined), fakeGame.weekConditions());
+  for (const bad of [{ ...venue, knots: 40 }, { ...venue, seed: "x" }, { ...venue, zones: { ...zones, gain: "much" } }, { ...venue, zones: { ...zones, curve: [1] } }]) {
+    assert.deepEqual(stored(bad), fakeGame.weekConditions());
+  }
+  assert.deepEqual(heatConditions({ ...venue, extra: 1, zones: { ...zones, extra: 2 } }), venue, "only the fields the engine reads are kept");
 });

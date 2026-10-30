@@ -1,83 +1,20 @@
 // Venue environments use BufferGeometry and lit materials taken from the
-// running game. No external renderer or remote assets are loaded. The game's
-// wind always blows along +x and its heat area never moves, so a venue turns
-// its coast around the course instead: the beach lies at the venue's angle to
-// the wind, beyond the course and the water AI riders sail. All props remain
-// stationary in world space while the rider and camera move. Land is shaped
-// with three.js's simplex noise and props with its geometry (props.js), both
-// vendored in lib/.
+// running game. No external renderer or remote assets are loaded. Each coast
+// lies where coast.js puts it, and all props remain stationary in world space
+// while the rider and camera move. Land is shaped with three.js's simplex
+// noise and props with its geometry (props.js), both vendored in lib/.
+import { SITE_LAYOUTS, shorelineAt, shorelineBase, shorelineOffset } from "./coast.js";
 import { SimplexNoise } from "./lib/SimplexNoise.js";
 import { addBlock, addBush, addFeatherFlag, addPagoda, addPalm, addPerson, addRig, seeded } from "./props.js";
 
-// The game's heat area: depth along the wind (x), length across it (z).
-const COURSE = { depth: 220, length: 420 };
 const LAND_CLEARANCE_D = 1.5;
 const SHORE_HALF_LENGTH = 4200;
 const SHORE_COLS = 1200;
 const pendingBatches = new WeakMap();
 
-// inland: the direction from the water to the beach, measured from the wind:
-// 0 is onshore, ±90° side-shore, beyond ±90° a little offshore. Negative
-// angles put the beach on the far side of the course from the camera, so the
-// coast is in view. That mirrors both venues: there the wind comes from the
-// left as you look out to sea, here from the right.
-export const SITE_LAYOUTS = {
-  "sotavento-fuerteventura": {
-    inland: -100 * Math.PI / 180, // side-shore, slightly offshore
-    shoreBuffer: 90,
-    sandbarOffshore: 280,
-    curveAmplitude: 5.5,
-    curveFrequency: .0036,
-    curveSecondary: 2.4,
-    curveSecondaryFrequency: .011,
-  },
-  "westerland-sylt": {
-    inland: -45 * Math.PI / 180, // side-onshore
-    shoreBuffer: 100,
-    sandbarOffshore: 400,
-    curveAmplitude: 3.2,
-    curveFrequency: .0045,
-    curveSecondary: 1.8,
-    curveSecondaryFrequency: .013,
-  },
-};
-// s runs along the shore, d inland from the water.
-for (const layout of Object.values(SITE_LAYOUTS)) {
-  const inX = Math.cos(layout.inland), inZ = Math.sin(layout.inland);
-  layout.frame = { rightX: -inZ, rightZ: inX, inX, inZ };
-}
-
 // The coast being built (its frame); point() places (s, d, height) on it.
 let building = null;
 const point = (s, d, y = 0) => [building.rightX * s + building.inX * d, y, building.rightZ * s + building.inZ * d];
-
-// The shoreline sits shoreBuffer beyond the course's corner nearest the beach.
-function shorelineBase(layout) {
-  const { inX, inZ } = layout.frame;
-  return COURSE.depth / 2 * Math.abs(inX) + COURSE.length / 2 * Math.abs(inZ) + layout.shoreBuffer;
-}
-function shorelineOffset(s, layout) {
-  return Math.sin(s * layout.curveFrequency) * layout.curveAmplitude +
-    Math.sin(s * layout.curveSecondaryFrequency + .7) * layout.curveSecondary;
-}
-export function shorelineAt(venueId, s) {
-  const layout = SITE_LAYOUTS[venueId];
-  return layout ? shorelineBase(layout) + shorelineOffset(s, layout) : 0;
-}
-
-// Where the water shader draws a venue's shallows and calms its waves: the
-// inland direction, the straight shoreline's distance from the course centre,
-// its bends (as shorelineOffset: [a1, f1, a2, f2]) and the sandbar's distance
-// out from it.
-export function coastFor(venueId) {
-  const layout = SITE_LAYOUTS[venueId];
-  if (!layout) return null;
-  const { curveAmplitude, curveFrequency, curveSecondary, curveSecondaryFrequency } = layout;
-  return {
-    inX: layout.frame.inX, inZ: layout.frame.inZ, shoreline: shorelineBase(layout), sandbar: layout.sandbarOffshore,
-    curve: [curveAmplitude, curveFrequency, curveSecondary, curveSecondaryFrequency],
-  };
-}
 
 function writeLocalPosition(state, frame, s, d) {
   state.x = frame.rightX * s + frame.inX * d;

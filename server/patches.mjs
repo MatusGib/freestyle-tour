@@ -4,8 +4,9 @@
 // breaks a patch fails loudly instead of silently doing nothing.
 //   { part: "engine" } or { marker: "text" }, plus
 //   { find: "text" or /pattern/g, replace: "text", expect: 1 }
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { registerHooks } from "node:module";
+import { join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { fileFor } from "../lib/snapshot.mjs";
 
@@ -66,4 +67,24 @@ export function patchSnapshot(snapshot, rules, log = console.error) {
     }
   }
   return result;
+}
+
+// Applies the rules to the snapshot's modules when this thread imports them,
+// and resolves the patches' "/__mods/..." imports to the mods folder, as the
+// local server serves both to the browser. The AI worker sails its heats in
+// this patched engine, so it feels the same game the player does.
+export function patchImports(snapshot, rules, modsDir) {
+  // Node imports a module by its real path, so a linked vendor folder counts.
+  const base = pathToFileURL(realpathSync(snapshot.dir) + sep).href;
+  const mods = pathToFileURL(resolve(modsDir) + sep).href;
+  registerHooks({
+    resolve(specifier, context, next) {
+      return specifier.startsWith("/__mods/") ? { url: mods + specifier.slice("/__mods/".length), shortCircuit: true } : next(specifier, context);
+    },
+    load(url, context, next) {
+      if (!url.startsWith(base) || !url.endsWith(".js")) return next(url, context);
+      const path = `/${decodeURI(url.slice(base.length))}`;
+      return { format: "module", source: applyPatches(path, readFileSync(new URL(url), "utf8"), snapshot.manifest.parts, rules), shortCircuit: true };
+    },
+  });
 }

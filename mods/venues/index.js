@@ -1,9 +1,11 @@
 import {
+  peekPlannedHeat,
   saveSelectedVenue,
   selectedVenueId,
   takePlannedHeat,
   venueConditions,
   venueRoomId,
+  venueZones,
   windText,
 } from "./venue.js";
 import { createVenueTextures, mountVenueScenery, resolveVenueCollision } from "./scenery.js";
@@ -128,11 +130,33 @@ export default {
       game.setPracticeConditions(engine.weekConditions(engine.weekStart(Date.now())), false);
     }
 
+    // The local server stores each solo heat's wind, for replays and ghosts,
+    // but the game's request to start one carries none: the venue's goes with
+    // it, decided there, and the heat then starts in exactly that wind.
+    let decided = null;
+    const nextConditions = () => {
+      const planned = peekPlannedHeat();
+      if (planned) return planned.conditions;
+      const venue = selected();
+      return venue ? venueConditions(engine.roomConditions, venue, venueRoomId(venue.id)) : null;
+    };
+    const fetchFromPage = window.fetch;
+    window.fetch = function (input, init) {
+      const url = new URL(typeof input === "string" ? input : input.url, location.href);
+      if (init?.method === "POST" && url.pathname === "/api/heats" && typeof init.body === "string") {
+        decided = nextConditions();
+        if (decided) init = { ...init, body: JSON.stringify({ ...JSON.parse(init.body), conditions: decided }) };
+      }
+      return fetchFromPage.call(this, input, init);
+    };
+
     function applyAtHeatStart(found) {
       const originalStart = found.start;
       found.start = function (...args) {
         const [heat, clock, state, originalConditions] = args;
         if (clock || state) return originalStart.apply(this, args);
+        const chosen = decided;
+        decided = null;
 
         const planned = takePlannedHeat();
         if (planned) {
@@ -144,9 +168,15 @@ export default {
         const venue = selected();
         showVenue(found, venue);
         if (!venue) return originalStart.apply(this, args);
-        const conditions = venueConditions(engine.roomConditions, venue, venueRoomId(venue.id));
+        const conditions = chosen ?? venueConditions(engine.roomConditions, venue, venueRoomId(venue.id));
         setVenueStatus(venue);
         return originalStart.call(this, heat, clock, state, { ...(originalConditions ?? {}), ...conditions });
+      };
+      // The practice wind the game's own panel sets keeps the venue's zones.
+      const setPractice = found.setPracticeConditions;
+      found.setPracticeConditions = function (conditions, beast) {
+        const zones = conditions && !conditions.zones && venueZones(selected());
+        return setPractice.call(this, zones ? { ...conditions, zones } : conditions, beast);
       };
     }
 
