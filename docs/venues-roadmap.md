@@ -21,23 +21,29 @@ sandbar, Playa Barca judging tower, René Egli centre, low resort wings, dunes,
 and distant Jandía ridge; Sylt's steel-blue North Sea, offshore ridge and
 trough, shorebreak, rocky groynes, yellow crossing markers, blue-and-white
 beach baskets, Brandenburger Strand event strip, promenade, sea wall, and
-Musikmuschel. The heat rectangle is rotated relative to each coast and the
-shoreline is placed beyond its inland edge. The local collision boundary keeps
-the rider off sand, while Sylt groynes are solid unless cleared with a high
-jump. Raised terrain occludes the water at the curved coast; the lagoon and
-reef accents are separate shallow scene bands. The game's water shader remains
-unchanged so a venue patch cannot blank the shared water surface.
-The game exposes wind strength and gusts but no wind bearing, so course
-orientation and visual water drift are venue-aligned approximations; the base
-simulation's physical wind force is unchanged.
+Musikmuschel. The game's wind always blows along +x and its heat area never
+moves, so the coast is turned to the venue's angle to the wind instead:
+side-shore and slightly offshore at Sotavento, side-onshore at Sylt. The heat
+area, its buoys and the AI's heats are the game's own. The scene is mirrored
+so the beach stays in the default camera's view. The local collision boundary
+keeps the rider off sand, while Sylt groynes are solid unless cleared with a
+high jump. Raised terrain occludes the water at the curved coast.
+
+A serve-time patch (`mods/venues/patches.mjs`) turns the water shader's fixed
+colours into uniforms, all starting at the game's own values, and adds wind
+chop, whitecaps whose cover follows the measured whitecap formula for the local
+wind (gusts included), and each venue's shallows, sandbar and shorebreak. The
+sky dome and scene haze follow the venue. The water plan,
+`docs/superpowers/plans/2026-10-30-venue-water.md`, has what comes next.
 
 The current scene uses approximate, sourced site dimensions rather than a
-georeferenced event map. At Sotavento the heat centre is about 266 m offshore;
-the sandbar crosses near its centre and the shoreward course edge has about
-80 m of dry-beach clearance. At Westerland the heat centre is about 210 m from
-the beach, with about 100 m between the course edge and dry sand; the ridge is
-about 400 m offshore, leaving the trough and nearshore surf visible in the
-sailing view.
+georeferenced event map. The beach lies at least 80 m beyond the nearest course
+corner and at least 30 m beyond the water six local AI heats were seen to sail
+(they overshoot the course ends by up to 43 m). At Sotavento the shoreline is
+about 316 m from the heat centre and the sandbar crosses the heat about 36 m on
+its beach side. At Westerland the shoreline is about 326 m from the heat
+centre, and the ridge, about 400 m out, crosses the seaward part of the
+heat.
 
 The committed tour data currently has 55 events across 2006–2025 and 13 raw
 location strings. It has no `2026.json` season file. A refresh of 2026 failed

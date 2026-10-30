@@ -57,13 +57,17 @@ The venue profiles are in `tour/venues.json`. They are curated separately
 from the crawled event results, with PWA source links and notes explaining how
 qualitative reports map to the game's wind range. Venue selection adds
 stationary 3D coastal terrain and location-specific props to the scene without
-changing the base game's trick and water physics. The 220 × 420 m heat frame is
-rotated to each venue and the beach is positioned beyond its shoreward edge.
+changing the base game's tricks, scoring or heat area. The game's wind always
+blows the same way and its heat area never moves, so each venue turns its
+coast instead: the beach lies at the venue's real angle to the wind
+(side-shore at Sotavento, side-onshore at Sylt), beyond the course and the
+water AI riders sail. The scene is mirrored, so the coast stays in view.
 Raised terrain occludes water at the curved shoreline, collision keeps the
 rider off the sand, and Sylt's rock groynes stop the rider unless a jump clears
-them. Sotavento shows the Playa Barca lagoon and sandbar; Sylt shows the
-North Sea ridge, trough, shorebreak, and Westerland promenade. Wind bearing is
-not exposed by the base simulation, so venue alignment is an approximation.
+them. A serve-time patch gives the game's water shader each venue's colours,
+wind chop and whitecaps that grow with the wind (gusts included), and its
+shallows: the Playa Barca lagoon and sandbar at Sotavento; the sandy surf zone,
+sand ridge and shorebreak at Sylt. Without a venue the water looks as before.
 
 ## The Champion's challenge
 
