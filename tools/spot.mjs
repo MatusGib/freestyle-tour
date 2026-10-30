@@ -1,7 +1,7 @@
 // Builds a real-world spot's files from open map data:
 //   node tools/spot.mjs <id>              lists what it would download, or builds from the cache
 //   node tools/spot.mjs <id> --download   downloads what is missing (each source once), then builds
-//   node tools/spot.mjs <id> --where x,z  prints the latitude and longitude of a game point
+//   node tools/spot.mjs <id> --where=x,z  prints the latitude and longitude of a game point (the = keeps a negative x working)
 // Reads tour/spots/<id>.json; writes mods/venues/spots/<id>/.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
