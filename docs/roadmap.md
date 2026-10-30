@@ -127,6 +127,11 @@ decisions and completion criteria are in the
 The first optional `venues` mod now has playable Sotavento and Sylt profiles.
 The full venue catalog, distinct scenery and tournament integration remain in
 progress.
+
+Real-world spots, built from map data the true way round, start with Bonaire:
+`docs/superpowers/specs/2026-10-30-real-world-spots-design.md`. A second spec,
+the venue rendering pipeline (see-through water, reflections, sky, post),
+follows it.
 Pilot design: `docs/superpowers/specs/2026-10-28-venue-profiles-design.md`.
 Plan: `docs/superpowers/plans/2026-10-28-venue-profiles.md`.
 
