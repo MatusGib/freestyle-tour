@@ -1,0 +1,17 @@
+{
+  "id": "sorobon-bonaire",
+  "name": "Sorobon, Bonaire",
+  "centre": { "lat": 12.0785, "lon": -68.2275 },
+  "windFrom": 90,
+  "detail": 2500,
+  "horizon": 12500,
+  "island": { "south": 11.98, "west": -68.45, "north": 12.33, "east": -68.18 },
+  "beach": { "top": 0.4, "slope": 0.02, "width": 80 },
+  "layer": "s2cloudless-2024",
+  "calibration": [],
+  "sources": [
+    { "name": "OpenStreetMap", "licence": "ODbL 1.0", "credit": "© OpenStreetMap contributors", "url": "https://www.openstreetmap.org/copyright" },
+    { "name": "Sentinel-2 cloudless 2024", "licence": "CC BY-NC-SA 4.0", "credit": "Sentinel-2 cloudless - https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024)", "url": "https://s2maps.eu" },
+    { "name": "Terrain Tiles", "licence": "open data, attribution required", "credit": "Terrain Tiles on AWS Open Data (Mapzen and the sources it lists, including SRTM)", "url": "https://registry.opendata.aws/terrain-tiles/" }
+  ]
+}
