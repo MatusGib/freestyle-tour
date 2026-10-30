@@ -14,7 +14,7 @@ import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS } from "../mods/venues/water.js";
 import { setKnots, setSea, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
-import { ZONE_VERSION, zoneKnots, zonesFor } from "../mods/venues/zones.js";
+import { zoneKnots, zonesFor } from "../mods/venues/zones.js";
 import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
@@ -143,7 +143,7 @@ test("with the venues mod, an event at a venue names it, and its AI heat sails i
   assert.deepEqual({ gain: zones.gain, from: zones.from, over: zones.over, lee: zones.lee }, { gain: 4, from: 300, over: 120, lee: 3 }, "the AI sails in Sotavento's wind zones");
   assert.deepEqual(body.conditions, calls[0], "and the player gets the same conditions");
   assert.equal(body.venue.id, SOTAVENTO);
-  assert.equal(body.key, `2026-10-24|${weekStart}|m:yentel-caers|375|${catalog.version}|${SOTAVENTO}|z${ZONE_VERSION}`, "the cache keeps venue heats apart");
+  assert.match(body.key, new RegExp(`^2026-10-24\\|${weekStart}\\|m:yentel-caers\\|375\\|[0-9a-f]{12}$`), "the key ends in a hash of the conditions, so venue heats are kept apart");
 });
 
 test("without the venues mod, events name no venue and AI heats sail this week's solo wind", async (t) => {

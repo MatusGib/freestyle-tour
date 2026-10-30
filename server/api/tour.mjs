@@ -1,7 +1,9 @@
 // Endpoints for the challenge mod: the tour's seasons and events, an event's
 // riders, and an AI heat in the selected conditions. Riders appear only under
 // their pseudonyms; real names never leave the server.
+import { createHash } from "node:crypto";
 import { averageScore, heatTarget, seedOf } from "../../lib/ai/score.mjs";
+import { eventWind } from "../event-winds.mjs";
 import { publicVenue, venueForLocation } from "../venues.mjs";
 import { venueConditions } from "../../mods/venues/venue.js";
 import { ZONE_VERSION } from "../../mods/venues/zones.js";
@@ -9,6 +11,18 @@ import { fail, ok } from "./reply.mjs";
 
 const NO_TOUR = "No tour data on this computer: run npm run tour-data.";
 const round = (value) => Math.round(value * 100) / 100;
+const digest = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex").slice(0, 12);
+
+// Where an event's heats get their wind: its reported wind, else its venue's
+// usual one, else this week's. What the event card shows.
+export function eventWindInfo(venue, wind) {
+  if (wind) {
+    const source = wind.sources?.[0];
+    return { source: "reported", knots: wind.knots, gustKnots: wind.gustKnots, reported: wind.reported, day: wind.day ?? null, confidence: wind.confidence, url: source?.url ?? null, title: source?.title ?? null };
+  }
+  if (venue) return { source: "usual", knots: venue.gameConditions.knots, gustKnots: venue.gameConditions.gustKnots };
+  return { source: "week" };
+}
 
 // Seasons newest first, each with its events in date order.
 export function listSeasons(tour) {
@@ -29,8 +43,8 @@ export function listVenues(catalog) {
 }
 
 // An event's riders by division, in place order, with each one's average heat
-// score going into the event.
-export function eventRiders(tour, id, catalog = null, venuesEnabled = false) {
+// score going into the event; with the venues mod, its venue and wind.
+export function eventRiders(tour, id, catalog = null, venuesEnabled = false, eventWinds = null) {
   if (!tour) return fail(404, NO_TOUR);
   const event = tour.events.get(Number(id));
   if (!event) return fail(404, `No event ${id} in the tour data.`);
@@ -41,29 +55,35 @@ export function eventRiders(tour, id, catalog = null, venuesEnabled = false) {
     divisions[name] = entries.map((e) => ({ rider: e.rider, pseudonym: tour.riders.get(e.rider).pseudonym, place: e.place, average: round(averageScore(ratings[e.rider].rating)) }));
   }
   const result = { id: event.id, name: event.name, divisions };
-  if (venuesEnabled) Object.assign(result, { location: event.location, venue: publicVenue(venue) });
+  if (venuesEnabled) Object.assign(result, { location: event.location, venue: publicVenue(venue), wind: eventWindInfo(venue, eventWind(eventWinds, event.id)) });
   return ok(result);
 }
 
-// The rider's heat in the event venue's profile when that mod is enabled, or
-// this week's solo wind otherwise. body: { rider, event }.
-export async function aiHeat(body, { tour, venues, mods, game, now, ai, aiHeats, snapshot }) {
+// The rider's heat. With the venues mod: in the event's reported wind, else
+// its venue's usual wind, with the venue's zones; otherwise, and at events
+// with neither, in this week's solo wind. body: { rider, event }.
+export async function aiHeat(body, { tour, venues, eventWinds, mods, game, now, ai, aiHeats, snapshot }) {
   if (!tour) return fail(404, NO_TOUR);
   const event = tour.events.get(Number(body.event));
   if (!event) return fail(404, `No event ${body.event} in the tour data.`);
   const division = Object.keys(event.divisions).find((name) => event.divisions[name].entries.some((e) => e.rider === body.rider));
   if (!division) return fail(404, `${body.rider} didn't sail at ${event.name}.`);
   const weekStart = game.weekStart(now());
-  const venue = mods?.includes("venues") ? venueForLocation(venues, event.location) : null;
-  const venueKey = venue ? `|${venues.version}|${venue.id}|z${ZONE_VERSION}` : "";
-  const key = `${snapshot}|${weekStart}|${body.rider}|${event.id}${venueKey}`;
-  const cached = aiHeats.data.heats[key];
-  if (cached) return ok(cached);
+  const venuesOn = !!mods?.includes("venues");
+  const venue = venuesOn ? venueForLocation(venues, event.location) : null;
+  const wind = venuesOn ? eventWind(eventWinds, event.id) : null;
+  const roomId = `event:${event.id}:week:${weekStart}`;
   const conditions = venue
-    ? venueConditions(game.roomConditions, venue, `event:${event.id}:week:${weekStart}`)
-    : game.weekConditions(weekStart);
+    ? venueConditions(game.roomConditions, venue, roomId, wind ?? venue.gameConditions)
+    : wind
+      ? { ...game.roomConditions(roomId), knots: wind.knots, gustKnots: wind.gustKnots }
+      : game.weekConditions(weekStart);
   const rating = tour.ratings.events[event.id][division][body.rider].rating;
   const target = round(heatTarget(rating, seedOf(body.rider, event.id, weekStart)));
+  // A changed wind, zone or target sails a fresh heat.
+  const key = `${snapshot}|${weekStart}|${body.rider}|${event.id}|${digest({ conditions, target, zoneVersion: ZONE_VERSION })}`;
+  const cached = aiHeats.data.heats[key];
+  if (cached) return ok(cached);
   let heat;
   try {
     heat = await ai.sail(conditions, target);

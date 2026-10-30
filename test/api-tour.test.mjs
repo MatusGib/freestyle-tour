@@ -1,10 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { averageScore, heatTarget, seedOf } from "../lib/ai/score.mjs";
 import { handleApi } from "../server/api/index.mjs";
+import { indexEventWinds } from "../server/event-winds.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
+import { loadVenueCatalog } from "../server/venues.mjs";
 import { WEEK, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
 const NOW = Date.parse("2026-10-21T12:00:00Z");
@@ -80,8 +83,9 @@ test("an AI heat sails this week's solo wind at the rider's seeded target, then 
   assert.deepEqual(ai.calls, [{ conditions: fakeGame.weekConditions(weekStart), target }]);
   assert.deepEqual(
     { ...body, replay: undefined },
-    { key: `2026-10-24|${weekStart}|m:balz-muller|378`, rider: "m:balz-muller", pseudonym: "Balt Möller", event: 378, eventName: "2025 Sylt", weekStart, conditions: fakeGame.weekConditions(weekStart), target, score: target - 0.4, tricks: [{ tack: "port", label: "Culo", score: 8 }], replay: undefined },
+    { key: body.key, rider: "m:balz-muller", pseudonym: "Balt Möller", event: 378, eventName: "2025 Sylt", weekStart, conditions: fakeGame.weekConditions(weekStart), target, score: target - 0.4, tricks: [{ tack: "port", label: "Culo", score: 8 }], replay: undefined },
   );
+  assert.match(body.key, new RegExp(`^2026-10-24\\|${weekStart}\\|m:balz-muller\\|378\\|[0-9a-f]{12}$`));
   assert.deepEqual((await call("POST", "/api/local/ai-heats", { rider: "m:balz-muller", event: 378 })).body, body);
   assert.equal(ai.calls.length, 1, "the second request comes from the cache");
 });
@@ -105,4 +109,56 @@ test("unknown events, riders who didn't sail there, and planner errors are repor
 test("without tour data an AI heat says how to build it too", async (t) => {
   const { call } = setup(t, { tour: false });
   assert.deepEqual(await call("POST", "/api/local/ai-heats", { rider: "m:balz-muller", event: 378 }), { status: 404, body: { error: "No tour data on this computer: run npm run tour-data." } });
+});
+
+const REPORTED = { event: 378, slug: "e378", knots: 24, gustKnots: 4, reported: "24 kt and gusty on finals day", day: "2025-09-30", confidence: "reported", sources: [{ title: "2025 Sylt report", date: "2025-09-30", url: "https://example.test/report" }] };
+
+// The fixture's events are all at "Somewhere"; `at` says where the venue is.
+function venueSetup(t, { winds = [REPORTED], at = "Somewhere" } = {}) {
+  const s = setup(t);
+  const file = join(tempDir(t), "venues.json");
+  writeFileSync(file, JSON.stringify({ version: 2, venues: [{ id: "sotavento-fuerteventura", name: "Sotavento, Fuerteventura", locations: [at], gameConditions: { knots: 19, gustKnots: 6 }, windZones: { gain: 4, from: 300, over: 120, lee: 3 } }] }));
+  Object.assign(s.ctx, {
+    mods: ["venues"],
+    game: { ...fakeGame, roomConditions: (id) => ({ seed: id.length, knots: 15, gustKnots: 0 }) },
+    venues: loadVenueCatalog(file),
+    eventWinds: indexEventWinds({ version: 1, events: winds }),
+  });
+  return s;
+}
+
+test("an AI heat sails the event's reported wind, else its venue's usual wind, with the venue's zones", async (t) => {
+  const { call, ai } = venueSetup(t);
+  await call("POST", "/api/local/ai-heats", { rider: "m:balz-muller", event: 378 });
+  await call("POST", "/api/local/ai-heats", { rider: "m:yentel-caers", event: 375 });
+  assert.deepEqual(ai.calls.map(({ conditions: c }) => [c.knots, c.gustKnots, c.zones?.gain]), [[24, 4, 4], [19, 6, 4]]);
+});
+
+test("an event with a reported wind at a venue we don't have sails that wind, without zones", async (t) => {
+  const { call, ai } = venueSetup(t, { at: "Elsewhere" });
+  await call("POST", "/api/local/ai-heats", { rider: "m:balz-muller", event: 378 });
+  await call("POST", "/api/local/ai-heats", { rider: "m:yentel-caers", event: 375 });
+  const weekStart = fakeGame.weekStart(NOW);
+  assert.deepEqual(ai.calls[0].conditions, { seed: `event:378:week:${weekStart}`.length, knots: 24, gustKnots: 4 });
+  assert.deepEqual(ai.calls[1].conditions, fakeGame.weekConditions(weekStart));
+});
+
+test("a changed wind sails the heat again; the same wind comes from the cache", async (t) => {
+  const { call, ai, ctx } = venueSetup(t);
+  const race = () => call("POST", "/api/local/ai-heats", { rider: "m:balz-muller", event: 378 });
+  await race();
+  await race();
+  assert.equal(ai.calls.length, 1);
+  ctx.eventWinds = indexEventWinds({ version: 1, events: [{ ...REPORTED, knots: 20 }] });
+  await race();
+  assert.equal(ai.calls.length, 2);
+  assert.equal(ai.calls[1].conditions.knots, 20);
+});
+
+test("an event says where its wind comes from", (t) => {
+  const { call } = venueSetup(t);
+  assert.deepEqual(call("GET", "/api/local/tour/events/378").body.wind, { source: "reported", knots: 24, gustKnots: 4, reported: "24 kt and gusty on finals day", day: "2025-09-30", confidence: "reported", url: "https://example.test/report", title: "2025 Sylt report" });
+  assert.deepEqual(call("GET", "/api/local/tour/events/375").body.wind, { source: "usual", knots: 19, gustKnots: 6 });
+  const elsewhere = venueSetup(t, { winds: [], at: "Elsewhere" });
+  assert.deepEqual(elsewhere.call("GET", "/api/local/tour/events/375").body.wind, { source: "week" });
 });

@@ -14,7 +14,7 @@ const HEAT_PATH = "/api/local/heats/";
 const EVENT_PATH = "/api/local/tour/events/";
 
 // request: { method, path, query: URLSearchParams, body, host }; ctx: { store,
-// game, now(), tour, venues, mods, ai, aiHeats, snapshot, lobby, relay,
+// game, now(), tour, venues, eventWinds, mods, ai, aiHeats, snapshot, lobby, relay,
 // weekly, champion, weekRooms, log }. POST
 // /api/local/ai-heats and POST /api/local/weekly/start answer with a promise,
 // the rest straight away.
@@ -31,7 +31,7 @@ export function handleApi({ method, path, query, body, host }, ctx) {
   if (method === "GET" && path.startsWith(HEAT_PATH)) return heatDetail(path.slice(HEAT_PATH.length), store, game);
   if (route === "GET /api/local/tour/seasons") return listSeasons(ctx.tour);
   if (route === "GET /api/local/venues") return listVenues(ctx.venues);
-  if (method === "GET" && path.startsWith(EVENT_PATH)) return eventRiders(ctx.tour, path.slice(EVENT_PATH.length), ctx.venues, ctx.mods?.includes("venues"));
+  if (method === "GET" && path.startsWith(EVENT_PATH)) return eventRiders(ctx.tour, path.slice(EVENT_PATH.length), ctx.venues, ctx.mods?.includes("venues"), ctx.eventWinds);
   if (route === "POST /api/local/ai-heats") return aiHeat(body, ctx);
   if (route === "GET /api/local/weekly") return weeklyInfo(ctx);
   if (route === "POST /api/local/weekly/start") return startWeekly(ctx);
