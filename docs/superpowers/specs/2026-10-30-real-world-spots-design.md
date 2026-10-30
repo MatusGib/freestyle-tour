@@ -23,7 +23,7 @@ looks like real sand and rock, not flat colour.
 
 | Topic | Decision |
 |---|---|
-| Source of the land | Real map data: OpenStreetMap features, Copernicus elevation, Sentinel-2 cloudless colours. Landmarks are modelled by hand from photos |
+| Source of the land | Real map data: OpenStreetMap features, AWS Terrain Tiles elevation, Sentinel-2 cloudless colours. Landmarks are modelled by hand from photos |
 | Look | As realistic as possible, though richer than the game's own lagoon. The riders, buoys and HUD stay the game's |
 | Orientation | True: the map turned so the real wind blows along the game's +x, never mirrored. Sotavento and Sylt are flipped to match later |
 | First spot | Sorobon, Bonaire; then Pozo and Podersdorf on the same tools |
@@ -93,7 +93,12 @@ approximate) and photogrammetric 3D tiles (their licences don't allow it).
 
 - `centre`: latitude and longitude of the competition area off Sorobon beach,
   fixed during the build from OpenStreetMap (the Jibe City and Sorobon
-  features) and event photos;
+  features) and the comparison image. It is 12.0960, −68.2342: in the lagoon
+  inside the reef, where the depth map clears the whole course, with the
+  beach 117 m beyond the heat area;
+- `calibration`: points with a known depth (latitude, longitude, metres,
+  note) that the depth fit is made from; `island` (the box whose coastline
+  closes), `beach` (the shore's profile) and `layer` (the EOX layer);
 - `detail`: the half-width of the detailed area, 2500 m; `horizon`: 12500 m;
 - `windFrom`: the trade wind's bearing, 90° (east) unless the reports say
   otherwise;
@@ -104,16 +109,20 @@ approximate) and photogrammetric 3D tiles (their licences don't allow it).
 Run once per spot, `node tools/spot.mjs sorobon-bonaire`. It downloads into
 `cache/spots/<id>/` (git-ignored) and writes `mods/venues/spots/<id>/`:
 
-- **Elevation:** Copernicus DEM GLO-30 tiles (30 m). Near the shore the
-  heights are rebuilt from OpenStreetMap's coastline and a beach profile, since
-  30 m cells can't hold a beach. Written as 16-bit heights on a local metre
-  grid: `terrain.bin` (detail, 4 m) and `horizon.bin` (coarse, 60 m).
-- **Colour:** EOX Sentinel-2 cloudless imagery (about 10 m per pixel),
-  colour-corrected to daylight, as `ground.jpg` (detail) and `horizon.jpg`.
+- **Elevation:** AWS Terrain Tiles (terrarium PNG, SRTM-class, about 30 m,
+  open data on AWS); chosen over Copernicus GeoTIFFs because PNG needs no TIFF
+  reader. Near the shore the heights are rebuilt from OpenStreetMap's
+  coastline and a beach profile, since 30 m cells can't hold a beach. Written
+  as 16-bit heights in decimetres on a local metre grid: `terrain.bin`
+  (detail, 5 m, 1001 × 1001) and `horizon.bin` (coarse, 50 m, 501 × 501).
+- **Colour:** EOX Sentinel-2 cloudless imagery (about 10 m per pixel), as
+  `ground.png` (detail, 512 px over 5 km) and `horizon.png` (1024 px over
+  25 km). EOX answers with JPEG whatever format is asked for, so the tool has
+  its own baseline JPEG decoder.
 - **Seabed depth:** estimated from the satellite colours with the log-ratio
   method for clear shallow water (blue over green), calibrated with known
-  depths: the lagoon about 1 m, the reef crest 0 to 0.3 m, open sea beyond
-  the reef 10 m and more. Written as `depth.png` (8-bit, 0–20 m).
+  depths: the lagoon about 1 m, the reef crest 0.2 m, open sea about 1 km
+  beyond the reef 20 m. Written as `depth.png` (detail) and `horizon-depth.png`, 8-bit, 0–20 m.
 - **Ground types:** `ground-type.png`, one value per cell: dry sand, wet sand,
   coral rubble, scrub soil, limestone rock, mangrove, built-up. From
   OpenStreetMap polygons where they exist, else from the satellite colour.
@@ -122,12 +131,18 @@ Run once per spot, `node tools/spot.mjs sorobon-bonaire`. It downloads into
   `height` or `building:levels`), roads and jetties, all in game coordinates.
 - **Comparison:** `compare.png`, the built shoreline, reef and buildings drawn
   over the satellite image, for checking the match.
-- **Picture:** `picture.jpg`, a 384 × 256 crop of the satellite image around
+- **Picture:** `picture.png`, a 384 × 256 crop of the satellite image around
   the course, for the venue chooser and the event card. `publicVenue` reports
   `scenery` for a venue with spot files as well as one with an analytic coast,
   and the mod picks the picture's file by kind.
 - **Credits:** `CREDITS.md` listing each source, its licence and its credit
   line.
+
+Sorobon's files measure 5.8 MB together: `terrain.bin` 2.0 MB,
+`horizon.png` 1.4 MB, `ground.png` 0.6 MB, `compare.png` 0.6 MB,
+`horizon.bin` 0.5 MB, `horizon-depth.png` 0.3 MB, `features.json` 0.2 MB,
+`picture.png` 0.2 MB, `depth.png` 0.04 MB, `ground-type.png` and the
+small files under 0.01 MB each.
 
 Game coordinates: a local east/north metre grid around `centre`, turned so
 the wind's downwind direction is +x and north is where it then falls; the
@@ -206,6 +221,18 @@ Sotavento and Sylt look.
 - **Satellite-derived depth** is approximate where the bottom is dark (sea
   grass, coral) rather than sand. Calibration and a cap keep it plausible;
   the map's reef line overrides.
+- **Depth from colour is blind in the lagoon.** The fit runs from lagoon to
+  open sea, about 130 m of depth per unit of colour ratio, so a 0.01 dip in the
+  ratio reads as 1.4 m shallower. Dark patches of lagoon floor, probably
+  seagrass, came out as 0 m, and the course check refused the first two
+  centres. Sorobon's calibration therefore has five points on that dark
+  floor at 1.0 m, with the course placed where the map clears it. The check
+  passes with the fit, not with a measured depth: plan 2 should treat the
+  lagoon as about 1 m, and use the reef line, not the depth, for the surf.
+- **Ground types at 10 m cells:** the 512 px detail image has 9.8 m cells, so
+  the wet sand band (under 8 m from the shore) never appears, and the beach
+  is a few pixels of dry sand. Plan 2 should draw the beach from the shoreline
+  and `features.json`, not from `ground-type.png`.
 - **30 m elevation** can't show small dunes or the beach berm; the shoreline
   rebuild and detail textures carry the near view.
 - **Performance** with dense vegetation and large textures: instancing,
@@ -214,4 +241,5 @@ Sotavento and Sylt look.
   first, and the horizon mesh sized to what is visible.
 - **Licences:** EOX's 2018+ imagery is CC BY-NC-SA 4.0, fine for this private,
   non-commercial project with credit; OpenStreetMap is ODbL with credit;
-  Copernicus DEM's terms are confirmed and quoted in `CREDITS.md` before use.
+  Terrain Tiles are open data on AWS with attribution; the credit lines of all
+  three sources are in `CREDITS.md`.
