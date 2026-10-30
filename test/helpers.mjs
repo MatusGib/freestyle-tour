@@ -73,3 +73,16 @@ export function writeTour(dir) {
     ],
   }));
 }
+
+// Writes the developer panel's four data files into dir and returns their
+// paths: a wind for event 378 of writeTour()'s tour, one venue at its
+// "Somewhere", the champion and the AI's tuning.
+export function writeDataFiles(dir) {
+  const paths = { eventWinds: join(dir, "event-winds.json"), venues: join(dir, "venues.json"), champion: join(dir, "champion.json"), tuning: join(dir, "tuning.json") };
+  const write = (file, value) => writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+  write(paths.eventWinds, { version: 1, events: [{ event: 378, slug: "e378", knots: 18, gustKnots: 6, reported: "18–25 kt, gusty", confidence: "reported", sources: [{ title: "Report", date: "2025-09-30", url: "https://example.test/report" }] }] });
+  write(paths.venues, { version: 2, venues: [{ id: "sotavento-fuerteventura", name: "Sotavento, Fuerteventura", locations: ["Somewhere"], gameConditions: { knots: 19, gustKnots: 6 }, windZones: { gain: 4, from: 300, over: 120, lee: 3, note: "Stronger out" } }] });
+  write(paths.champion, { rider: "m:lennart-neubauer", name: "Lennart Neubauer", rating: 1946, target: 45.5, wind: { knots: 21, gustKnots: 6 }, events: [] });
+  write(paths.tuning, { aiTargetOffset: 0 });
+  return paths;
+}
