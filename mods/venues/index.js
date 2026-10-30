@@ -10,6 +10,7 @@ import {
 } from "./venue.js";
 import { createVenueTextures, mountVenueScenery, resolveVenueCollision } from "./scenery.js";
 import { applyVenueLook } from "./water.js";
+import { resolveSpotCollision } from "./realworld/collision.js";
 import { createPopover, el } from "../lib/ui.js";
 
 const getJson = async (url) => {
@@ -191,7 +192,10 @@ export default {
       if (CanvasTexture) textures = createVenueTextures(CanvasTexture);
       else log("the scene patch is missing; the beach has no sand texture");
       applyAtHeatStart(found);
-      await onStep((state, input) => resolveVenueCollision(state, input, game?.__venueSceneryVenueId));
+      await onStep((state, input) => {
+        if (game?.__venueSpot) resolveSpotCollision(state, input, game.__venueSpot);
+        else resolveVenueCollision(state, input, game?.__venueSceneryVenueId);
+      });
       const venue = selected();
       showVenue(found, venue);
       setVenueStatus(venue);
