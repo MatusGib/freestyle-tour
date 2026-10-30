@@ -8,6 +8,7 @@ import {
 } from "./venue.js";
 import { createVenueTextures, mountVenueScenery, resolveVenueCollision } from "./scenery.js";
 import { applyVenueLook } from "./water.js";
+import { createPopover, el } from "../lib/ui.js";
 
 const getJson = async (url) => {
   const res = await fetch(url);
@@ -15,40 +16,20 @@ const getJson = async (url) => {
   if (!res.ok) throw new Error(body.error ?? `${url} answered ${res.status}`);
   return body;
 };
-const el = (tag, props = {}, ...children) => {
-  const node = Object.assign(document.createElement(tag), props);
-  node.append(...children.filter((child) => child !== null));
-  return node;
-};
-
-const PANEL_STYLE =
-  "position:fixed;right:12px;bottom:12px;z-index:100000;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;" +
-  "box-sizing:border-box;font:13px/1.45 system-ui,sans-serif;background:#fbfaf6;color:#13262b;padding:14px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3)";
-const BUTTON_STYLE = "border:0;border-radius:8px;padding:7px 10px;background:#178b93;color:white;font:600 12px system-ui,sans-serif;cursor:pointer";
+const picture = (venue) => `/__mods/venues/assets/${venue.id}.svg`;
 
 export default {
   name: "venues",
   async setup({ engine, overlay, whenGame, onStep, log }) {
     let textures = { sand: null };
     const holder = overlay("venues");
-    holder.style.cssText = "font:12px/1.4 system-ui,sans-serif;background:rgba(10,40,40,.85);color:#e8f4f2;padding:4px 10px;border-radius:8px;pointer-events:auto";
-    const open = el("button", {
-      type: "button",
-      textContent: "Choose venue",
-      style: "border:0;background:transparent;color:#e8f4f2;font:600 12px system-ui,sans-serif;cursor:pointer",
-    });
-    const thumbnail = el("img", {
-      alt: "",
-      width: 64,
-      height: 38,
-      hidden: true,
-      style: "width:64px;height:38px;object-fit:cover;border:1px solid rgba(255,255,255,.42);border-radius:5px;vertical-align:middle",
-    });
-    const status = el("span", { style: "margin-left:6px" });
-    holder.append(open, thumbnail, status);
-    const panel = el("div", { hidden: true });
-    panel.style.cssText = PANEL_STYLE;
-    document.body.append(panel);
+    holder.className = "ft-slot";
+    const thumbnail = el("img", { className: "ft-chip-thumb", alt: "", width: 40, height: 24, hidden: true });
+    const current = el("span", { className: "ft-chip-value", textContent: "Weekly wind" });
+    const open = el("button", { type: "button", className: "ft-chip", ariaHasPopup: "dialog" },
+      thumbnail, el("span", { className: "ft-chip-text" }, el("span", { className: "ft-chip-label", textContent: "Venue" }), current));
+    holder.append(open);
+    const panel = createPopover("Choose a venue", "venues");
 
     let game = null;
     let venues = [];
@@ -60,11 +41,11 @@ export default {
       log("could not load venue profiles", error);
       return [];
     });
-    const setStatus = (value) => void (status.textContent = value ? ` ${value}` : "");
     const setVenueStatus = (venue) => {
       thumbnail.hidden = !venue;
-      thumbnail.src = venue ? `/__mods/venues/assets/${venue.id}.svg` : "";
-      setStatus(venue?.name ?? "Weekly wind");
+      thumbnail.src = venue ? picture(venue) : "";
+      current.textContent = venue?.name ?? "Weekly wind";
+      open.title = venue ? `Venue: ${venue.name}` : "Venue: the game's weekly wind";
     };
     const selected = () => venues.find((venue) => venue.id === selectedVenueId()) ?? null;
     // The coast, its water and its sky, or the game's own look without a venue.
@@ -73,69 +54,64 @@ export default {
       if (!applyVenueLook(found, venue)) log("the water patch is missing; keeping the game's water");
     };
 
+    // Each venue is an option: its picture, wind and character, with the
+    // sourced notes folded away; the game's own weekly wind is the last one.
     function renderPanel() {
       const active = selected();
-      const choices = venues.map((venue) => {
-        const button = el("button", {
-          type: "button",
-          textContent: active?.id === venue.id ? "Using this venue" : "Use this venue",
-          style: BUTTON_STYLE,
-          disabled: active?.id === venue.id,
-          onclick: () => choose(venue),
-        });
-        return el("article", { style: "padding:10px 0;border-top:1px solid #d9e3df" },
-          el("strong", { textContent: venue.name }),
-          el("img", {
-            src: `/__mods/venues/assets/${venue.id}.svg`,
-            alt: `${venue.name} shoreline illustration`,
-            style: "display:block;width:100%;height:112px;object-fit:cover;margin:8px 0;border-radius:8px;background:#dcebe5",
-          }),
-          el("p", { textContent: `${windText(venue.gameConditions)} · ${venue.character}`, style: "margin:4px 0" }),
-          el("small", { textContent: venue.profileNote, style: "display:block;color:#50636a;margin-bottom:8px" }),
-          venue.courseNote ? el("small", { textContent: `Heat position: ${venue.courseNote}`, style: "display:block;color:#31565e;margin-bottom:7px" }) : null,
-          venue.landmarks?.length ? el("small", { textContent: `Look for: ${venue.landmarks.join(" · ")}`, style: "display:block;color:#31565e;margin-bottom:5px" }) : null,
-          venue.waterZones?.length ? el("small", { textContent: `Water: ${venue.waterZones.join(" · ")}`, style: "display:block;color:#31565e;margin-bottom:8px" }) : null,
-          button,
+      const option = (venue) => {
+        const chosen = active?.id === venue.id;
+        const details = el("details", { className: "ft-details" },
+          el("summary", { textContent: "About this venue" }),
+          el("p", { textContent: venue.profileNote }),
+          venue.courseNote && el("p", { textContent: venue.courseNote }),
+          venue.landmarks?.length && el("p", { textContent: `Look for: ${venue.landmarks.join(" · ")}` }),
+          venue.waterZones?.length && el("p", { textContent: `Water: ${venue.waterZones.join(" · ")}` }),
         );
-      });
-      const clear = el("button", {
-        type: "button",
-        textContent: "Use the game's weekly wind",
-        style: `${BUTTON_STYLE};background:transparent;color:#16666d;border:1px solid #178b93`,
-        onclick: clearChoice,
-      });
-      panel.replaceChildren(
-        el("div", { style: "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px" },
-          el("strong", { textContent: "Freestyle venues" }),
-          el("button", { type: "button", textContent: "Close", onclick: () => void (panel.hidden = true) }),
+        const button = el("button", { type: "button", className: "ft-option", onclick: () => choose(venue) },
+          el("img", { src: picture(venue), alt: "", width: 96, height: 64 }),
+          el("span", {},
+            el("span", { className: "ft-option-name" }, venue.name, chosen && el("span", { className: "ft-check", textContent: "In use" })),
+            el("span", { className: "ft-option-meta", textContent: windText(venue.gameConditions) }),
+            el("span", { className: "ft-option-text", textContent: venue.character, style: "display:block" }),
+          ),
+        );
+        button.setAttribute("aria-pressed", String(chosen));
+        return el("li", {}, button, details);
+      };
+      const weekly = el("button", { type: "button", className: "ft-option ft-plain", onclick: clearChoice },
+        el("span", {},
+          el("span", { className: "ft-option-name" }, "The game's weekly wind", !active && el("span", { className: "ft-check", textContent: "In use" })),
+          el("span", { className: "ft-option-text", textContent: "No coast: the open water and wind everyone sails this week.", style: "display:block" }),
         ),
-        el("p", { textContent: "Choose a place for your next practice or solo heat. The profile uses the game's existing wind and water response.", style: "margin:0 0 8px;color:#50636a" }),
-        ...choices,
-        el("div", { style: "padding-top:10px" }, clear),
+      );
+      weekly.setAttribute("aria-pressed", String(!active));
+      panel.body.replaceChildren(
+        el("p", { className: "ft-sub", textContent: "For your next practice or solo heat. The wind and water follow the venue; the rules and scoring stay the game's." }),
+        el("ul", { className: "ft-options" }, ...venues.map(option), el("li", {}, weekly)),
       );
     }
 
     async function showPanel() {
       if (loading) return;
+      if (panel.open) return panel.hide();
       loading = true;
       try {
         if (!venues.length) await catalogReady;
-        if (!venues.length) throw new Error("No venue profiles are available.");
+        if (!venues.length) throw new Error("the local server has no venue profiles.");
         renderPanel();
-        panel.hidden = false;
       } catch (error) {
         log("could not load venue profiles", error);
-        panel.replaceChildren(el("p", { textContent: `Couldn't load venues: ${error.message}` }));
-        panel.hidden = false;
+        panel.body.replaceChildren(el("p", { className: "ft-muted", textContent: `Couldn't load the venues: ${error.message}` }));
       } finally {
         loading = false;
       }
+      panel.show(open);
     }
 
     function choose(venue) {
       saveSelectedVenue(venue.id);
       setVenueStatus(venue);
-      panel.hidden = true;
+      panel.hide();
       if (!game) return;
       showVenue(game, venue);
       // Update the current practice water if the game is idling on the water.
@@ -146,7 +122,7 @@ export default {
     function clearChoice() {
       saveSelectedVenue(null);
       setVenueStatus(null);
-      panel.hidden = true;
+      panel.hide();
       if (!game) return;
       showVenue(game, null);
       game.setPracticeConditions(engine.weekConditions(engine.weekStart(Date.now())), false);

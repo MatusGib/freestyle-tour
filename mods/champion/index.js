@@ -6,13 +6,11 @@
 // Bull helmet, with a congratulations screen.
 import { SEEN_KEY, TITLE, bestText, failedText, heatText, menuLine, newWin, prizeDue, raceText, readyText, winText } from "./champion.js";
 import { HELMET, WON_KEY, drawHelmetPicture } from "./helmet.js";
+import { ensureStyles } from "../lib/ui.js";
 
 const PLAYER_KEY = "fristajlo-player-v3"; // the game's own record of your rider
-const TEAL = "#178b93";
-const PRIMARY = `background:${TEAL};color:#fff;border:0;border-radius:10px;padding:10px 16px;font:600 15px system-ui,sans-serif;cursor:pointer`;
-const SECONDARY = `background:transparent;color:${TEAL};border:1px solid ${TEAL};border-radius:10px;padding:10px 16px;font:600 15px system-ui,sans-serif;cursor:pointer`;
-const LABEL = `margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:${TEAL};font-weight:700`;
-const MUTED = "color:#4a5d63;font-size:13px";
+const PRIMARY = "ft-button ft-button-primary";
+const SECONDARY = "ft-button";
 const TROPHY =
   '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>';
 
@@ -43,12 +41,26 @@ const el = (tag, props = {}, children = []) => {
   return node;
 };
 
-// A card over the game; a click outside it closes it.
+// A card over the game, in the game's own look. A click outside it or Escape
+// closes it, and focus goes back to where it was.
 function dialog(children) {
-  const card = el("div", { role: "dialog", style: "box-sizing:border-box;background:#fbfaf6;color:#13262b;border-radius:16px;max-width:460px;width:100%;max-height:100%;overflow:auto;padding:20px 22px;box-shadow:0 18px 50px rgba(0,0,0,.35)" }, children);
-  const backdrop = el("div", { style: "position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,30,34,.55);font:15px/1.45 system-ui,sans-serif" }, [card]);
+  ensureStyles();
+  const back = document.activeElement;
+  const card = el("div", { className: "ft-card", role: "dialog", ariaModal: "true" }, children);
+  const heading = card.querySelector("h2");
+  if (heading) {
+    heading.id = "ft-champion-title";
+    card.setAttribute("aria-labelledby", heading.id);
+  }
+  const backdrop = el("div", { className: "ft-backdrop" }, [card]);
+  backdrop.remove = function () {
+    Element.prototype.remove.call(this);
+    back?.focus?.();
+  };
   backdrop.addEventListener("click", (event) => event.target === backdrop && backdrop.remove());
+  backdrop.addEventListener("keydown", (event) => event.key === "Escape" && backdrop.remove());
   document.body.append(backdrop);
+  card.querySelector("button")?.focus();
   return backdrop;
 }
 function helmetPicture() {
@@ -56,7 +68,7 @@ function helmetPicture() {
   drawHelmetPicture(canvas);
   return canvas;
 }
-const buttons = (...list) => el("div", { style: "display:flex;gap:8px;flex-wrap:wrap;margin-top:14px" }, list);
+const buttons = (...list) => el("div", { className: "ft-actions" }, list);
 
 // Puts the helmet on your rider through the local server's rider save, then
 // lets the game pick it up: it reloads your rider when its window gets focus.
@@ -94,12 +106,12 @@ export default {
       write(SEEN_KEY, String(info.lastWin.at));
       const first = read(WON_KEY) !== "true";
       write(WON_KEY, "true");
-      const wear = el("button", { type: "button", textContent: "Wear it now", style: PRIMARY });
-      const close = el("button", { type: "button", textContent: "Close", style: SECONDARY });
+      const wear = el("button", { type: "button", textContent: "Wear it now", className: PRIMARY });
+      const close = el("button", { type: "button", textContent: "Close", className: SECONDARY });
       const box = dialog([
-        el("p", { textContent: "Congratulations!", style: LABEL }),
-        el("h2", { textContent: winText(info), style: "margin:4px 0 12px;font-size:20px;line-height:1.3" }),
-        el("div", { style: "display:flex;gap:12px;align-items:center;background:#eef6f6;border-radius:12px;padding:10px" }, [
+        el("h2", { textContent: "Congratulations!", className: "ft-title" }),
+        el("p", { textContent: winText(info), style: "margin:6px 0 0" }),
+        el("div", { className: "ft-prize" }, [
           helmetPicture(),
           el("p", { style: "margin:0", textContent: first ? "Your prize: the Red Bull helmet. It's in the look editor now, with the headwear." : "The Red Bull helmet is already yours." }),
         ]),
@@ -154,25 +166,24 @@ export default {
     }
 
     function showCard() {
-      const go = el("button", { type: "button", textContent: raceText(info.opponent.name), style: PRIMARY });
-      const close = el("button", { type: "button", textContent: "Close", style: SECONDARY });
-      statusLine = el("p", { style: `margin:10px 0 0;${MUTED}`, textContent: status });
+      const go = el("button", { type: "button", textContent: raceText(info.opponent.name), className: PRIMARY });
+      const close = el("button", { type: "button", textContent: "Close", className: SECONDARY });
+      statusLine = el("p", { className: "ft-muted", style: "margin:10px 0 0", textContent: status, ariaLive: "polite" });
       const box = dialog([
-        el("p", { textContent: TITLE, style: LABEL }),
-        el("h2", { textContent: info.event.name, style: "margin:2px 0 0;font-size:22px;line-height:1.25" }),
-        el("p", { textContent: `${info.event.when} · ${info.event.place}`, style: `margin:2px 0 12px;${MUTED}` }),
-        el("p", { textContent: info.story, style: "margin:0 0 12px" }),
-        el("p", { textContent: "Podium", style: LABEL }),
-        el("ol", { style: "margin:4px 0 12px;padding-left:22px" }, info.event.podium.map((name) => el("li", { textContent: name }))),
-        el("div", { style: "display:flex;gap:12px;align-items:center;background:#eef6f6;border-radius:12px;padding:10px;margin-bottom:12px" }, [
+        el("h2", { textContent: info.event.name, className: "ft-title" }),
+        el("p", { textContent: `${TITLE} · ${info.event.when} · ${info.event.place}`, className: "ft-sub", style: "margin:4px 0 14px" }),
+        el("p", { textContent: info.story, style: "margin:0" }),
+        el("h3", { textContent: "Podium" }),
+        el("ol", {}, info.event.podium.map((name) => el("li", { textContent: name }))),
+        el("div", { className: "ft-prize" }, [
           helmetPicture(),
           el("div", {}, [
             el("strong", { textContent: "Prize: the Red Bull helmet" }),
-            el("div", { style: MUTED, textContent: read(WON_KEY) === "true" ? "Yours already: it's in the look editor." : `Beat ${info.opponent.name} to win it for your rider.` }),
+            el("div", { className: "ft-muted", textContent: read(WON_KEY) === "true" ? "Yours already: it's in the look editor." : `Beat ${info.opponent.name} to win it for your rider.` }),
           ]),
         ]),
-        el("p", { style: `margin:0;${MUTED}`, textContent: heatText(info) }),
-        el("p", { style: `margin:4px 0 0;${MUTED}`, textContent: bestText(info) }),
+        el("p", { className: "ft-muted", style: "margin:14px 0 0", textContent: heatText(info) }),
+        el("p", { className: "ft-muted", style: "margin:4px 0 0", textContent: bestText(info) }),
         buttons(go, close),
         statusLine,
       ]);

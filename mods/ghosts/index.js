@@ -37,12 +37,12 @@ export default {
     let ghost = null;
 
     const box = overlay("ghosts");
-    box.style.cssText = "font:12px/1.4 system-ui,sans-serif;background:rgba(10,40,40,.85);color:#e8f4f2;padding:4px 10px;border-radius:8px;pointer-events:auto";
+    box.className = "ft-slot";
     const checkbox = Object.assign(document.createElement("input"), { type: "checkbox", checked: enabled });
-    const label = document.createElement("label");
-    const status = document.createElement("span");
-    label.append(checkbox, " Ghost");
-    box.append(label, status);
+    const label = Object.assign(document.createElement("label"), { className: "ft-chip ft-toggle" });
+    const status = Object.assign(document.createElement("span"), { className: "ft-status" });
+    label.append(checkbox, "Ghost", status);
+    box.append(label);
 
     const stop = () => {
       if (ghost) game.clearOpponent();

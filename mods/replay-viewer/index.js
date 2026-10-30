@@ -41,9 +41,9 @@ export default {
   setup({ engine, overlay, whenGame, log }) {
     document.head.append(el("style", { textContent: `.${OPEN_CLASS} .menu-layer{display:none!important}` }));
     const holder = overlay("replay-viewer");
-    holder.style.cssText = "pointer-events:auto";
+    holder.className = "ft-slot";
     holder.hidden = true;
-    holder.append(el("button", { type: "button", textContent: "Replays", onclick: () => showList().catch((e) => log("could not list heats", e)) }));
+    holder.append(el("button", { type: "button", className: "ft-chip", textContent: "Replays", onclick: () => showList().catch((e) => log("could not list heats", e)) }));
     const panel = el("div", { hidden: true });
     panel.style.cssText = PANEL_STYLE;
     document.body.append(panel);
