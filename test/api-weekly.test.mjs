@@ -73,7 +73,7 @@ function setup(t, { ai = fakeAi(), rooms = roomConditions } = {}) {
   const logs = [];
   const game = { ...fakeGame, roomConditions: rooms };
   const log = (line) => logs.push(line);
-  const weekRooms = createWeekRooms({ champion: CHAMPION, game, now, ai, log });
+  const weekRooms = createWeekRooms({ champion: () => ctx.champion, game, now, ai, log });
   const ctx = { store, game, now, ai, weekly, lobby, relay: createRelay({ lobby, now }), champion: CHAMPION, weekRooms, log, snapshot: "2026-10-24" };
   const call = (method, path, body = {}) => handleApi({ method, path, query: new URLSearchParams(), body, host: "localhost:5180" }, ctx);
   const poll = (body = {}) => call("POST", "/api/lagoons", { playerKey: "k1", ...body }).body;
@@ -193,4 +193,15 @@ test("errors: a planner failure, and no room with the champion's gusts", async (
   const windless = setup(t, { rooms: (id) => ({ seed: 1, knots: 15, gustKnots: 0 }) });
   const none = await windless.call("POST", "/api/local/weekly/start");
   assert.deepEqual([none.status, none.body.error], [500, "Couldn't get Lennart Neubauer ready: no room id gives gusts of 6"]);
+});
+
+test("changing the champion's wind or target sails his next room again, with the new values", async (t) => {
+  const { call, ai, ctx } = setup(t);
+  call("GET", "/api/local/weekly");
+  await settle();
+  ctx.champion = { ...CHAMPION, wind: { knots: 17, gustKnots: 6 }, target: 40 };
+  const { body } = call("GET", "/api/local/weekly");
+  await settle();
+  assert.deepEqual([body.wind, body.opponent.target], [{ knots: 17, gustKnots: 6 }, 40]);
+  assert.deepEqual(ai.calls.filter(([what]) => what === "sail").map(([, , knots, target]) => [knots, target]), [[21, 45.5], [17, 40]]);
 });

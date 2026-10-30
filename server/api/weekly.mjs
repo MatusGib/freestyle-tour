@@ -61,17 +61,23 @@ export function roomQueue(rooms, heatFor, log = () => {}) {
 
 // The champion's rooms for each week, as a function of the week (weekOf()):
 // one room queue a week, made when the week is first asked for, since the
-// week's event is in the room ids.
+// week's event is in the room ids. champion: a function giving him as he is
+// now; a change to his wind or target starts a new queue, so his next room is
+// sailed with the new values.
 export function createWeekRooms({ champion, game, now, ai, log }) {
-  const opponent = opponentFor(champion);
-  const heatFor = async (conditions) => {
-    const sailed = await ai.sail(conditions, opponent.target);
-    const { poses, settledAt } = await ai.poses(conditions, sailed.replay);
-    return { score: sailed.score, attempts: sailed.attempts, poses, settledAt };
-  };
   let current = null;
   return (week) => {
-    if (current?.weekStart !== week.weekStart) current = { weekStart: week.weekStart, rooms: roomQueue(championRooms(game.roomConditions, week.event.id, now(), champion.wind), heatFor, log) };
+    const { wind, target } = champion();
+    const key = `${week.weekStart}|${wind.knots}|${wind.gustKnots}|${target}`;
+    if (current?.key !== key) {
+      const opponent = opponentFor(champion());
+      const heatFor = async (conditions) => {
+        const sailed = await ai.sail(conditions, opponent.target);
+        const { poses, settledAt } = await ai.poses(conditions, sailed.replay);
+        return { score: sailed.score, attempts: sailed.attempts, poses, settledAt };
+      };
+      current = { key, rooms: roomQueue(championRooms(game.roomConditions, week.event.id, now(), wind), heatFor, log) };
+    }
     return current.rooms;
   };
 }
