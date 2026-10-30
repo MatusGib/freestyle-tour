@@ -28,6 +28,8 @@ export const VENUE_LOOKS = {
     chop: 1, caps: 1, surf: .3, barWidth: 18, shallowWidth: 290, shelter: .75,
     fetch: 40000, swell: { length: 60, height: .15 },
     cloud: .42, cloudTint: [.97, .97, .95], haziness: .0016, landHaze: .0009,
+    // The trades blow harder out past the sandbar, lighter close to the beach.
+    zones: [5, 220, 120, 3],
   },
   // The open North Sea: dark grey-green water, green-brown with sand in the
   // surf zone, a steep shorebreak and steeper chop, under a paler, cooler sky.
@@ -37,7 +39,19 @@ export const VENUE_LOOKS = {
     chop: 1.35, caps: 1.2, surf: 1, barWidth: 30, shallowWidth: 110, shelter: 0,
     fetch: 60000, swell: { length: 80, height: .6 },
     cloud: .72, cloudTint: [.86, .88, .89], haziness: .0022, landHaze: .0016,
+    // An onshore wind arrives evenly; only out over the sand ridge a little more.
+    zones: [2, 380, 80, 0],
   },
+};
+
+// The wind zones are a preview of how they would look, not wind the rider
+// feels: localStorage "freestyle-tour.venue.zones-preview" = "1" turns it on.
+const previewZones = () => {
+  try {
+    return localStorage.getItem("freestyle-tour.venue.zones-preview") === "1";
+  } catch {
+    return false;
+  }
 };
 
 // Returns false when the water patch is missing (the game then keeps its look).
@@ -55,6 +69,7 @@ export function applyVenueLook(game, venue) {
   water.uCaps.value = look.caps;
   water.uSurf.value = look.surf;
   water.uFogRate.value = look.haziness;
+  water.uZone.value = coast && look.zones && previewZones() ? look.zones : [0, 0, 0, 0];
   const bar = coast ? [coast.sandbar, look.barWidth, look.shallowWidth, look.shelter] : [0, 0, 0, 0];
   water.uShore.value = coast ? [coast.inX, coast.inZ, coast.shoreline, 0] : [0, 0, 0, 0];
   water.uCurve.value = coast ? coast.curve : [0, 0, 0, 0];

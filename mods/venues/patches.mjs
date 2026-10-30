@@ -49,6 +49,7 @@ uniform float uChop;
 uniform float uCaps;
 uniform float uSurf;
 uniform float uFogRate;
+uniform vec4 uZone;
 uniform vec4 uShore;
 uniform vec4 uCurve;
 uniform vec4 uBar;
@@ -70,9 +71,14 @@ const SHALLOWS = `
  float shelter=coast*uBar.w*(1.-smoothstep(uBar.x-40.,uBar.x+5.,off));
  col=mix(col,uShallow*(.92+.16*n),clamp(max(shallow*.9,bar*.65),0.,1.));`;
 
-// The local wind, gusts included, drives the chop and the whitecaps.
+// The local wind, gusts included, drives the chop and the whitecaps. uZone,
+// a looks-only preview of a venue's wind zones (water.js), adds uZone.x knots
+// from uZone.y m out over uZone.z m, and takes uZone.w knots off near the
+// beach; stronger zones darken like a gust.
 const LOCAL_WIND = `
- float localKnots=uKnots+(uGustKnots>0.?shape*extra:0.);
+ float zoneKnots=coast*(uZone.x*smoothstep(uZone.y,uZone.y+uZone.z+1.,off)-uZone.w*(1.-smoothstep(0.,90.,off)));
+ gust=clamp(gust+max(0.,zoneKnots)/9.*mottle,0.,1.);
+ float localKnots=uKnots+(uGustKnots>0.?shape*extra:0.)+zoneKnots;
  float choppy=uChop*(1.-shelter)*clamp((localKnots-8.)/12.,0.,1.8)*(1.-smoothstep(150.,600.,dist));`;
 
 // Whitecaps cover W=3.84e-6*U^3.41 of the sea (Monahan and O'Muircheartaigh
@@ -108,7 +114,7 @@ const DEFAULTS = [
   `uShallow:{value:${glsl(GAME_COLOURS.light)}}`,
   `uSky:{value:${glsl(GAME_COLOURS.sky)}}`,
   `uHaze:{value:${glsl(GAME_COLOURS.haze)}}`,
-  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}",
+  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}", "uZone:{value:[0,0,0,0]}",
   "uShore:{value:[0,0,0,0]}", "uCurve:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
   `uWave:{value:[${new Array(16).fill(0).join(",")}]}`,
 ].join(",");

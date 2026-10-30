@@ -51,6 +51,6 @@ test("the new uniforms start at the colours the game's shaders had, so the game 
     assert.deepEqual(literal.slice(5, -1).split(",").map(Number), GAME_COLOURS[colour]);
     assert.ok(text.includes(`${name}:{value:[${GAME_COLOURS[colour].join(",")}]}`), `${name} starts at ${literal}`);
   }
-  for (const zero of ["uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uShore:{value:[0,0,0,0]}", "uCloud:{value:0}", "uFogRate:{value:.0026}"]) assert.ok(text.includes(zero));
+  for (const zero of ["uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uShore:{value:[0,0,0,0]}", "uZone:{value:[0,0,0,0]}", "uCloud:{value:0}", "uFogRate:{value:.0026}"]) assert.ok(text.includes(zero));
   assert.ok(original.includes("float fog=1.-exp(-dist*.0026);"), "the game's haze rate is .0026");
 });

@@ -67,7 +67,16 @@ rider off the sand, and Sylt's rock groynes stop the rider unless a jump clears
 them. A serve-time patch gives the game's water shader each venue's colours,
 wind chop and whitecaps that grow with the wind (gusts included), and its
 shallows: the Playa Barca lagoon and sandbar at Sotavento; the sandy surf zone,
-sand ridge and shorebreak at Sylt. Without a venue the water looks as before.
+sand ridge and shorebreak at Sylt. Venues add wind waves and swell (visual
+only: the physics never read the waves) that die on the beach without
+flooding it, clouds and their own haze; the beaches are built with three.js
+r185's geometry and simplex noise, vendored in `mods/venues/lib`. Without a
+venue the water looks as before. The plan for more is
+`docs/superpowers/plans/2026-10-30-venue-water.md`.
+
+The mods share one look, the game's own (`mods/lib/ui.js`): their chips sit
+in a tray under the wordmark (one Mods chip on a phone), and their panels open
+as popovers under it.
 
 ## The Champion's challenge
 

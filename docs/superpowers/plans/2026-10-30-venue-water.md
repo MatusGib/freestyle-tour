@@ -37,28 +37,33 @@ What a windsurfer reads from the water, and what the game can draw from it:
 Check: both venues side by side at 15, 19 and 25 kt (practice), and the game's
 own look with no venue chosen.
 
-## Phase 2: wave height that follows the wind
+## Phase 2: wave height that follows the wind (built)
 
-Chop is now only shading. Real chop and swell also lift the board and the
-buoys. The game moves its water mesh in a vertex shader and computes the same
-heights on the CPU for the rider, buoys and wake.
+The game's physics never read the waves (its engine doesn't import the wave
+module), so taller waves are visual only. `mods/venues/waves.js`:
 
-1. Find whether the physics read the wave height (jumps, landings). If they
-   do, taller waves change the game, and the server's AI must sail the same
-   waves; stop and decide with the user.
-2. If they don't: patch the vertex shader and the CPU height function together
-   with one amplitude per venue and wind, so the rider still floats on the
-   drawn surface.
-3. Add swell at open-sea venues (Sylt, Pozo): long crests running to the
-   beach, steepening and breaking on the bar and the shorebreak.
+- Wind waves sized by JONSWAP for the wind and each venue's fetch (about 1 m
+  and 32 m long at Sotavento in 19 kt; 1.1 m and 40 m at Sylt in 17 kt), in
+  three crests spread around the wind, plus a swell running to the beach
+  (0.6 m at Sylt).
+- Calmer inside Sotavento's sandbar; rising a little over Sylt's shallows;
+  dying on the beach, where the water stays below the sand (it used to flood
+  it) and a wet foreshore slopes under it so the swash runs up and down.
+- The water mesh has a vertex every 7.2 m instead of 14.4 m, and the vertex
+  shader and the game's height function add the same waves, so the rider,
+  buoys and wake float on the drawn surface.
+
+Still to do: waves that visibly break on the bar and the shorebreak, not just
+foam.
 
 ## Phase 3: wind you can see on the beach and the rider
 
-- Flags and banners at the event site that stream in the wind direction and
-  flap harder in more wind.
-- Spray off the board and sail, growing with speed and wind; spindrift off
+- Built: feather flags streaming downwind, a banner fence, rigged sails and
+  boards on the sand, spectators (`mods/venues/props.js`, with three.js r185's
+  geometry and simplex noise, vendored in `mods/venues/lib`).
+- Still to do: flags that flap harder in more wind (they are static now);
+  spray off the board and sail, growing with speed and wind; spindrift off
   crests above about 25 kt.
-- Rigged sails lying on the beach, and spectators along the event strip.
 
 ## Phase 4: light and sky per venue
 
@@ -66,6 +71,9 @@ heights on the CPU for the rider, buoys and wake.
   calima haze.
 - Sylt: low autumn sun or overcast, soft light, little glitter, grey sky.
 - Optional time of day per event (morning, midday, evening heats).
+
+Built so far: clouds in the sky dome (fair-weather at Sotavento, broken at
+Sylt) and per-venue haze, so the Jandía ridges and Westerland show.
 
 ## Phase 5: where the wind is stronger (decision needed)
 
@@ -76,6 +84,12 @@ Podersdorf are gusty and shifty. Two ways:
 - **Visual only (recommended to start).** Keep drawing the game's own gust
   field, which already is the wind the rider feels. Phase 1 makes it easier to
   read.
+- **Preview (built, off by default).** Each venue has a zone profile in
+  `water.js` (Sotavento: 5 kt more from 220 m out, 3 kt less near the beach;
+  Sylt: 2 kt more over the sand ridge). With localStorage
+  `freestyle-tour.venue.zones-preview` set to `1`, the water draws it: darker,
+  rougher water with more whitecaps where it blows harder, calmer water in the
+  lee. It is looks only; the rider doesn't feel it.
 - **Real wind zones.** Make the wind stronger or gustier by place at each
   venue. This changes the physics: the server's AI must sail the same zones,
   weekly scores stop being comparable across venues, and the patch must run in
@@ -106,8 +120,8 @@ values.
 ## Order
 
 1. Phase 1 tuning with the user (colours, whitecap amount).
-2. Phase 3 flags and spray: cheap, clearly shows the wind.
-3. Phase 2, after checking the physics.
+2. Phase 3 flags that flap with the wind, and spray.
+3. Phase 2 breaking waves.
 4. Phase 4.
 5. Phase 6 as each venue is mapped.
 6. Phase 5 only after the user chooses.
