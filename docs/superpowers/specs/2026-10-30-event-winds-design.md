@@ -286,9 +286,11 @@ from `heatTarget`, from −10 to +10. The champion keeps his own target.
   a rider of a Sotavento event without a report, see the wind in the
   countdown, discard.
 - **One-off check while building:** the AI aiming for 40 at 12, 16, 20, 24 and
-  28 kt. The results go into this spec. If light wind costs it much more than
-  the half point it gives up at 21 kt, that is recorded and left (real riders
-  score less in light wind too), unless the user asks to retune.
+  28 kt (`node tools/ai-check.mjs --weeks 2 --targets 40 --winds
+  12,16,20,24,28`). Measured 2026-10-30, two weeks' seeds, 4 kt gusts: 12 kt
+  −0.56 against the target on average, 16 kt +0.06, 20 kt +0.04, 24 kt −0.71,
+  28 kt −0.30; mean miss 0.36, worst 1.14, inside the AI check's bar. Light
+  wind costs it no more than strong wind, so nothing is retuned.
 
 ## Risks
 
@@ -296,5 +298,5 @@ from `heatTarget`, from −10 to +10. The champion keeps his own target.
   wind in words. They become `bounded` or `inferred`, or `null`.
 - **The sail and word tables are approximations** for a pro freestyler of
   about 75 kg. The panel exists to correct them by feel.
-- **The AI in light wind.** Fewer planing moves may pull its scores under its
-  targets; the one-off check measures it.
+- **The AI in light wind.** Fewer planing moves could pull its scores under
+  its targets; the one-off check found it lands within a point at 12 kt.
