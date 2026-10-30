@@ -67,15 +67,15 @@ export function createDevData({ paths, tour, draftStore = null, log = console.lo
     if (!files.eventWinds) log(`No ${paths.eventWinds}: events sail in their venue's usual wind.`);
   };
   // Lays the draft over the files and checks the lot; throws a problem() at
-  // the first broken field.
+  // the first broken field, naming its file as the repo does.
   const build = (draft) => {
     const { data, dropped } = overlay(files, draft, tour);
-    if (tour) checkEventWinds(data.eventWinds, tour, paths.eventWinds);
+    if (tour) checkEventWinds(data.eventWinds, tour, DATA_FILES.eventWinds);
     const values = {
       eventWinds: tour ? indexEventWinds(data.eventWinds) : null,
-      venues: data.venues && indexVenueCatalog(data.venues, paths.venues),
-      champion: checkChampion(data.champion, paths.champion),
-      tuning: checkTuning(data.tuning, paths.tuning),
+      venues: data.venues && indexVenueCatalog(data.venues, DATA_FILES.venues),
+      champion: checkChampion(data.champion, DATA_FILES.champion),
+      tuning: checkTuning(data.tuning, DATA_FILES.tuning),
     };
     return { data, values, dropped };
   };
