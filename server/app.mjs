@@ -14,6 +14,7 @@ import { createLobby } from "./lagoon/lobby.mjs";
 import { createRelay } from "./lagoon/relay.mjs";
 import { createStore } from "./store.mjs";
 import { loadTour } from "./tour.mjs";
+import { loadVenueCatalog } from "./venues.mjs";
 import { recordRoom } from "./weekly.mjs";
 
 export const CSP = [
@@ -49,6 +50,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
   const snapshot = openSnapshot(root, name);
   game ??= await loadGame(snapshot, ["engine", "week", "wind"]);
   tour ??= loadTour(join(root, "tour"));
+  const venues = mods?.includes("venues") ? loadVenueCatalog(join(root, "tour", "venues.json")) : null;
   ai ??= createSailer({ root, snapshot: snapshot.name });
   champion ??= JSON.parse(readFileSync(new URL("./champion.json", import.meta.url), "utf8"));
   const store = createStore(dataFile);
@@ -74,10 +76,18 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
   const weekRooms = createWeekRooms({ champion, game, now, ai, log });
   const patched = patchSnapshot(snapshot, await loadPatches(modsDir, mods), log);
   const page = prepareHtml(readFileSync(join(snapshot.dir, "index.html"), "utf8"));
-  const config = JSON.stringify({ snapshot: snapshot.name, parts: snapshot.manifest.parts, mods });
+  let threeUrl = null;
+  if (mods?.includes("venues") && snapshot.manifest.parts.scene) {
+    const sceneSource = readFileSync(join(snapshot.dir, fileFor(snapshot.manifest.parts.scene)), "utf8");
+    const threeImport = sceneSource.match(/from["']([^"']*dispose-model-[^"']+\.js)["']/)?.[1];
+    threeUrl = threeImport ? new URL(threeImport, `http://localhost${snapshot.manifest.parts.scene}`).pathname : null;
+  }
+  const configObject = { snapshot: snapshot.name, parts: snapshot.manifest.parts, mods };
+  if (threeUrl) configObject.threeUrl = threeUrl;
+  const config = JSON.stringify(configObject);
   const files = new Set(snapshot.manifest.files.map((f) => f.path));
   const modsRoot = resolve(modsDir) + sep;
-  const ctx = { store, game, now, tour, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, weekRooms, log };
+  const ctx = { store, game, now, tour, venues, mods, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, weekRooms, log };
 
   const send = (res, status, type, body) => {
     res.writeHead(status, { "content-type": type, "content-security-policy": CSP, "cache-control": "no-store" });

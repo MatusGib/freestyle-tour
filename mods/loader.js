@@ -23,6 +23,7 @@ for (const name of config.mods) {
       mods: config.mods,
       engine,
       parts,
+      threeUrl: config.threeUrl,
       log,
       whenGame,
       onStep: async (fn) => onStep(await whenGame(), fn),

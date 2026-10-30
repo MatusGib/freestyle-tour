@@ -1,9 +1,11 @@
 // Sail a solo heat against an AI rider. Pick an event and a rider; the local
-// server sails that rider's heat in this week's solo wind (about 20 seconds),
-// and your next solo heat shows them as the opponent. At the end, both totals
-// and the winner. The AI's heat never affects your physics or score.
+// server sails that rider's heat in the event venue's conditions when the
+// venues mod is enabled (about 20 seconds), and your next solo heat shows them
+// as the opponent. At the end, both totals and the winner. The AI's heat never
+// affects your physics or score.
 import { claimOpponent, releaseOpponent } from "../lib/opponent.js";
 import { createRunner } from "../lib/replay.js";
+import { clearPlannedHeat, rememberPlannedHeat } from "../venues/venue.js";
 import { aiSample, isSoloHeatStart, isStale, nextHeatText, planningText, resultText, riderLine } from "./challenge.js";
 
 const PANEL_STYLE =
@@ -17,6 +19,7 @@ const getJson = async (url, init) => {
   return body;
 };
 const postJson = (url, body) => getJson(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+const windText = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt, gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt, steady wind`);
 const el = (tag, props = {}, ...children) => {
   const node = Object.assign(document.createElement(tag), props);
   node.append(...children.filter((child) => child !== null));
@@ -25,7 +28,8 @@ const el = (tag, props = {}, ...children) => {
 
 export default {
   name: "challenge",
-  setup({ engine, overlay, whenGame, onStep, log }) {
+  setup({ engine, overlay, whenGame, onStep, log, mods = [] }) {
+    const venuesEnabled = mods.includes("venues");
     const holder = overlay("challenge");
     holder.style.cssText = "font:12px/1.4 system-ui,sans-serif;background:rgba(10,40,40,.85);color:#e8f4f2;padding:4px 10px;border-radius:8px;pointer-events:auto";
     const status = el("span");
@@ -43,11 +47,13 @@ export default {
 
     function arm(heat) {
       armed = heat;
+      if (venuesEnabled) rememberPlannedHeat(heat);
       claimOpponent("challenge");
       say(nextHeatText(heat));
     }
     function disarm() {
       armed = null;
+      if (venuesEnabled) clearPlannedHeat();
       releaseOpponent("challenge");
     }
     async function plan(rider, pseudonym, event) {
@@ -72,6 +78,17 @@ export default {
       const showEvent = async () => {
         const event = await getJson(`/api/local/tour/events/${eventSelect.value}`);
         riders.replaceChildren(
+          event.venue && el("img", {
+            src: `/__mods/venues/assets/${event.venue.id}.svg`,
+            alt: `${event.venue.name} shoreline illustration`,
+            style: "display:block;width:100%;height:100px;object-fit:cover;margin:4px 0 8px;border-radius:8px",
+          }),
+          el("p", {
+            textContent: event.venue
+              ? `${event.venue.name} · typical profile: ${windText(event.venue.gameConditions)}`
+              : `${event.location ?? "Unknown location"} · using this week's conditions`,
+            style: "margin:4px 0 10px;opacity:.82",
+          }),
           ...Object.entries(event.divisions).flatMap(([division, list]) => [
             el("strong", { textContent: division === "men" ? "Men" : "Women" }),
             el("ol", { style: "list-style:none;padding:0;margin:2px 0 8px" }, ...list.map((r) =>

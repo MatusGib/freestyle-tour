@@ -11,7 +11,7 @@ export const aiSample = (pose, now) => ({ pose, updatedAt: now, streamId: "chall
 
 export const riderLine = (r) => `${r.place}. ${r.pseudonym} · ${r.average.toFixed(1)}`;
 export const planningText = (pseudonym) => `Planning ${pseudonym}'s heat…`;
-export const nextHeatText = (heat) => `Next solo heat: vs ${heat.pseudonym} (target ${heat.target.toFixed(1)})`;
+export const nextHeatText = (heat) => `Next solo heat: vs ${heat.pseudonym} (target ${heat.target.toFixed(1)})${heat.venue ? ` at ${heat.venue.name}` : ""}`;
 
 // A challenge sailed in an earlier week's wind has to be planned again.
 export const isStale = (heat, weekStart) => heat.weekStart !== weekStart;

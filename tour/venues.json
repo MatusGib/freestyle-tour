@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "venues": [
+    {
+      "id": "sotavento-fuerteventura",
+      "name": "Sotavento, Fuerteventura",
+      "place": "Sotavento, Fuerteventura, Spain",
+      "locations": [
+        "Sotavento, Fuerteventura",
+        "Sotavento, Fuerteventura, Spain"
+      ],
+      "gameConditions": {
+        "knots": 19,
+        "gustKnots": 6
+      },
+      "character": "Steady summer NE trades, a bright low-tide lagoon and small left-breaking shore waves near the main break.",
+      "confidence": "qualitative",
+      "profileNote": "The heat is framed against Playa Barca: lagoon and sandbar out front, the judging tower and René Egli beach centre on shore, and the Jandía ridges behind. The water stays calmer landward of the bar and roughens toward the Atlantic.",
+      "courseNote": "The heat centre sits about 266 m offshore, with its shoreward edge about 80 m clear of the beach. The sandbar crosses near the heat centre, with the start just on its lagoon side. The course axis is angled about 24° from shore-normal to suggest side-onshore NE trades; this game version has no wind-bearing input, so that angle changes the heat frame and water visuals, not physical wind force.",
+      "landmarks": [
+        "Playa Barca judging tower, grandstand and competition tents",
+        "René Egli windsurf centre and low resort buildings",
+        "Wind-shaped golden dunes with the Jandía ridge behind"
+      ],
+      "waterZones": [
+        "Turquoise, calmer lagoon on the shoreward side of the sandbar",
+        "A shallow, foamy sandbar line at the lagoon's outer edge",
+        "Darker, more textured Atlantic water and a small left-breaking shore wave"
+      ],
+      "sources": [
+        {
+          "title": "Fuerteventura Tourism: Sotavento windsurfing",
+          "accessed": "2026-10-28",
+          "url": "https://mapas.fuerteventuraturismo.es/en/water-sports/resource/playa-de-sotavento-windsurf"
+        },
+        {
+          "title": "Fuerteventura Tourism: Sotavento beach and lagoon",
+          "accessed": "2026-10-28",
+          "url": "https://mapas.fuerteventuraturismo.es/en/fuerteventura-tourism/resource/sotavento"
+        },
+        {
+          "title": "2025 Fuerteventura World Cup site map",
+          "date": "2025-07-18",
+          "url": "https://www.fuerteventura-worldcup.org/images/LACARPA-2025.pdf"
+        },
+        {
+          "title": "PWA 2026 Fuerteventura event preview",
+          "date": "2026-07-15",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-27/"
+        },
+        {
+          "title": "PWA 2026 Fuerteventura event report",
+          "date": "2026-07-21",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-35/"
+        }
+      ]
+    },
+    {
+      "id": "westerland-sylt",
+      "name": "Westerland, Sylt",
+      "place": "Westerland, Sylt, Germany",
+      "locations": [
+        "Westerland, Sylt, Germany",
+        "Sylt, Germany"
+      ],
+      "gameConditions": {
+        "knots": 17,
+        "gustKnots": 4
+      },
+      "character": "Exposed west-facing North Sea water; onshore westerlies can bring steep shorebreak, while offshore easterlies can leave the nearshore water much flatter.",
+      "confidence": "qualitative",
+      "profileNote": "The heat faces Westerland's open beach: the sand ridge and trough sit offshore, rocky groynes cross the shorebreak, and the Musikmuschel and promenade mark the town side. Wave size and water state vary sharply with wind and tide.",
+      "courseNote": "The heat axis points directly toward the beach, matching an onshore westerly setup. The beach is about 210 m from the heat centre, leaving roughly 100 m beyond the shoreward course edge; the sand ridge is about 400 m offshore. Wind bearing is not simulated by this game version.",
+      "landmarks": [
+        "Brandenburger Strand event beach and competition tents",
+        "Westerland promenade, sea wall and Musikmuschel shell stage",
+        "Blue-and-white Strandkörbe and rock groynes with beach markers"
+      ],
+      "waterZones": [
+        "Open North Sea swell and choppy water outside the shorebreak",
+        "A submerged sand ridge around 400 m out with a deeper trough behind it",
+        "A steep shorebreak in onshore westerlies; flatter-looking nearshore water in offshore easterlies"
+      ],
+      "sources": [
+        {
+          "title": "Schleswig-Holstein coastal profile: Sylt west coast",
+          "accessed": "2026-10-28",
+          "url": "https://www.schleswig-holstein.de/DE/fachinhalte/K/kuestenschutz_fachplaene/2_Sylt/1_Einleitung/1_Einleitung"
+        },
+        {
+          "title": "PWA 2026 Sylt event page",
+          "date": "2026-09-25",
+          "url": "https://www.pwaworldtour.com/events/detail/2026-sylt-germany-grand-slam/"
+        },
+        {
+          "title": "PWA 2026 Sylt freestyle report",
+          "date": "2026-09-27",
+          "url": "https://www.pwaworldtour.com/news/detail/citroen-windsurf-world-cup-sylt-10/"
+        },
+        {
+          "title": "Sylt tourism: Brandenburger Strand access",
+          "accessed": "2026-10-28",
+          "url": "https://www.sylt.de/en/poi/barrierefreier-stranduebergang-strandstrasse"
+        },
+        {
+          "title": "Sylt tourism: Musikmuschel on the Westerland promenade",
+          "accessed": "2026-10-28",
+          "url": "https://www.sylt.de/poi/musikmuschel"
+        }
+      ]
+    }
+  ]
+}

@@ -117,12 +117,26 @@ AI riders' results resemble the real ones.
 
 ### 4. Every PWA freestyle venue (idea 17)
 
-Compile the full venue list from the PWA ranking pages (2006–2026) and news
-reports (1997–2005). Model each venue's typical wind strength and gustiness,
-water state (flat, chop, swell), scenery and course orientation.
+Add a venue system for PWA freestyle events. The detailed sequence, data
+decisions and completion criteria are in the
+[venue implementation roadmap](venues-roadmap.md).
 
-Done when each venue plays and looks distinct and the tournament mode uses the
-real venue for each event.
+The first optional `venues` mod now has playable Sotavento and Sylt profiles.
+The full venue catalog, distinct scenery and tournament integration remain in
+progress.
+Pilot design: `docs/superpowers/specs/2026-10-28-venue-profiles-design.md`.
+Plan: `docs/superpowers/plans/2026-10-28-venue-profiles.md`.
+
+Start with the structured PWA freestyle events from 2006–2026, then cover
+historical venues from 1997–2005. Represent each event's reported conditions
+separately from its venue's typical conditions so the same spot can feel
+different across years. Record typical wind and gustiness, water, scenery and
+course orientation where the game supports them. Use the game's existing
+environment settings and keep its heat rules and core physics unchanged.
+
+Done when every supported freestyle event loads its sourced venue profile,
+venue profiles create distinct playable environments, and tournament events
+load their venue automatically.
 
 ### 5. More tricks (idea 20)
 

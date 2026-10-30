@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" aria-labelledby="title desc">
+  <title id="title">Sotavento, Fuerteventura</title>
+  <desc id="desc">Golden dunes and volcanic mountains rise behind a long tidal sandbar and turquoise lagoon, marked by a windsurf flag.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#f7bd74"/><stop offset="1" stop-color="#fff0c6"/></linearGradient>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#29b6b4"/><stop offset="1" stop-color="#087d91"/></linearGradient>
+    <linearGradient id="sand" x2="0" y2="1"><stop stop-color="#f6ca78"/><stop offset="1" stop-color="#d58a43"/></linearGradient>
+  </defs>
+  <rect width="720" height="300" fill="url(#sky)"/>
+  <circle cx="586" cy="66" r="34" fill="#fff2c4" opacity=".95"/>
+  <path d="M0 160 88 106l50 27 74-75 80 78 78-54 67 65 73-48 73 51 57-31v90H0Z" fill="#8d5849"/>
+  <path d="m0 174 105-44 53 22 68-61 63 75 67-47 86 57 66-44 80 47 82-36 70 25v52H0Z" fill="#b66b4b"/>
+  <path d="M0 192q115-48 235-12t230-5q134-35 255 10v55H0Z" fill="url(#sand)"/>
+  <path d="M0 225q122-22 232 4t235-6q128-27 253 3v74H0Z" fill="url(#sea)"/>
+  <path d="M-8 239q105-15 206-2t204-1q107-17 214 0t112 5v15q-116-11-221 2t-210 0q-111-14-305 1Z" fill="#e7c27e"/>
+  <path d="M0 246q120-14 238 4t243-3q117-18 239 3M0 271q106-8 212 5t252-2q142-12 256 3" fill="none" stroke="#a5e4d4" stroke-width="3" opacity=".65"/>
+  <path d="M514 188V111" stroke="#fff9e8" stroke-width="5"/>
+  <path d="M518 113h46l-22 25h-24Z" fill="#ef5d47"/>
+  <path d="M518 138h24l22 25h-46Z" fill="#fff9e8"/>
+  <path d="M514 111v77" stroke="#425860" stroke-width="2"/>
+</svg>

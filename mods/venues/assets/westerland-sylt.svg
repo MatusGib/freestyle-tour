@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" aria-labelledby="title desc">
+  <title id="title">Westerland, Sylt</title>
+  <desc id="desc">Blue and white beach baskets, rocky groynes, the North Sea and Westerland's resort frontage.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#8bc9dc"/><stop offset="1" stop-color="#e6f3ed"/></linearGradient>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#4ba9b5"/><stop offset="1" stop-color="#247887"/></linearGradient>
+  </defs>
+  <rect width="720" height="300" fill="url(#sky)"/>
+  <circle cx="108" cy="66" r="28" fill="#fff5d0" opacity=".9"/>
+  <path d="M0 168q105-27 213 0t216 0q141-28 291 4v55H0Z" fill="#d8e8dc"/>
+  <path d="M15 165v-37h42v37m8 0v-52h50v52m10 0v-32h46v32m335-1v-45h48v45m7 0v-62h58v62m8 0v-38h49v38" fill="#f5f0e5" stroke="#8b8176" stroke-width="3"/>
+  <path d="m15 128 21-15 21 15m49-15 17-12 18 12m347 8 24-18 24 18m34-18 29-20 29 20" fill="#a95145"/>
+  <path d="M0 176h720" stroke="#b8a98c" stroke-width="5"/>
+  <path d="M0 197q130-18 248 4t239-3q111-20 233 1v46H0Z" fill="#c4b69b"/>
+  <path d="M0 226q129-13 242 4t245-3q118-16 233 2v71H0Z" fill="url(#sea)"/>
+  <path d="M0 247q106-10 207 3t258-1q137-12 255 3M0 274q118-9 228 3t247-2q127-10 245 2" fill="none" stroke="#b9e4dd" stroke-width="3" opacity=".7"/>
+  <path d="m65 186 9-10 8 8 9-12 10 11 8-9 11 11 8-10 9 11 12-9 10 9v9H65Zm516 0 8-10 8 8 9-12 10 11 8-9 11 11 8-10 9 11 12-9 10 9v9h-93Z" fill="#5c625f"/>
+  <path d="M527 187v-23l19-14 19 14v23Z" fill="#fffdf7" stroke="#89908b" stroke-width="2"/>
+  <path d="m527 164 19-14 19 14M577 187v-20l17-12 18 12v20Z" fill="#eee9df" stroke="#89908b" stroke-width="2"/>
+  <path d="M170 218q4-60 63-60t63 60v36H170Z" fill="#f5eee0" stroke="#745d51" stroke-width="4"/>
+  <path d="M180 211q0-45 18-53v60h-18Zm37-52h18v59h-18Zm37 0q18 11 18 53h-18Z" fill="#477f91"/>
+  <path d="M162 215h143v49H162Z" fill="#f5eee0" stroke="#745d51" stroke-width="4"/>
+  <path d="M172 221h20v37h-20Zm42 0h21v37h-21Zm43 0h20v37h-20Z" fill="#477f91"/>
+  <path d="M157 263h153v10H157Z" fill="#745d51"/>
+  <path d="m177 273-9 17m133-17 9 17" stroke="#745d51" stroke-width="5"/>
+</svg>
