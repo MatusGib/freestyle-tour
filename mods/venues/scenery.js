@@ -3,7 +3,11 @@
 // wind always blows along +x and its heat area never moves, so a venue turns
 // its coast around the course instead: the beach lies at the venue's angle to
 // the wind, beyond the course and the water AI riders sail. All props remain
-// stationary in world space while the rider and camera move.
+// stationary in world space while the rider and camera move. Land is shaped
+// with three.js's simplex noise and props with its geometry (props.js), both
+// vendored in lib/.
+import { SimplexNoise } from "./lib/SimplexNoise.js";
+import { addBlock, addBush, addFeatherFlag, addPagoda, addPalm, addPerson, addRig, seeded } from "./props.js";
 
 // The game's heat area: depth along the wind (x), length across it (z).
 const COURSE = { depth: 220, length: 420 };
@@ -61,13 +65,18 @@ export function shorelineAt(venueId, s) {
   return layout ? shorelineBase(layout) + shorelineOffset(s, layout) : 0;
 }
 
-// Where the water shader draws a venue's shallows: the inland direction, the
-// straight shoreline's distance from the course centre and the sandbar's
-// distance out from it.
+// Where the water shader draws a venue's shallows and calms its waves: the
+// inland direction, the straight shoreline's distance from the course centre,
+// its bends (as shorelineOffset: [a1, f1, a2, f2]) and the sandbar's distance
+// out from it.
 export function coastFor(venueId) {
   const layout = SITE_LAYOUTS[venueId];
   if (!layout) return null;
-  return { inX: layout.frame.inX, inZ: layout.frame.inZ, shoreline: shorelineBase(layout), sandbar: layout.sandbarOffshore };
+  const { curveAmplitude, curveFrequency, curveSecondary, curveSecondaryFrequency } = layout;
+  return {
+    inX: layout.frame.inX, inZ: layout.frame.inZ, shoreline: shorelineBase(layout), sandbar: layout.sandbarOffshore,
+    curve: [curveAmplitude, curveFrequency, curveSecondary, curveSecondaryFrequency],
+  };
 }
 
 function writeLocalPosition(state, frame, s, d) {
@@ -325,6 +334,18 @@ function addSurface(group, template, s0, s1, d0, d1, rows, cols, heightAt, color
   return addMesh(group, template, positions, indices, "#ffffff", { ...meshOptions, colors, uvs });
 }
 
+// The wet foreshore slopes from the beach (top, at the shoreline) to 0.7 m
+// under the water 14 m out, so the swash runs up and down the sand.
+function addForeshore(group, template, venueId, layout, top, color) {
+  const coastOffset = (s) => shorelineOffset(s, layout);
+  const shore = shorelineBase(layout);
+  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore - 14, shore, 4, SHORE_COLS,
+    (s, d) => top + (top + .7) * (d - shorelineAt(venueId, s)) / 14,
+    (s, d) => ({ color, factor: .94 + .06 * Math.sin(s * .09 + d * .3) }),
+    { coastOffset, coastOffsetEnd: coastOffset },
+  );
+}
+
 function addGrass(group, template, placements, color, seed = 1, groundAt = () => 0) {
   const positions = [], indices = [];
   let random = seed;
@@ -345,21 +366,6 @@ function addGrass(group, template, placements, color, seed = 1, groundAt = () =>
   return addMesh(group, template, positions, indices, color, { flatShading: true });
 }
 
-function addTent(group, template, s, d, scale = 1, baseY = 0) {
-  addBox(group, template, s, d, 8 * scale, 5 * scale, 2.3 * scale, "#eee9df", 0, baseY);
-  // Tall A-frame canopy: an extruded triangular roof, set on the box below.
-  const positions = [], indices = [];
-  const half = 4 * scale, deep = 2.5 * scale, peak = 4.6 * scale;
-  const a = [[s - half, d - deep, 2.2 * scale + baseY], [s + half, d - deep, 2.2 * scale + baseY], [s, d - deep, peak + baseY]];
-  const b = a.map(([x, z, y]) => [x, d + deep, y]);
-  for (const face of [[a[0], a[1], a[2]], [b[1], b[0], b[2]], [a[0], b[0], b[1], a[1]], [a[1], b[1], b[2], a[2]], [b[2], a[0], a[2]]]) {
-    const offset = positions.length / 3;
-    face.forEach(([x, z, y]) => positions.push(...point(x, z, y)));
-    for (let i = 1; i < face.length - 1; i++) indices.push(offset, offset + i, offset + i + 1);
-  }
-  addMesh(group, template, positions, indices, "#fffdf7");
-}
-
 function addBeachBasket(group, template, s, d, baseY = 0) {
   addBox(group, template, s, d, 2.7, 2, 1.25, "#477f91", 0, baseY);
   for (let i = -2; i <= 2; i++) {
@@ -370,162 +376,167 @@ function addBeachBasket(group, template, s, d, baseY = 0) {
   addBox(group, template, s + 1.05, d + .55, .08, .08, .75, "#786655", 0, baseY);
 }
 
-function buildSotavento(group, template, textures) {
-  const venueId = "sotavento-fuerteventura";
-  const layout = SITE_LAYOUTS["sotavento-fuerteventura"];
+// What props.js needs to place geometry on the coast being built.
+const kitFor = (group, template) => ({ point, add: (positions, indices, color, options) => addMesh(group, template, positions, indices, color, options) });
+
+// The yaw that turns a prop's local +x (along the shore) onto the wind (+x in
+// the world).
+const windYaw = () => Math.atan2(-building.inX, building.rightX);
+
+const smooth = (a, b, x) => {
+  const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
+// Fractal simplex noise (-1 to 1) and its ridged form (0 to 1; sharpness 2
+// gives knife-edge crests, about 1 worn, rounded ridges), for dunes and
+// mountains that don't repeat like sums of sines.
+function landNoise(seed) {
+  const simplex = new SimplexNoise({ random: seeded(seed) });
+  const fbm = (x, y, octaves = 4) => {
+    let value = 0, amplitude = .5, frequency = 1;
+    for (let i = 0; i < octaves; i++) {
+      value += amplitude * simplex.noise(x * frequency, y * frequency);
+      amplitude *= .5;
+      frequency *= 2.03;
+    }
+    return value;
+  };
+  const ridged = (x, y, octaves = 5, sharpness = 2) => {
+    let value = 0, amplitude = .5, frequency = 1;
+    for (let i = 0; i < octaves; i++) {
+      value += amplitude * (1 - Math.abs(simplex.noise(x * frequency, y * frequency))) ** sharpness;
+      amplitude *= .5;
+      frequency *= 2.1;
+    }
+    return value;
+  };
+  return { fbm, ridged };
+}
+
+// The three terrain strips every coast has: the beach, the dunes and the land
+// behind, all on one groundAt so their edges meet.
+function addLand(group, template, venueId, layout, textures, groundAt, colorAt) {
   const shore = shorelineBase(layout);
   const coastOffset = (s) => shorelineOffset(s, layout);
-  const smooth = (a, b, x) => {
-    const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
-    return t * t * (3 - 2 * t);
-  };
+  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore, shore + 90, 18, SHORE_COLS, groundAt, colorAt, { map: textures.sand, coastOffset });
+  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore + 90, shore + 520, 64, SHORE_COLS, groundAt, colorAt, { map: textures.sand });
+  addSurface(group, template, -4600, 4600, shore + 520, shore + 2400, 90, 900, groundAt, colorAt);
+}
+
+function buildSotavento(group, template, textures) {
+  const venueId = "sotavento-fuerteventura";
+  const layout = SITE_LAYOUTS[venueId];
+  const shore = shorelineBase(layout);
+  const kit = kitFor(group, template);
+  const wind = windYaw();
+  const random = seeded(1993);
+  const { fbm, ridged } = landNoise(28);
+  const inlandOf = (s, d) => d - shorelineAt(venueId, s);
+  // A wide, gently rising beach; foredunes behind it; then the Jandía massif:
+  // old, worn volcanic ridges cut by gullies, rising to about 200 m inland.
   const groundAt = (s, d) => {
-    const inland = d - shorelineAt(venueId, s);
-    const shoreRipple = Math.sin(s * .021 + inland * .04) * .035 + Math.sin(s * .071) * .018;
-    if (inland <= 88) return .12 + .22 * Math.max(0, inland / 88) + shoreRipple * Math.max(0, inland / 88);
-    const duneT = Math.max(0, Math.min(1, (inland - 88) / 172));
-    const duneEdge = .34 + 8.8 + .5 * Math.sin(s * .018) + .25 * Math.sin(s * .057);
-    if (inland <= 260) {
-      return .34 + 8.8 * Math.pow(duneT, 1.35) +
-        (.5 * Math.sin(s * .018) + .25 * Math.sin(s * .057)) * duneT +
-        1.55 * Math.sin(s * .025 + inland * .03) * Math.sin(Math.PI * duneT);
-    }
-    const inlandDistance = inland - 260;
-    const far = Math.max(.08, 1 - inlandDistance / 1100);
-    const ridge = Math.max(0,
-      Math.sin(s * .0105 + .7) * 20 + Math.sin(s * .024 + 1.8) * 13 + Math.sin(s * .052) * 7,
-    );
-    const shoulder = Math.max(0, 17 - Math.abs(s + 125) * .075) + Math.max(0, 14 - Math.abs(s - 180) * .07);
-    return duneEdge + smooth(0, 145, inlandDistance) * far *
-      (ridge + shoulder + 3.5 * Math.sin(inland * .018 + s * .016));
+    const inland = inlandOf(s, d);
+    const beach = .12 + .3 * Math.min(inland, 90) / 90 + Math.max(0, inland - 90) * .012;
+    const dunes = smooth(70, 150, inland) * (1 - smooth(420, 560, inland)) * (6 * Math.max(0, fbm(s * .011, inland * .018) + .25) + 1.2 * fbm(s * .05, inland * .06));
+    const hills = smooth(500, 1500, inland) * (1 + inland / 2400) * (150 * ridged(s * .0009 + 3, inland * .0011, 4, 1.15) + 18 * fbm(s * .005, inland * .005));
+    return beach + Math.max(0, dunes) + hills;
   };
-  const sandColor = (s, d) => {
-    const inland = d - shorelineAt(venueId, s);
-    const color = inland < 14 ? "#bba982" : inland < 88 ? "#d6bd83" : inland < 260 ? "#c6a36e" : "#a47753";
-    return { color, factor: .93 + .07 * Math.sin(s * .071 + d * .12) };
+  const colorAt = (s, d) => {
+    const inland = inlandOf(s, d);
+    const shade = .93 + .07 * fbm(s * .08, inland * .08, 2);
+    if (inland < 90) return { color: "#dcc493", factor: shade };
+    if (inland < 520) return { color: fbm(s * .03, inland * .03, 2) > .18 ? "#a8a06c" : "#e2ca96", factor: shade };
+    const height = groundAt(s, d);
+    return { color: height > 120 ? "#86644f" : height > 40 ? "#9c7757" : "#b48d63", factor: .88 + .12 * fbm(s * .01, inland * .01, 3) };
   };
+  addForeshore(group, template, venueId, layout, .12, "#a38e68");
+  addLand(group, template, venueId, layout, textures, groundAt, colorAt);
+  const at = (s, inland) => [s, shore + inland, groundAt(s, shore + inland)];
 
-  // The Playa Barca lagoon and its sandbar are drawn by the water shader
-  // (water.js), so they move with the waves.
-  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore, shore + 88, 16, SHORE_COLS,
-    groundAt,
-    sandColor,
-    { map: textures.sand, coastOffset },
-  );
-  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore + 88, shore + 260, 40, SHORE_COLS,
-    groundAt,
-    sandColor,
-    { map: textures.sand },
-  );
-  // The inland terrain continues the foredune ridge into the Jandía hills;
-  // matched edge elevations keep the long shoreline from ending in a cliff.
-  addSurface(group, template, -4600, 4600, shore + 260, shore + 1450, 84, 800,
-    groundAt,
-    (s, d) => ({ color: d - shorelineAt(venueId, s) > 760 ? "#795d4d" : "#a47753", factor: .87 + .13 * Math.sin(s * .031 + d * .011) }),
-  );
-
-  // Playa Barca's PWA judging tower and event village sit on the dry beach,
-  // behind the lagoon-side heat field.
+  // Playa Barca's judging tower and the event village: pagodas, a banner
+  // fence and a line of sponsors' feather flags along the beach front.
   addJudgeTower(group, template, 0, shore + 22, groundAt(0, shore + 22));
-  addBox(group, template, -18, shore + 23, 23, 1.2, .42, "#9c7955", 0, groundAt(-18, shore + 23));
-  for (let i = 0; i < 9; i++) {
-    const s = -220 + i * 55, d = shore + 43 + (i % 2) * 8;
-    addTent(group, template, s, d, .92, groundAt(s, d));
+  const trims = ["#d23c3c", "#1d6fd1", "#f2c230", "#20262e"];
+  for (let i = 0; i < 12; i++) {
+    const [s, d, y] = at(-250 + i * 46, 46 + (i % 2) * 7);
+    addPagoda(kit, s, d, y, { trim: trims[i % trims.length], width: i % 4 === 0 ? 7 : 5 });
   }
-  addBox(group, template, -250, shore + 62, 44, 18, 4.5, "#f0e8d5", 0, groundAt(-250, shore + 62));
-  addBox(group, template, -250, shore + 52.8, 43, .4, 2.1, "#c65347", 0, groundAt(-250, shore + 52.8));
+  for (let s = -150; s <= 150; s += 6.5) {
+    const [, d, y] = at(s, 31);
+    addBox(group, template, s, d, 6, .12, 1.1, ["#e8412d", "#1d6fd1", "#f4f2ec", "#20262e"][Math.round(s / 6.5) & 3], 0, y);
+  }
+  for (let s = -170; s <= 170; s += 8.5) {
+    const [, d, y] = at(s, 15 + (Math.round(s / 8.5) % 2) * 2);
+    addFeatherFlag(kit, s, d, y, ["#e8412d", "#1d9bd1", "#f2c230", "#20262e", "#e9ecef"][Math.round(s / 8.5 + 20) % 5], wind);
+  }
+  // The rigging areas either side of the village, and spectators along the
+  // water's edge and around the tower.
+  for (let i = 0; i < 46; i++) {
+    const side = i % 2 ? 1 : -1;
+    const [s, d, y] = at(side * (120 + random() * 170), 8 + random() * 26);
+    addRig(kit, s, d, y, random, wind);
+  }
+  for (let i = 0; i < 170; i++) {
+    const near = i < 70;
+    const [s, d, y] = at(near ? (random() - .5) * 90 : (random() - .5) * 420, near ? 6 + random() * 22 : 2 + random() * 7);
+    addPerson(kit, s, d, y, random);
+  }
 
-  // The René Egli base and the low Meliá resort wings sit behind the open
-  // beach. Keep them subordinate to the dunes and distant Jandía relief.
-  addBox(group, template, 20, shore + 129, 56, 21, 4.2, "#ece7da", 0, groundAt(20, shore + 129));
+  // The René Egli centre and the low Meliá resort wings among palms, with
+  // bushes holding the dunes.
+  addBlock(kit, 20, shore + 129, groundAt(20, shore + 129), 56, 21, 4.4, { windows: textures.windows });
   addBox(group, template, 20, shore + 117.8, 50, .42, 2.1, "#73aeb0", 0, groundAt(20, shore + 129) + 1.1);
-  addBox(group, template, 58, shore + 136, 18, 14, 3.4, "#f3eee4", 0, groundAt(58, shore + 136));
-  for (const [s, d, width, depth, height, color] of [
-    [-112, shore + 180, 76, 44, 15, "#eee9df"],
-    [112, shore + 192, 94, 52, 18, "#e7e0d5"],
-  ]) {
-    const baseY = groundAt(s, d);
-    addBox(group, template, s, d, width, depth, height, color, 0, baseY);
-    addBox(group, template, s, d - depth / 2 - .2, width + 1, .4, .55, "#8e6651", 0, baseY + .9);
-    const floors = Math.floor(height / 3.3);
-    for (let floor = 0; floor < floors; floor++) {
-      for (let bay = 0; bay < Math.max(2, Math.floor(width / 5)); bay++) {
-        addBox(group, template, s - width / 2 + 3 + bay * 4.3, d - depth / 2 - .42, .9, .12, 1.15, "#789092", 0, baseY + 2 + floor * 3.15);
-      }
+  for (const [s, inland, width, depth, floors] of [[-118, 180, 70, 36, 3], [-150, 222, 60, 30, 4], [105, 190, 86, 40, 4], [150, 236, 64, 30, 5]]) {
+    const [, d, y] = at(s, inland);
+    for (let step = 0; step < floors; step++) {
+      addBlock(kit, s, d + step * 6, y + step * 3, width - step * 4, depth - step * 6, 3, { windows: textures.windows, roof: "#c9b9a0" });
     }
   }
-  for (let i = 0; i < 7; i++) {
-    const s = -42 + i * 14;
-    const d = shore + 86 + (i % 2) * 4;
-    const height = 7 + (i % 3) * .8;
-    addCylinder(group, template, s, d, groundAt(s, d), .055, .04, height, "#e8dfc9", 8);
-    const positions = [], indices = [];
-    const mastD = d - .16;
-    const offset = positions.length / 3;
-    positions.push(...point(s, mastD, groundAt(s, d)), ...point(s + 4.2, mastD, groundAt(s, d)), ...point(s + 3.5, mastD - .06, groundAt(s, d) + height));
-    indices.push(offset, offset + 1, offset + 2);
-    addMesh(group, template, positions, indices, ["#c45a46", "#e6cf69", "#4d8790", "#edede3", "#426c88", "#d78955", "#4d7b52"][i]);
+  for (let i = 0; i < 26; i++) {
+    const [s, d, y] = at(-200 + random() * 400, 140 + random() * 70);
+    addPalm(kit, s, d, y, random);
   }
-  addGrass(group, template, [[-360, shore + 148, 170, 1.2], [-220, shore + 218, 150, 1.4], [25, shore + 225, 130, 1.2], [285, shore + 170, 170, 1.1]], "#89944c", 812, groundAt);
+  for (let i = 0; i < 160; i++) {
+    const [s, d, y] = at((random() - .5) * 1400, 120 + random() * 380);
+    addBush(kit, s, d, y, random, random() < .5 ? "#8b8f58" : "#9d9466");
+  }
 }
 
 function buildSylt(group, template, textures) {
   const venueId = "westerland-sylt";
-  const layout = SITE_LAYOUTS["westerland-sylt"];
+  const layout = SITE_LAYOUTS[venueId];
   const shore = shorelineBase(layout);
-  const coastOffset = (s) => shorelineOffset(s, layout);
-  const smooth = (a, b, x) => {
-    const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
-    return t * t * (3 - 2 * t);
-  };
+  const kit = kitFor(group, template);
+  const wind = windYaw();
+  const random = seeded(2023);
+  const { fbm } = landNoise(54);
+  const inlandOf = (s, d) => d - shorelineAt(venueId, s);
+  // A beach rising to the sea wall, the promenade and the flat town behind
+  // it; beyond the town, Sylt's high grey dunes.
   const groundAt = (s, d) => {
-    const inland = d - shorelineAt(venueId, s);
-    if (inland <= 112) {
-      const t = Math.max(0, inland / 112);
-      return .16 + .94 * t + (.035 * Math.sin(s * .024 + inland * .06) + .025 * Math.sin(s * .081)) * t;
-    }
-    if (inland <= 188) {
-      const t = (inland - 112) / 76;
-      const urban = 1 - smooth(320, 900, Math.abs(s));
-      const beachEdgeRipple = .035 * Math.sin(s * .024 + 112 * .06) + .025 * Math.sin(s * .081);
-      const lowRelief = (1.1 * Math.sin(s * .025 + inland * .022) + .4 * Math.sin(s * .063)) * t * (1 - urban * .8);
-      return 1.1 + beachEdgeRipple + 1.55 * t + lowRelief;
-    }
-    const inlandDistance = inland - 188;
-    const urban = 1 - smooth(320, 920, Math.abs(s));
-    const far = Math.max(.1, 1 - inlandDistance / 1050);
-    const dune = Math.sin(s * .021 + inland * .037) * 3.4 + Math.sin(s * .065 - inland * .058) * 1.3;
-    const ramp = smooth(0, 150, inlandDistance);
-    const edgeRelief = (1.1 * Math.sin(s * .025 + 188 * .022) + .4 * Math.sin(s * .063)) * (1 - urban * .8);
-    return 2.65 + edgeRelief + ramp * far * dune * (1 - urban * .72);
+    const inland = inlandOf(s, d);
+    const town = 1 - smooth(380, 900, Math.abs(s));
+    const beach = .16 + .94 * Math.min(inland, 112) / 112 + 1.4 * smooth(112, 132, inland);
+    const dunes = smooth(120, 220, inland) * (1 - town * .9) * (11 * Math.max(0, fbm(s * .008, inland * .012) + .35) + 2 * fbm(s * .04, inland * .04));
+    return beach + Math.max(0, dunes);
   };
-  const sandColor = (s, d) => {
-    const inland = d - shorelineAt(venueId, s);
-    const color = inland < 18 ? "#99988d" : inland < 112 ? "#c6bba4" : inland < 188 ? "#b1a78e" : "#8b917e";
-    return { color, factor: .92 + .08 * Math.sin(s * .1 + d * .12) };
+  const colorAt = (s, d) => {
+    const inland = inlandOf(s, d);
+    const shade = .92 + .08 * fbm(s * .09, inland * .09, 2);
+    if (inland < 112) return { color: "#cdbfa2", factor: shade };
+    const town = 1 - smooth(380, 900, Math.abs(s));
+    if (town > .5 && inland < 600) return { color: "#a9a79c", factor: shade };
+    return { color: fbm(s * .02, inland * .02, 2) > -.1 ? "#7f8c63" : "#c9bc9c", factor: shade };
   };
-
-  // Westerland faces the open North Sea. A long submerged sand ridge sits
-  // roughly 400 m out; a shallow trough and the steep shorebreak lie inshore.
-  // The water shader draws them (water.js), so they move with the waves.
-  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore, shore + 112, 24, SHORE_COLS,
-    groundAt,
-    sandColor,
-    { map: textures.sand, coastOffset },
-  );
-  addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore + 112, shore + 188, 24, SHORE_COLS,
-    groundAt,
-    sandColor,
-  );
-  addSurface(group, template, -4600, 4600, shore + 188, shore + 1320, 42, 800,
-    groundAt,
-    (s, d) => ({ color: d - shorelineAt(venueId, s) > 330 ? "#758b82" : "#969b87", factor: .9 + .1 * Math.sin(s * .05) }),
-  );
+  addForeshore(group, template, venueId, layout, .16, "#8d8774");
+  addLand(group, template, venueId, layout, textures, groundAt, colorAt);
+  const at = (s, inland) => [s, shore + inland, groundAt(s, shore + inland)];
   // A raised, paved promenade and sea wall back the central contest beach.
-  addSurface(group, template, -370, 370, shore + 114, shore + 130, 2, 180,
-    () => 2.35,
-    () => ({ color: "#aaa99f", factor: .98 }),
-  );
+  addSurface(group, template, -370, 370, shore + 114, shore + 130, 2, 180, () => 2.35, () => ({ color: "#aaa99f", factor: .98 }));
+  addBox(group, template, 0, shore + 111.8, 720, 3.8, 1.25, "#a7a59b", 0, 1.1);
+  addBox(group, template, 0, shore + 111.8, 720, 4.1, .22, "#d6d2c5", 0, 2.35);
+  addMusicShell(group, template, -14, shore + 121, 2.35);
 
   // Sylt's north-south rock groynes reach about 20 m into the sea and repeat
   // every 100–200 m. At high tide, marked heads can be the only visible cue.
@@ -544,50 +555,55 @@ function buildSylt(group, template, textures) {
     const markerD = signD - .13, y0 = signBase + .1, y1 = signBase + .93, half = .34, thick = .07;
     for (const sign of [-1, 1]) {
       const positions = [], indices = [];
-      const a = positions.length / 3;
       positions.push(...point(s - half, markerD, sign < 0 ? y0 : y1), ...point(s - half + thick, markerD, sign < 0 ? y0 : y1),
         ...point(s + half, markerD, sign < 0 ? y1 : y0), ...point(s + half - thick, markerD, sign < 0 ? y1 : y0));
-      indices.push(a, a + 1, a + 2, a, a + 2, a + 3);
+      indices.push(0, 1, 2, 0, 2, 3);
       addMesh(group, template, positions, indices, "#343831");
     }
   }
 
-  // The World Cup festival occupies a 500 m stretch of Brandenburger Strand.
-  for (let s = -225; s <= 225; s += 45) {
-    const d = shore + 43 + (Math.round(s / 45) % 2) * 5;
-    addTent(group, template, s, d, .98, groundAt(s, d));
-    if (s % 90 === 0) addBox(group, template, s, shore + 51, 11, 6, 4.2, "#e9e3d6", 0, groundAt(s, shore + 51));
+  // The World Cup village on Brandenburger Strand: pagodas, feather flags,
+  // the rigging area, spectators, and the blue-and-white beach baskets.
+  const trims = ["#1d6fd1", "#e8412d", "#20262e", "#f2c230"];
+  for (let i = 0; i < 11; i++) {
+    const [s, d, y] = at(-225 + i * 45, 43 + (i % 2) * 5);
+    addPagoda(kit, s, d, y, { trim: trims[i % trims.length], width: i % 3 === 0 ? 7 : 5 });
+  }
+  for (let s = -160; s <= 160; s += 9) {
+    const [, d, y] = at(s, 18);
+    addFeatherFlag(kit, s, d, y, ["#1d6fd1", "#e8412d", "#f2c230", "#e9ecef", "#20262e"][Math.round(s / 9 + 20) % 5], wind);
+  }
+  for (let i = 0; i < 40; i++) {
+    const side = i % 2 ? 1 : -1;
+    const [s, d, y] = at(side * (110 + random() * 160), 10 + random() * 24);
+    addRig(kit, s, d, y, random, wind);
+  }
+  for (let i = 0; i < 150; i++) {
+    const [s, d, y] = at((random() - .5) * 360, i < 90 ? 4 + random() * 10 : 100 + random() * 12);
+    addPerson(kit, s, d, y, random);
   }
   for (let s = -420; s <= 420; s += 42) {
     const basketS = s + (Math.round(s / 42) % 2) * 7;
-    const basketD = shore + 24 + (Math.abs(s) % 3) * 6;
-    addBeachBasket(group, template, basketS, basketD, groundAt(basketS, basketD));
+    const [, basketD, y] = at(basketS, 24 + (Math.abs(s) % 3) * 6);
+    addBeachBasket(group, template, basketS, basketD, y);
   }
 
-  // Westerland's promenade, sea wall and Musikmuschel back the competition
-  // beach; dunes and the pale resort skyline continue behind the waterfront.
-  addBox(group, template, 0, shore + 111.8, 720, 3.8, 1.25, "#a7a59b", 0, 1.1);
-  addBox(group, template, 0, shore + 111.8, 720, 4.1, .22, "#d6d2c5", 0, 2.35);
-  addMusicShell(group, template, -14, shore + 121, 2.35);
-  addBox(group, template, 182, shore + 234, 74, 36, 18, "#e8e2d6", 0, groundAt(182, shore + 234));
-  addBox(group, template, 182, shore + 215.7, 75, .6, 1.2, "#7b9694", 0, groundAt(182, shore + 234) + 1.4);
-  addBox(group, template, -162, shore + 202, 68, 31, 17, "#e0ddd4", 0, groundAt(-162, shore + 202));
-  addBox(group, template, -162, shore + 186.1, 66, .55, 1.2, "#9b6354", 0, groundAt(-162, shore + 202) + 1.4);
-  for (const [s, d, w, dep, h, color] of [
-    [-330, shore + 190, 25, 14, 17, "#e7dfd1"], [-278, shore + 222, 30, 17, 19, "#eee7da"],
-    [-100, shore + 242, 34, 16, 21, "#e6e0d5"], [30, shore + 220, 28, 14, 18, "#f0eadf"],
-    [315, shore + 202, 32, 16, 18, "#e4ded1"], [370, shore + 235, 25, 14, 17, "#ece5d8"],
+  // Westerland's waterfront: hotels along the promenade and, behind them, the
+  // tall slabs of the Kurzentrum that mark the town from the sea.
+  for (const [s, inland, width, depth, height] of [
+    [-330, 150, 26, 16, 15], [-280, 156, 30, 18, 18], [-200, 150, 34, 16, 12], [-110, 152, 28, 16, 15],
+    [60, 152, 30, 16, 15], [130, 150, 34, 18, 18], [215, 154, 28, 16, 12], [300, 150, 30, 16, 15], [370, 156, 26, 14, 12],
   ]) {
-    const baseY = groundAt(s, d);
-    addBox(group, template, s, d, w, dep, h, color, 0, baseY);
-    addBox(group, template, s, d - dep / 2 - .15, w + .8, .4, .55, "#985c4f", 0, baseY + .8);
-    for (let floor = 0; floor < Math.floor(h / 3.6); floor++) {
-      for (let bay = 0; bay < Math.max(2, Math.floor(w / 4)); bay++) {
-        addBox(group, template, s - w / 2 + 2 + bay * 3.2, d - dep / 2 - .4, .85, .12, 1.05, "#738b8d", 0, baseY + 1.45 + floor * 3.5);
-      }
-    }
+    const [, d, y] = at(s, inland);
+    addBlock(kit, s, d, y, width, depth, height, { windows: textures.windows, wall: "#efe9dd", roof: "#8f5a4c" });
   }
-  addGrass(group, template, [[-1200, shore + 133, 360, 1.4], [-720, shore + 151, 380, 1.7], [-180, shore + 144, 330, 1.4], [480, shore + 158, 390, 1.7], [1050, shore + 139, 370, 1.5]], "#75844b", 937, groundAt);
+  for (const [s, inland, width, height] of [[-70, 320, 48, 30], [30, 350, 44, 38], [140, 330, 36, 27]]) {
+    const [, d, y] = at(s, inland);
+    addBlock(kit, s, d, y, width, 16, height, { windows: textures.windows, wall: "#e6e2d8", roof: "#9a9a96" });
+  }
+  // Marram grass holds the dunes either side of the town.
+  const tufts = Array.from({ length: 120 }, () => [(random() < .5 ? -1 : 1) * (420 + random() * 1400), shore + 150 + random() * 300, 36, 1.2 + random() * .5]);
+  addGrass(group, template, tufts, "#75844b", 937, groundAt);
 }
 
 function makeSandTexture(CanvasTexture) {
@@ -627,11 +643,43 @@ function makeSandTexture(CanvasTexture) {
   return texture;
 }
 
-export function createVenueTextures(CanvasTexture) {
-  return { sand: makeSandTexture(CanvasTexture) };
+// A façade of 4 window bays by 4 floors, for props.js's addBlock: tinted glass
+// with a light reflection, white frames and a balcony rail under each floor.
+function makeWindowTexture(CanvasTexture) {
+  if (!CanvasTexture || typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 256;
+  const context = canvas.getContext("2d", { alpha: false });
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, 256, 256);
+  for (let floor = 0; floor < 4; floor++) {
+    for (let bay = 0; bay < 4; bay++) {
+      const x = bay * 64 + 12, y = floor * 64 + 14;
+      const glass = context.createLinearGradient(x, y, x + 40, y + 34);
+      glass.addColorStop(0, "#6f8ea0");
+      glass.addColorStop(.55, "#3d5566");
+      glass.addColorStop(1, "#4d6b7c");
+      context.fillStyle = "#d9d6cf";
+      context.fillRect(x - 3, y - 3, 46, 40);
+      context.fillStyle = glass;
+      context.fillRect(x, y, 40, 34);
+      context.fillStyle = "#c7c3ba";
+      context.fillRect(bay * 64, floor * 64 + 54, 64, 4);
+    }
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = 1000; // Three.js RepeatWrapping
+  texture.colorSpace = "srgb";
+  texture.anisotropy = 4;
+  texture.needsUpdate = true;
+  return texture;
 }
 
-export function mountVenueScenery(game, venue, textures = { sand: null }) {
+export function createVenueTextures(CanvasTexture) {
+  return { sand: makeSandTexture(CanvasTexture), windows: makeWindowTexture(CanvasTexture) };
+}
+
+export function mountVenueScenery(game, venue, textures = { sand: null, windows: null }) {
   if (game.__venueSceneryVenueId === venue?.id && game.__venueScenery) return;
   if (game.__venueScenery) {
     game.__venueScenery.parent?.remove(game.__venueScenery);

@@ -12,6 +12,7 @@ import { loadVenueCatalog, venueForLocation } from "../server/venues.mjs";
 import { SITE_LAYOUTS, coastFor, resolveVenueCollision, shorelineAt } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS } from "../mods/venues/water.js";
+import { setKnots, setSea, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
 const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
@@ -180,4 +181,65 @@ test("a Sylt groyne stops a rider unless a jump clears it", () => {
   const before = { ...jumping };
   resolveVenueCollision(jumping, { power: 1 }, SYLT);
   assert.deepEqual(jumping, before);
+});
+
+test("wind waves grow with the wind and the fetch, as JONSWAP gives them, up to a fully developed sea", () => {
+  const sylt = windSea(17, 60000);
+  assert.ok(Math.abs(sylt.height - 1.09) < .02 && Math.abs(sylt.length - 39.6) < .5, JSON.stringify(sylt));
+  assert.ok(windSea(25, 40000).height > windSea(15, 40000).height);
+  const ocean = windSea(20, 1e9);
+  assert.ok(Math.abs(ocean.height - .22 * (20 * .5144) ** 2 / 9.81) < 1e-9, "capped at Hs = 0.22 U²/g");
+});
+
+// The sea water.js gives a venue's waves.
+function seaAt(id) {
+  const look = VENUE_LOOKS[id], coast = coastFor(id);
+  setSea({ fetch: look.fetch, swell: look.swell, inX: coast.inX, inZ: coast.inZ, shoreline: coast.shoreline, curve: coast.curve, bar: [coast.sandbar, look.barWidth, look.shallowWidth, look.shelter], surf: look.surf });
+  return coast;
+}
+
+test("without a venue the game's own waves are unchanged", () => {
+  setSea(null);
+  setKnots(19);
+  assert.equal(venueWater(12, -40, 3.5, .27), .27);
+});
+
+test("on each beach the water stays below the sand, whatever the waves do", () => {
+  for (const id of [SOTAVENTO, SYLT]) {
+    const { inX, inZ } = seaAt(id);
+    setKnots(25);
+    const top = id === SYLT ? .16 : .12;
+    for (let s = -600; s <= 600; s += 37) {
+      for (const inland of [0, 3, 20]) {
+        // Find the curved shoreline at s, then step inland from it.
+        let x = -inZ * s + inX * 300, z = inX * s + inZ * 300;
+        const off = shoreOffset(x, z);
+        x += inX * (off + inland);
+        z += inZ * (off + inland);
+        for (let t = 0; t < 30; t += .7) {
+          assert.ok(venueWater(x, z, t, .38) < top, `${id}: water above the sand at s ${s}, ${inland} m inland`);
+        }
+      }
+    }
+  }
+  setSea(null);
+});
+
+test("Sotavento's lagoon stays calm and Sylt's open sea doesn't", () => {
+  const range = (id, off) => {
+    const { inX, inZ, shoreline } = seaAt(id);
+    const x = inX * (shoreline - off), z = inZ * (shoreline - off);
+    let low = Infinity, high = -Infinity;
+    for (let t = 0; t < 40; t += .25) {
+      const h = venueWater(x, z, t, 0);
+      low = Math.min(low, h);
+      high = Math.max(high, h);
+    }
+    return high - low;
+  };
+  setKnots(19);
+  assert.ok(range(SOTAVENTO, 150) < range(SOTAVENTO, 400) / 2.5, "inside the sandbar the waves are much smaller");
+  setKnots(17);
+  assert.ok(range(SYLT, 150) > 1, "Sylt's sea is over a metre from trough to crest");
+  setSea(null);
 });

@@ -14,21 +14,24 @@ import { ROOT, tempDir } from "./helpers.mjs";
 const snapshot = tryOpenSnapshot(ROOT);
 const skip = !snapshot && "no snapshot yet: run npm run snapshot";
 
-test("the venues patches give the water and sky uniforms and hand over CanvasTexture, and both modules still parse", { skip }, async (t) => {
+test("the venues patches give the water and sky uniforms, add the venue's waves, hand over CanvasTexture, and all three modules still parse", { skip }, async (t) => {
   const errors = [];
   const patched = patchSnapshot(snapshot, await loadPatches(join(ROOT, "mods"), ["venues"]), (line) => errors.push(line));
   assert.deepEqual(errors, []);
-  assert.equal(patched.size, 2);
+  assert.equal(patched.size, 3);
   const water = [...patched.values()].find((p) => p.text.includes("uniform vec3 uDeep;")).text;
+  const heights = [...patched.values()].find((p) => p.text.includes("__venueWater")).text;
   const scene = patched.get(snapshot.manifest.parts.scene).text;
   assert.ok(scene.includes("ve.three={CanvasTexture:f};export{ve as Game}"));
-  for (const uniform of ["uKnots", "uDeep", "uLight", "uShallow", "uSky", "uHaze", "uChop", "uCaps", "uSurf", "uShore", "uBar"]) {
+  for (const uniform of ["uKnots", "uDeep", "uLight", "uShallow", "uSky", "uHaze", "uChop", "uCaps", "uSurf", "uFogRate", "uShore", "uCurve", "uBar", "uWave"]) {
     assert.ok(water.includes(`${uniform}:{value:`), `${uniform} has a starting value`);
   }
-  assert.ok(water.includes("r.uKnots.value=n.knots"), "the water gets the heat's wind");
+  assert.ok(water.includes("r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots)"), "the water gets the heat's wind, and its waves");
+  assert.ok(water.includes("new h(O,O,360,360)") && heights.includes("let a=k/360"), "the mesh and the height function share the finer grid");
+  assert.ok(heights.includes("return __venueWater(e,t,n,O.reduce(") && heights.includes("world.y=venueWater(world.xz,world.y);"), "the rider's height and the drawn mesh add the same waves");
   assert.ok(water.includes("uSkyLow:{value:") && water.includes('e.name="sky"'), "the sky can be found and tinted");
   const dir = tempDir(t);
-  for (const [name, text] of [["water.mjs", water], ["scene.mjs", scene]]) {
+  for (const [name, text] of [["water.mjs", water], ["scene.mjs", scene], ["heights.mjs", heights]]) {
     writeFileSync(join(dir, name), text);
     const check = spawnSync(process.execPath, ["--check", join(dir, name)], { encoding: "utf8" });
     assert.equal(check.status, 0, `${name}: ${check.stderr}`);
@@ -48,5 +51,6 @@ test("the new uniforms start at the colours the game's shaders had, so the game 
     assert.deepEqual(literal.slice(5, -1).split(",").map(Number), GAME_COLOURS[colour]);
     assert.ok(text.includes(`${name}:{value:[${GAME_COLOURS[colour].join(",")}]}`), `${name} starts at ${literal}`);
   }
-  for (const zero of ["uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uShore:{value:[0,0,0,0]}"]) assert.ok(text.includes(zero));
+  for (const zero of ["uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uShore:{value:[0,0,0,0]}", "uCloud:{value:0}", "uFogRate:{value:.0026}"]) assert.ok(text.includes(zero));
+  assert.ok(original.includes("float fog=1.-exp(-dist*.0026);"), "the game's haze rate is .0026");
 });

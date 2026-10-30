@@ -3,13 +3,33 @@
 //   whitecaps that grow with the local wind, and a venue's shallows, sandbar
 //   and shorebreak. Every new uniform starts at the value that reproduces the
 //   game's own look, so nothing changes until a venue is chosen.
-// - The water gets the heat's wind speed along with its gusts.
-// - The sky dome's two colours become uniforms, and the dome a name to find.
+// - The water gets the heat's wind speed along with its gusts, and with it the
+//   venue's waves (waves.js): the mesh gets twice the vertices, and the mesh
+//   and the game's height function both add the waves and calm them on the
+//   beach, so the water stays below the sand.
+// - The sky dome's two colours become uniforms, it can draw clouds, and the
+//   dome gets a name to find. The water's haze rate becomes a uniform too.
 // - The Game class carries the CanvasTexture class, for the beach's sand.
-// The minified names (f, ve, r, n) are the 2026-10-24 snapshot's; a game
-// update that changes them makes these patches fail loudly.
+// The minified names (f, ve, r, n, j, k, h, O) are the 2026-10-24 snapshot's;
+// a game update that changes them makes these patches fail loudly.
+import { SHORE_GLSL, WAVE_GLSL } from "./waves.js";
+
 const WATER = "uniform float uGustDrift;";
-const SKY = "varying vec3 vP;void main(){float h=normalize(vP).y;vec3 col=mix(vec3(.77,.87,.78),vec3(.91,.94,.81),";
+const HEIGHTS = "function j(e,t,n){return O.reduce(";
+const FROM = 'from"/__mods/venues/waves.js";';
+const SKY = "varying vec3 vP;void main(){float h=normalize(vP).y;vec3 col=mix(vec3(.77,.87,.78),vec3(.91,.94,.81),smoothstep(0.,.65,h));gl_FragColor=vec4(col,1.);}";
+
+// The sky's gradient as uniforms, and cloud drawn with fractal noise on a
+// plane above the course: uCloud is how much of the sky it covers (0 is the
+// game's clear sky), uCloudTint its colour.
+const SKY_SHADER = "uniform vec3 uSkyLow;uniform vec3 uSkyHigh;uniform float uCloud;uniform vec3 uCloudTint;" +
+  "float skyHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}" +
+  "float skyNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(skyHash(i),skyHash(i+vec2(1,0)),f.x),mix(skyHash(i+vec2(0,1)),skyHash(i+vec2(1,1)),f.x),f.y);}" +
+  "float skyFbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*skyNoise(p);p=p*2.03+1.7;a*=.5;}return v;}" +
+  "varying vec3 vP;void main(){vec3 d=normalize(vP);float h=d.y;vec3 col=mix(uSkyLow,uSkyHigh,smoothstep(0.,.65,h));" +
+  "if(uCloud>0.&&h>0.){vec2 uv=d.xz/(h+.12)*1.4;float c=skyFbm(uv);float cover=smoothstep(1.05-uCloud,1.2-uCloud,c)*smoothstep(0.,.15,h);" +
+  "col=mix(col,uCloudTint*(.82+.3*skyFbm(uv*1.8+4.1)),cover*.92);}" +
+  "gl_FragColor=vec4(col,1.);}";
 
 // The game's own colours, as its shaders write them (sRGB, 0–1).
 export const GAME_COLOURS = {
@@ -28,19 +48,23 @@ uniform vec3 uHaze;
 uniform float uChop;
 uniform float uCaps;
 uniform float uSurf;
+uniform float uFogRate;
 uniform vec4 uShore;
-uniform vec4 uBar;`;
+uniform vec4 uCurve;
+uniform vec4 uBar;
+${SHORE_GLSL}`;
 
 // Short crests across the wind (+x) that run downwind; shading only, like the
 // game's own ripples, so the wave geometry and the rider are unchanged.
 const CHOP = "float chop(vec2 p){vec2 q=p-vec2(uTime*2.4,0.);return (noise(q*vec2(.85,.4))-.5)*.55+(noise(q*vec2(2.,1.1)+3.7)-.5)*.3+sin(p.x*1.7+p.y*.5-uTime*4.2)*.06;}\n";
 
-// off: metres out from the venue's shoreline (uShore: inland direction xy,
-// shoreline distance z). uBar: sandbar distance out, its width, the width of
-// the shallows, how much the water inside the sandbar is sheltered.
+// off: metres out from the venue's curved shoreline (uShore: inland direction
+// xy, shoreline distance z; uCurve: its bends). uBar: sandbar distance out, its
+// width, the width of the shallows, how much the water inside the sandbar is
+// sheltered.
 const SHALLOWS = `
  float coast=step(1.,uShore.z);
- float off=uShore.z-dot(p,uShore.xy);
+ float off=shoreOff(p);
  float shallow=coast*(1.-smoothstep(uBar.z*.5,uBar.z+1.,off))*(.75+.25*noise(p*.035));
  float bar=coast*(1.-smoothstep(0.,uBar.y+1.,abs(off-uBar.x)));
  float shelter=coast*uBar.w*(1.-smoothstep(uBar.x-40.,uBar.x+5.,off));
@@ -84,8 +108,9 @@ const DEFAULTS = [
   `uShallow:{value:${glsl(GAME_COLOURS.light)}}`,
   `uSky:{value:${glsl(GAME_COLOURS.sky)}}`,
   `uHaze:{value:${glsl(GAME_COLOURS.haze)}}`,
-  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}",
-  "uShore:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
+  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}",
+  "uShore:{value:[0,0,0,0]}", "uCurve:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
+  `uWave:{value:[${new Array(16).fill(0).join(",")}]}`,
 ].join(",");
 
 export const patches = [
@@ -102,18 +127,35 @@ export const patches = [
   { marker: WATER, find: "col=mix(col,vec3(.72,.85,.75),fresnel*", replace: "col=mix(col,uSky,fresnel*", expect: 1 },
   { marker: WATER, find: "col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;", replace: `col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;${WHITECAPS}`, expect: 1 },
   { marker: WATER, find: "col=mix(col,vec3(.73,.85,.76),fog);", replace: "col=mix(col,uHaze,fog);", expect: 1 },
+  { marker: WATER, find: "float fog=1.-exp(-dist*.0026);", replace: "float fog=1.-exp(-dist*uFogRate);", expect: 1 },
   { marker: WATER, find: "uGustPhase:{value:Array.from({length:e},()=>0)}}", replace: `uGustPhase:{value:Array.from({length:e},()=>0)},${DEFAULTS}}`, expect: 1 },
-  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uGustKnots.value=n.gustKnots", expect: 1 },
+  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots),r.uGustKnots.value=n.gustKnots", expect: 1 },
+  { marker: WATER, find: "function Z(e,n){", replace: `import{setKnots as __venueSetKnots}${FROM}function Z(e,n){`, expect: 1 },
+  { marker: WATER, find: "new h(O,O,180,180)", replace: "new h(O,O,360,360)", expect: 1 },
+  {
+    marker: HEIGHTS,
+    find: "function j(e,t,n){return O.reduce((r,i)=>r+Math.sin(e*i.x+t*i.z+n*i.speed)*i.amplitude,0)}",
+    replace: `import{venueWater as __venueWater}${FROM}function j(e,t,n){return __venueWater(e,t,n,O.reduce((r,i)=>r+Math.sin(e*i.x+t*i.z+n*i.speed)*i.amplitude,0))}`,
+    expect: 1,
+  },
+  { marker: HEIGHTS, find: "let a=k/180", replace: "let a=k/360", expect: 1 },
+  {
+    marker: HEIGHTS,
+    find: "varying vec3 vWorld;\nvoid main(){\n vec4 world=modelMatrix*vec4(position,1.);",
+    replace: `varying vec3 vWorld;${WAVE_GLSL}\nvoid main(){\n vec4 world=modelMatrix*vec4(position,1.);`,
+    expect: 1,
+  },
+  { marker: HEIGHTS, find: " vWorld=world.xyz;\n", replace: " world.y=venueWater(world.xz,world.y);\n vWorld=world.xyz;\n", expect: 1 },
   {
     marker: SKY,
     find: SKY,
-    replace: `uniform vec3 uSkyLow;uniform vec3 uSkyHigh;${SKY.replace("vec3(.77,.87,.78),vec3(.91,.94,.81),", "uSkyLow,uSkyHigh,")}`,
+    replace: SKY_SHADER,
     expect: 1,
   },
   {
     marker: SKY,
     find: "new _({side:1,depthTest:!1,depthWrite:!1,vertexShader:",
-    replace: `new _({uniforms:{uSkyLow:{value:${glsl(GAME_COLOURS.skyLow)}},uSkyHigh:{value:${glsl(GAME_COLOURS.skyHigh)}}},side:1,depthTest:!1,depthWrite:!1,vertexShader:`,
+    replace: `new _({uniforms:{uSkyLow:{value:${glsl(GAME_COLOURS.skyLow)}},uSkyHigh:{value:${glsl(GAME_COLOURS.skyHigh)}},uCloud:{value:0},uCloudTint:{value:[1,1,1]}},side:1,depthTest:!1,depthWrite:!1,vertexShader:`,
     expect: 1,
   },
   { marker: SKY, find: "e.renderOrder=-1,e.frustumCulled=!1", replace: 'e.name="sky",e.renderOrder=-1,e.frustumCulled=!1', expect: 1 },
