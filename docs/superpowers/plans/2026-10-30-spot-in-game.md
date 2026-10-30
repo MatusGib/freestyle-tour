@@ -65,7 +65,7 @@ Facts from building it (PR #2):
 
 ### Task 1: Find out what the game allows (a spike, no commit of code)
 
-- [ ] **Step 1:** Start the preview (see the handoff notes for the port). Choose Sotavento, start practice, and in the page run:
+- [x] **Step 1:** Start the preview (see the handoff notes for the port). Choose Sotavento, start practice, and in the page run:
 
 ```js
 const { findGame } = await import("/__mods/lib/game.js");
@@ -75,11 +75,13 @@ const g = findGame();
 
 Record: where the camera lives on the game object, the sky dome's radius, the water mesh's size and whether it moves with the camera, and the renderer's `maxTextureSize`.
 
-- [ ] **Step 2:** In `vendor/<snapshot>/_next/static/chunks/scene-*.js`, find the minified names of the three.js classes plan 2 needs, next to the existing hand-over `export{ve as Game}`: `InstancedMesh`, `Mesh`, `BufferGeometry`, `BufferAttribute`, `InstancedBufferAttribute`, `DataTexture`, `MeshStandardMaterial` (or the buoy material's class), `Matrix4`, `Color`, and the constants `RepeatWrapping`, `NearestFilter`, `LinearMipmapLinearFilter`, `SRGBColorSpace`. Classes are found by their distinctive strings, for example `isInstancedMesh=!0`, `isDataTexture=!0`, `isMeshStandardMaterial=!0`. Note any class the bundle doesn't contain (three is tree-shaken). For those, plan 2 uses the vendored r185 core (`mods/venues/lib/three.core.min.js`) and checks that the game's renderer accepts its objects. Geometry and textures are usually fine; materials are not.
+- [x] **Step 2:** In `vendor/<snapshot>/_next/static/chunks/scene-*.js`, find the minified names of the three.js classes plan 2 needs, next to the existing hand-over `export{ve as Game}`: `InstancedMesh`, `Mesh`, `BufferGeometry`, `BufferAttribute`, `InstancedBufferAttribute`, `DataTexture`, `MeshStandardMaterial` (or the buoy material's class), `Matrix4`, `Color`, and the constants `RepeatWrapping`, `NearestFilter`, `LinearMipmapLinearFilter`, `SRGBColorSpace`. Classes are found by their distinctive strings, for example `isInstancedMesh=!0`, `isDataTexture=!0`, `isMeshStandardMaterial=!0`. Note any class the bundle doesn't contain (three is tree-shaken). For those, plan 2 uses the vendored r185 core (`mods/venues/lib/three.core.min.js`) and checks that the game's renderer accepts its objects. Geometry and textures are usually fine; materials are not.
 
-- [ ] **Step 3:** Write the findings into this plan, under "Findings" at the end, and adjust Tasks 6–10 where they assume something the game doesn't allow.
+- [x] **Step 3:** Write the findings into this plan, under "Findings" at the end, and adjust Tasks 6–10 where they assume something the game doesn't allow.
 
 ### Task 2: Hand over the classes
+
+**Dropped after Task 1** (see Findings): the vendored r185 core draws in the game's renderer, so no patch is needed.
 
 **Files:** `mods/venues/patches.mjs`, `test/venues-patch-snapshot.test.mjs`
 
@@ -564,4 +566,33 @@ The geometry is non-indexed. Use the material with `side: DoubleSide` if the wal
 
 ## Findings
 
-(Filled in by Task 1.)
+From Task 1, on the 2026-10-24 snapshot (2026-10-30, Sotavento's menu scene).
+
+**The game object.** `findGame()` returns the `Game`. The camera is `game.camera`, a `PerspectiveCamera(43, aspect, 0.1, 1800)`; the opponent's picture-in-picture has its own, `game.opponentPreview.camera`, also far 1800. Nothing resets `camera.far` after a change (`fit()` only sets the aspect).
+
+**The sky** is a `SphereGeometry` of radius 1300 named `sky`, moved to the camera every frame, drawn first (`renderOrder -1`, no depth test or write). It is a background, so terrain beyond 1300 m draws over it once `camera.far` is raised.
+
+**The water** is `game.ocean`, a 2600 × 2600 m `PlaneGeometry` (360 × 360 after the venues patch), rotated −90° about x, opaque and writing depth, and its position follows the rider (`ocean.position.x/z` = rider). Its material is `game.water`, the game's `ShaderMaterial`, with no scene fog (it fades by `uFogRate` itself). So **beyond 1300 m from the rider there is no water**: with a far plane past 1800 m the horizon terrain's seabed would show bare.
+
+**Renderer:** `maxTextureSize` 16384, anisotropy up to 16, `outputColorSpace` sRGB, ACES filmic tone mapping (4), shadows off. Lights: a `HemisphereLight` (2.6) and a `DirectionalLight` (3.2) from (−60, 100, −80). The buoy template's material is a `MeshStandardMaterial`.
+
+**Quality** (`game.quality.preset`): `low` (30 fps cap, pixel ratio ≤ 0.85, 1 Mpx), `balanced` (60 fps, ≤ 1.25, 2 Mpx), `high` (no cap, ≤ 1.75, 4 Mpx), `auto` (≤ 1.75, 2 Mpx, scaled 0.6–1 by frame time). The plan's "standard" is `balanced`.
+
+**GPU timer:** `game.setDiagnostics(true)` turns on `game.diagnostics`; every 500 ms `diagnostics.sample` holds `{ fps, cpuLoad, gpuLoad }`, the loads as percentages of the elapsed time. GPU milliseconds per frame are `gpuLoad / 100 × 1000 / fps`.
+
+**three.js classes.** three.js lives in `dispose-model-*.js`, revision 185, the same as the vendored `mods/venues/lib/three.core.min.js`, and `window.__THREE__` is `"185"`. The bundle has `BufferGeometry`, `DataTexture`, `Matrix4`, `MeshStandardMaterial` and `CanvasTexture`, but **no `InstancedMesh`** (tree-shaken; the renderer still handles `isInstancedMesh`). The scene chunk imports only some of the bundle's exports, so handing more over would mean patching its import line too. The renderer checks flags (`isMesh`, `isInstancedMesh`, `isTexture`…), never `instanceof` on three.js classes.
+
+**Tried in the page:** a vendored r185 `InstancedMesh` (50 boxes, `MeshStandardMaterial`, per-instance colours), a vendored `Mesh` with a clone of the buoy's material carrying a vendored `DataTexture` and an `onBeforeCompile`, and a vendored `Mesh` with a vendored `MeshStandardMaterial` and that texture. All three drew in the game's render (5 more draw calls, 3 new programs, no WebGL error) and showed in a screenshot.
+
+**Depth precision.** With near 0.1 and far 14 000, a 24-bit depth buffer resolves about d² / (0.1 × 2²⁴): 0.6 m at 1 km, 2.4 m at 2 km, 15 m at 5 km. The opaque water at y = 0 and a seabed 1 m below would flicker beyond about 1 km.
+
+**Screenshots** of the browser pane worked even while the pane was hidden.
+
+### What changes in the tasks
+
+- **Task 2 is dropped.** No hand-over patch: the real-world modules import the vendored r185 core (`InstancedMesh`, `Mesh`, `BufferGeometry`, `BufferAttribute`, `DataTexture`, `MeshStandardMaterial`, `Matrix4`, `Color` and the constants), as `props.js` already does. `mountSpot` (Task 11) builds only when `window.__THREE__` equals the vendored `REVISION`, so a game update to another three.js falls back to the game's scene instead of drawing wrongly.
+- **Task 6:** the terrain material is a vendored `MeshStandardMaterial`; textures are vendored `DataTexture`s made from the decoded images. Its shader discards fragments below the water level (y < −0.05): the water is opaque in this spec, so nothing visible is lost, and the seabed can't flicker through the water far away. The rendering spec, with see-through water, revisits this.
+- **Task 8:** `uSpotDepth` and `uSpotReef` are vendored `DataTexture`s, not `CanvasTexture`s.
+- **Task 9:** instancing uses the vendored `InstancedMesh`.
+- **Task 11:** besides raising `camera.far` (the main camera only; the opponent's picture stays at 1800) and thinning the land haze, `mountSpot` adds **far water**: a ring from ±1300 m to ±12 500 m at 200 m spacing, a child of `game.ocean` sharing `game.water`, its geometry turned +90° about x to undo the ocean's turn, so it follows the rider and matches the near water's colour, waves and haze. Removed on unmount.
+- **Task 12:** measure at `high` and `balanced`, with the GPU timer read as above.
