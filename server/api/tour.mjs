@@ -62,7 +62,7 @@ export function eventRiders(tour, id, catalog = null, venuesEnabled = false, eve
 // The rider's heat. With the venues mod: in the event's reported wind, else
 // its venue's usual wind, with the venue's zones; otherwise, and at events
 // with neither, in this week's solo wind. body: { rider, event }.
-export async function aiHeat(body, { tour, venues, eventWinds, mods, game, now, ai, aiHeats, snapshot }) {
+export async function aiHeat(body, { tour, venues, eventWinds, tuning, mods, game, now, ai, aiHeats, snapshot }) {
   if (!tour) return fail(404, NO_TOUR);
   const event = tour.events.get(Number(body.event));
   if (!event) return fail(404, `No event ${body.event} in the tour data.`);
@@ -79,7 +79,7 @@ export async function aiHeat(body, { tour, venues, eventWinds, mods, game, now, 
       ? { ...game.roomConditions(roomId), knots: wind.knots, gustKnots: wind.gustKnots }
       : game.weekConditions(weekStart);
   const rating = tour.ratings.events[event.id][division][body.rider].rating;
-  const target = round(heatTarget(rating, seedOf(body.rider, event.id, weekStart)));
+  const target = round(heatTarget(rating, seedOf(body.rider, event.id, weekStart)) + (tuning?.aiTargetOffset ?? 0));
   // A changed wind, zone or target sails a fresh heat.
   const key = `${snapshot}|${weekStart}|${body.rider}|${event.id}|${digest({ conditions, target, zoneVersion: ZONE_VERSION })}`;
   const cached = aiHeats.data.heats[key];

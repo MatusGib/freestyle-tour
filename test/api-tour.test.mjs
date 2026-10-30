@@ -8,6 +8,7 @@ import { indexEventWinds } from "../server/event-winds.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
 import { loadVenueCatalog } from "../server/venues.mjs";
+import { checkTuning } from "../server/tuning.mjs";
 import { WEEK, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
 const NOW = Date.parse("2026-10-21T12:00:00Z");
@@ -161,4 +162,18 @@ test("an event says where its wind comes from", (t) => {
   assert.deepEqual(call("GET", "/api/local/tour/events/375").body.wind, { source: "usual", knots: 19, gustKnots: 6 });
   const elsewhere = venueSetup(t, { winds: [], at: "Elsewhere" });
   assert.deepEqual(elsewhere.call("GET", "/api/local/tour/events/375").body.wind, { source: "week" });
+});
+
+test("the AI target offset moves every challenge rider's target", async (t) => {
+  const { call, ai, ctx } = setup(t);
+  ctx.tuning = { aiTargetOffset: -2.5 };
+  await call("POST", "/api/local/ai-heats", { rider: "m:balz-muller", event: 378 });
+  const weekStart = fakeGame.weekStart(NOW);
+  assert.equal(ai.calls[0].target, Math.round((heatTarget(1757, seedOf("m:balz-muller", 378, weekStart)) - 2.5) * 100) / 100);
+});
+
+test("the AI target offset is from -10 to +10 points", () => {
+  assert.deepEqual(checkTuning({ aiTargetOffset: 10 }), { aiTargetOffset: 10 });
+  assert.throws(() => checkTuning({ aiTargetOffset: 11 }), { path: "tuning.aiTargetOffset" });
+  assert.throws(() => checkTuning({}), { path: "tuning.aiTargetOffset" });
 });
