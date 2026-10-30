@@ -64,6 +64,15 @@ const CSS = `
 .ft-card h3{margin:16px 0 4px;font-size:15px}
 .ft-card ol{margin:0 0 4px;padding-left:22px;list-style:decimal}
 .ft-prize{display:flex;gap:14px;align-items:center;margin:16px 0 0;padding:12px;border-radius:12px;background:rgba(36,123,114,.08)}
+.ft-field input{box-sizing:border-box;width:100%;height:36px;padding:0 10px;border:1px solid #749f8c;border-radius:10px;background:#fbfdf8;color:#133e40;font:14px Arial,Helvetica,sans-serif}
+.ft-field input:focus-visible{outline:2px solid #247b72;outline-offset:2px}
+.ft-dev-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.ft-dev-tabs [aria-selected=true]{border-color:#247b72;box-shadow:0 0 0 1px #247b72;background:#f6fbf2}
+.ft-dev-form{grid-template-columns:1fr}
+.ft-dev-meta{display:flex;align-items:center;gap:8px}
+.ft-dev-changed input,.ft-dev-changed select{border-color:#247b72;box-shadow:0 0 0 1px #247b72;background-color:#f6fbf2}
+.ft-dev-reason{color:#a03a2c;font-size:12px}
+.ft-dev-reason:empty{display:none}
 @media (max-width:640px){
 .ft-tray{top:60px;left:12px;right:12px;flex-direction:row;flex-wrap:wrap;max-width:none}
 .ft-tray-toggle{display:inline-flex}
