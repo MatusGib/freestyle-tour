@@ -45,8 +45,12 @@ function merge(parts, random) {
 
 const CANOPY = ["#2c5426", "#335f2b", "#284d24"];
 
+// Far off (each kind's `far` shape), a few dozen triangles: open cylinders
+// for trunks and stems, single-facet blobs for crowns.
+const stem = (radius, height, sides = 6) => new CylinderGeometry(radius * 0.9, radius, height, sides, 1, true);
+
 function mangrove(random, far) {
-  if (far) return [[new IcosahedronGeometry(2.4, 1), CANOPY[0], place(0, 2.8, 0, { scale: [1.25, 0.7, 1.25] })]];
+  if (far) return [[stem(0.18, 1.6, 4), "#5b4a3c", place(0, 0.8, 0)], [new IcosahedronGeometry(2.4, 0), CANOPY[0], place(0, 2.8, 0, { scale: [1.25, 0.7, 1.25] })]];
   const parts = [[new CylinderGeometry(0.12, 0.18, 1.6, 6), "#5b4a3c", place(0, 1.2, 0)]];
   const roots = 6 + Math.floor(random() * 4);
   for (let k = 0; k < roots; k++) {
@@ -74,8 +78,9 @@ function ribbed(radius, height, segments) {
   return g;
 }
 
-function kadushi(random) {
+function kadushi(random, far) {
   const height = 3.5 + random() * 3, colour = "#6d8862";
+  if (far) return [[stem(0.26, height), colour, place(0, height / 2, 0)], ...[0, 2.6].map((a) => [stem(0.18, 1.8, 5), colour, place(Math.cos(a) * 0.62, height * 0.45 + 0.9, Math.sin(a) * 0.62)])];
   const parts = [[ribbed(0.24, height, 3), colour, place(0, height / 2, 0)]];
   const arms = 2 + Math.floor(random() * 3);
   for (let k = 0; k < arms; k++) {
@@ -86,9 +91,10 @@ function kadushi(random) {
   return parts;
 }
 
-function diviDivi(random) {
+function diviDivi(random, far) {
   const lean = 0.55 + random() * 0.15, trunk = 2 + random() * 0.8;
   const top = [Math.sin(lean) * trunk, Math.cos(lean) * trunk];
+  if (far) return [[stem(0.16, trunk, 4).translate(0, trunk / 2, 0), "#5a4a3a", place(0, 0, 0, { roll: -lean })], [new IcosahedronGeometry(1.3, 0), "#587c33", place(top[0] + 1, top[1], 0, { scale: [2.2, 0.45, 1.3] })]];
   const parts = [[new CylinderGeometry(0.1, 0.18, trunk, 6).translate(0, trunk / 2, 0), "#5a4a3a", place(0, 0, 0, { roll: -lean })]];
   const blobs = 3 + Math.floor(random() * 2);
   for (let k = 0; k < blobs; k++) {
@@ -98,7 +104,8 @@ function diviDivi(random) {
   return parts;
 }
 
-function scrub(random) {
+function scrub(random, far) {
+  if (far) return [[new IcosahedronGeometry(0.8, 0), "#737f5a", place(0, 0.44, 0, { scale: [1.3, 0.75, 1.2] })]];
   const parts = [], blobs = 2 + Math.floor(random() * 2);
   for (let k = 0; k < blobs; k++) {
     const r = 0.55 + random() * 0.45;
@@ -122,7 +129,7 @@ const RULES = {
   diviDivi: { ground: [4], perHectare: 6 },
   scrub: { ground: [4], perHectare: 40 },
 };
-const NEAR = 600; // metres from the course within which mangroves show their roots
+const NEAR = 600; // metres from the course within which plants show their detail
 const SHORE_CLEAR = 0.3; // metres above the water a land plant needs
 
 // The spot's plants within radius of the course, as instanced meshes in one
@@ -160,9 +167,9 @@ export function buildPlants(spot, { radius = 1500, seed = 2026 } = {}) {
   for (const [kind, all] of Object.entries(placed)) {
     // Divi-divis keep their lean downwind; the others turn any way.
     const points = all.filter((p) => Math.hypot(p.x, p.z) <= radius).map((p) => (kind === "diviDivi" ? { ...p, yaw: (p.yaw - Math.PI) * 0.08 } : p));
-    const near = kind === "mangrove" ? points.filter((p) => Math.hypot(p.x, p.z) <= NEAR) : points;
+    const near = points.filter((p) => Math.hypot(p.x, p.z) <= NEAR);
     for (let variant = 0; variant < 4; variant++) add(plantGeometry(kind, variant), near.filter((p) => p.variant === variant));
-    if (kind === "mangrove") add(plantGeometry(kind, 0, { far: true }), points.filter((p) => Math.hypot(p.x, p.z) > NEAR));
+    add(plantGeometry(kind, 0, { far: true }), points.filter((p) => Math.hypot(p.x, p.z) > NEAR));
   }
   return group;
 }

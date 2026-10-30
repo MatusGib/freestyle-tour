@@ -26,6 +26,10 @@ test("a divi-divi leans and streams downwind (+x)", () => {
   }
 });
 
-test("a far mangrove is a simple blob", () => {
-  assert.ok(plantGeometry("mangrove", 0, { far: true }).getAttribute("position").count / 3 <= 100);
+test("far off, each plant is a simple shape of a few dozen triangles, still standing at its foot", () => {
+  for (const kind of ["mangrove", "kadushi", "diviDivi", "scrub"]) {
+    const g = plantGeometry(kind, 0, { far: true }), box = bounds(g);
+    assert.ok(g.getAttribute("position").count / 3 <= 40, `${kind}: ${g.getAttribute("position").count / 3} triangles`);
+    assert.ok(box.min.y <= 0.1 && box.max.y > 0.8, `${kind} from ${box.min.y} to ${box.max.y}`);
+  }
 });

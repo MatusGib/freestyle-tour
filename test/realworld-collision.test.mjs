@@ -16,6 +16,13 @@ test("a rider driving onto land is stopped at the water's edge", () => {
   assert.equal(input.power, 0, "no drive into the land");
 });
 
+test("a rider deep inside land, where its edge is out of reach, is taken out to the nearest water", () => {
+  const s = { x: 130, z: 0, vx: 0, vz: 5, speed: 5, heading: Math.PI, air: false, height: 0 };
+  resolveSpotCollision(s, { power: 1 }, spot);
+  assert.ok(s.x <= 100 && s.x > 95, `x ${s.x}`);
+  assert.ok(Math.abs(s.z) < 1e-6, "straight out, not along the way it was going");
+});
+
 test("a rider in open water, or sailing away from the shore, is left alone", () => {
   const a = state(0, 5), b = state(99, -5);
   resolveSpotCollision(a, {}, spot); resolveSpotCollision(b, {}, spot);
