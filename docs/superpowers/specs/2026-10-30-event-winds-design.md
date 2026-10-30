@@ -32,8 +32,8 @@ when it feels right, written to the repo.
 ## Success criteria
 
 1. In the challenge panel, an event at one of the five venues with a reported
-   wind shows it (for example "Reported (26 July 2024, finals): 18 kt, gusts
-   20–24 kt", with the source linked), and a heat against any of its riders is sailed in
+   wind shows it (for example "Reported (26 July 2024): 18 kt, gusts 20–24 kt",
+   with the source linked), and a heat against any of its riders is sailed in
    it: the game's countdown shows that wind, and the AI's heat is sailed in
    the same.
 2. An event at one of the five venues without a reported wind shows "Usual at
@@ -169,23 +169,25 @@ and the venues mod mounts a coast only where one exists.
   replaces the venue's usual one. In `aiHeat` the wind is the event's, else
   the venue's usual one, else this week's; the venue's zones are added in the
   first two cases.
-- The AI heat's cache key adds the conditions' knots and gusts and the
-  heat's target, so a changed wind or offset sails a fresh heat.
+- The AI heat's cache key ends in a hash of its conditions (zones included)
+  and its target, so a changed wind, zone or offset sails a fresh heat.
 
 ### Wind zones at the edges (`mods/venues/zones.js`)
 
 The zones still add to the event's wind. At the top no cap is needed: 28 kt
 plus Sotavento's 4 kt is 32 kt, under the game's own 34 kt gusts. At the
 bottom a zone never takes the local wind below 12 kt (Sotavento's 3 kt lee in
-a 12 kt event would give 9). The wind patch and the water both use the floored
-value, and `ZONE_VERSION` goes up so cached AI heats are sailed again.
+a 12 kt event would give 9): `zonesFor` cuts the lee to the heat's wind less
+12 kt. The wind patch and the water both read the cut lee from the
+conditions, and the cache key's hash of the conditions sails changed heats
+again.
 
 ### The event card (`mods/challenge/`)
 
 `eventRiders` adds `wind`: `{ source: "reported" | "usual" | "week", knots,
 gustKnots, reported, day, confidence, url }`. The card shows:
 
-- "Reported (26 July 2024, finals): 18 kt, gusts 20–24 kt", the source linked;
+- "Reported (26 July 2024): 18 kt, gusts 20–24 kt", the source linked;
 - "Usual at Sorobon, Bonaire: 18 kt, steady wind";
 - "This week's wind".
 
@@ -217,9 +219,9 @@ from `heatTarget`, from −10 to +10. The champion keeps his own target.
 - Endpoints:
   - `GET /api/local/dev`: the files' values, the draft, and the 55 events
     grouped by venue;
-  - `PUT /api/local/dev/draft`: replaces the draft; 400 with the problem for
+  - `POST /api/local/dev/draft`: replaces the draft; 400 with the problem for
     each field it refuses, keeping the last good draft;
-  - `DELETE /api/local/dev/draft`: discards it;
+  - `POST /api/local/dev/discard`: discards it;
   - `POST /api/local/dev/write`: writes the values in force into whichever of
     `tour/event-winds.json`, `tour/venues.json`, `server/champion.json` and
     `server/tuning.json` the draft changes, reloads them, clears the draft,
