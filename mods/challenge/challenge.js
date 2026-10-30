@@ -24,10 +24,12 @@ export function resultText(yours, heat) {
 
 const DAY = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
-// The event card's wind: the event's own from its reports, its venue's usual
-// wind, or this week's. event: as GET /api/local/tour/events/<id> answers.
+// The event card's wind: the event's own from its reports ("Reported" only
+// when they give a number; read from sail sizes or words it is estimated), its
+// venue's usual wind, or this week's. event: as GET /api/local/tour/events/<id>
+// answers.
 export function windLine({ wind, venue }) {
-  if (wind?.source === "reported") return `Reported${wind.day ? ` (${DAY.format(new Date(wind.day))})` : ""}: ${windText(wind)}`;
+  if (wind?.source === "reported") return `${wind.confidence === "reported" ? "Reported" : "Estimated from reports"}${wind.day ? ` (${DAY.format(new Date(wind.day))})` : ""}: ${windText(wind)}`;
   if (wind?.source === "usual") return `Usual at ${venue.name}: ${windText(wind)}`;
   return "This week's wind";
 }
