@@ -7,7 +7,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { resampleColour, wmsUrl } from "./spot/colour.mjs";
+import { decodeWms, resampleColour, wmsUrl } from "./spot/colour.mjs";
 import { DEPTH_MAX, depthImage, fitDepth, logRatio } from "./spot/depth.mjs";
 import { beachHeight, terrainSampler, terrainUrls } from "./spot/elevation.mjs";
 import { createFetcher } from "./spot/fetcher.mjs";
@@ -54,7 +54,7 @@ async function build(part) {
   const half = spot[part], size = IMAGE[part];
   const decoded = await Promise.all(tiles[part].map(async (t) => ({ ...t, image: decodePng(await fetcher.get(t.url, { source: "Terrain Tiles" })) })));
   const heightAt = terrainSampler(decoded);
-  const colour = resampleColour(decodePng(await fetcher.get(wms[part], { source: "EOX" })), boxes[part], frame, half, size);
+  const colour = resampleColour(decodeWms(await fetcher.get(wms[part], { source: "EOX" })), boxes[part], frame, half, size);
   const land = fillPolygons(features.shoreline, half, size);
   const water = Uint8Array.from(land, (v) => 1 - v);
   const cell = 2 * half / size, toLand = distanceTransform(land, size, size), toWater = distanceTransform(water, size, size);

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resampleColour, wmsUrl } from "../tools/spot/colour.mjs";
+import { decodeWms, resampleColour, wmsUrl } from "../tools/spot/colour.mjs";
+import { encodePng } from "../tools/spot/png.mjs";
 
 test("the WMS request asks for PNG over the box, longitude first", () => {
   const url = new URL(wmsUrl({ south: 1, west: 2, north: 3, east: 4 }, 1024, "s2cloudless-2024"));
@@ -17,4 +18,10 @@ test("each game pixel takes the colour at its place in the image", () => {
   const frame = { toLatLon: (x, z) => ({ lat: 0.5 - z / 100, lon: 0.5 + x / 100 }) };
   const out = resampleColour(image, { south: 0, west: 0, north: 1, east: 1 }, frame, 50, 2);
   assert.deepEqual([...out.data.subarray(0, 3)], [255, 0, 0], "pixel (0, 0), at -x and -z, is the image's north-west");
+});
+
+test("the WMS answer is decoded as PNG or JPEG, whichever the server sent", () => {
+  const image = { width: 2, height: 1, channels: 3, data: Uint8Array.from([1, 2, 3, 4, 5, 6]) };
+  assert.deepEqual(decodeWms(encodePng(image)), image);
+  assert.throws(() => decodeWms(Buffer.from("<ServiceException>")), /not a PNG/);
 });
