@@ -44,8 +44,8 @@ export default {
       return [];
     });
     const setVenueStatus = (venue) => {
-      thumbnail.hidden = !venue;
-      thumbnail.src = venue ? picture(venue) : "";
+      thumbnail.hidden = !venue?.scenery;
+      thumbnail.src = venue?.scenery ? picture(venue) : "";
       current.textContent = venue?.name ?? "Weekly wind";
       open.title = venue ? `Venue: ${venue.name}` : "Venue: the game's weekly wind";
     };
@@ -70,10 +70,10 @@ export default {
           venue.waterZones?.length && el("p", { textContent: `Water: ${venue.waterZones.join(" · ")}` }),
         );
         const button = el("button", { type: "button", className: "ft-option", onclick: () => choose(venue) },
-          el("img", { src: picture(venue), alt: "", width: 96, height: 64 }),
+          venue.scenery && el("img", { src: picture(venue), alt: "", width: 96, height: 64 }),
           el("span", {},
             el("span", { className: "ft-option-name" }, venue.name, chosen && el("span", { className: "ft-check", textContent: "In use" })),
-            el("span", { className: "ft-option-meta", textContent: windText(venue.gameConditions) }),
+            el("span", { className: "ft-option-meta", textContent: venue.scenery ? windText(venue.gameConditions) : `${windText(venue.gameConditions)} · the game's own scenery` }),
             el("span", { className: "ft-option-text", textContent: venue.character, style: "display:block" }),
           ),
         );

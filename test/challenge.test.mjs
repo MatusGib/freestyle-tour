@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { aiSample, isSoloHeatStart, isStale, nextHeatText, planningText, resultText, riderLine } from "../mods/challenge/challenge.js";
+import { aiSample, isSoloHeatStart, isStale, nextHeatText, planningText, resultText, riderLine, windLine } from "../mods/challenge/challenge.js";
 
 const heat = { pseudonym: "Balt Möller", target: 41.267, score: 40.81, weekStart: 1000 };
 
@@ -28,4 +28,13 @@ test("challenges start at a solo heat's first step, and send poses like the 1v1 
   assert.equal(isSoloHeatStart(state(true, 0), { competitionClock: () => 0 }), false);
   const pose = { x: 1 };
   assert.deepEqual(aiSample(pose, 12.5), { pose, updatedAt: 12.5, streamId: "challenge" });
+});
+
+test("the event card says where its wind comes from", () => {
+  const venue = { name: "Sorobon, Bonaire" };
+  assert.equal(windLine({ venue, wind: { source: "reported", knots: 18, gustKnots: 6, day: "2024-07-26" } }), "Reported (26 July 2024): 18 kt, gusts 20–24 kt");
+  assert.equal(windLine({ venue, wind: { source: "reported", knots: 20, gustKnots: 0, day: null } }), "Reported: 20 kt, steady wind");
+  assert.equal(windLine({ venue, wind: { source: "usual", knots: 18, gustKnots: 0 } }), "Usual at Sorobon, Bonaire: 18 kt, steady wind");
+  assert.equal(windLine({ venue: null, wind: { source: "week" } }), "This week's wind");
+  assert.equal(windLine({}), "This week's wind", "without the venues mod");
 });

@@ -6,8 +6,8 @@
 import { claimOpponent, releaseOpponent } from "../lib/opponent.js";
 import { createRunner } from "../lib/replay.js";
 import { createPopover, el } from "../lib/ui.js";
-import { clearPlannedHeat, rememberPlannedHeat, windText } from "../venues/venue.js";
-import { aiSample, isSoloHeatStart, isStale, nextHeatText, planningText, resultText, riderLine } from "./challenge.js";
+import { clearPlannedHeat, rememberPlannedHeat } from "../venues/venue.js";
+import { aiSample, isSoloHeatStart, isStale, nextHeatText, planningText, resultText, riderLine, windLine } from "./challenge.js";
 
 const getJson = async (url, init) => {
   const res = await fetch(url, init);
@@ -88,10 +88,11 @@ export default {
         const event = await getJson(`/api/local/tour/events/${eventSelect.value}`);
         riders.replaceChildren(
           el("div", { className: "ft-venue" },
-            event.venue && el("img", { src: `/__mods/venues/assets/${event.venue.id}.svg`, alt: "", width: 84, height: 52 }),
+            event.venue?.scenery && el("img", { src: `/__mods/venues/assets/${event.venue.id}.svg`, alt: "", width: 84, height: 52 }),
             el("div", {},
               el("strong", { textContent: event.venue?.name ?? event.location ?? "Venue unknown" }),
-              el("div", { className: "ft-muted", textContent: event.venue ? `Typical: ${windText(event.venue.gameConditions)}` : "Sailed in this week's wind" }),
+              el("div", { className: "ft-muted", textContent: windLine(event) }),
+              event.wind?.url && el("a", { className: "ft-muted", href: event.wind.url, target: "_blank", rel: "noopener noreferrer", textContent: event.wind.title ?? "Source" }),
             ),
           ),
           ...Object.entries(event.divisions).flatMap(([division, list]) => [
