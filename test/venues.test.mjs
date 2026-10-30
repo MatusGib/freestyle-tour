@@ -22,16 +22,26 @@ const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
 const SOTAVENTO = "sotavento-fuerteventura";
 const SYLT = "westerland-sylt";
 
-test("the tour's Sotavento and Sylt events find their venue, and no other event does", () => {
+test("the tour's events at the five venues find their venue, and no other event does", () => {
   const tour = loadTour(join(ROOT, "tour"));
   const matched = {};
   for (const event of tour.events.values()) {
     const venue = venueForLocation(catalog, event.location);
     if (venue) matched[event.location] = venue.id;
   }
-  assert.deepEqual(matched, { "Sotavento, Fuerteventura": SOTAVENTO, "Westerland, Sylt, Germany": SYLT });
+  assert.deepEqual(matched, {
+    "Sotavento, Fuerteventura": SOTAVENTO,
+    "Westerland, Sylt, Germany": SYLT,
+    "Neusiedler See, Podersdorf, Austria": "neusiedler-see-podersdorf",
+    "Pozo Izquierdo, Gran Canaria": "pozo-izquierdo-gran-canaria",
+    "Sorbon Beach, Bonaire, Dutch Netherlands Antilles": "sorobon-bonaire",
+  });
   assert.equal(venueForLocation(catalog, "sotavento  FUERTEVENTURA")?.id, SOTAVENTO, "spelling and spacing don't matter");
-  assert.equal(venueForLocation(catalog, "Pozo Izquierdo, Gran Canaria"), null);
+  assert.equal(venueForLocation(catalog, "Las Chucharas, Costa Teguise, Lanzarote, Canary Islands"), null);
+});
+
+test("every venue's usual wind is sourced", () => {
+  for (const venue of catalog.venues) assert.ok(venue.sources?.some((s) => s.url && (s.date || s.accessed)), `${venue.id} has no source`);
 });
 
 test("a catalog with a missing file, an unsupported wind, a repeated id or a shared location is refused", (t) => {
@@ -103,7 +113,7 @@ function setup(t, mods) {
 test("with the venues mod, an event at a venue names it, and its AI heat sails in the venue's wind", async (t) => {
   const { call, calls } = setup(t, ["venues", "challenge"]);
   const venues = call("GET", "/api/local/venues").body;
-  assert.deepEqual(venues.venues.map((v) => v.id), [SOTAVENTO, SYLT]);
+  assert.deepEqual(venues.venues.map((v) => v.id), [SOTAVENTO, SYLT, "neusiedler-see-podersdorf", "pozo-izquierdo-gran-canaria", "sorobon-bonaire"]);
   assert.ok(!JSON.stringify(venues).includes("locations"), "the location spellings stay on the server");
   const event = call("GET", "/api/local/tour/events/375").body;
   assert.equal(event.venue.id, SOTAVENTO);
@@ -126,10 +136,10 @@ test("without the venues mod, events name no venue and AI heats sail this week's
   assert.deepEqual(calls, [fakeGame.weekConditions()]);
 });
 
-test("every catalog venue has a coast and a water look", () => {
-  const ids = catalog.venues.map((v) => v.id).sort();
-  assert.deepEqual(Object.keys(SITE_LAYOUTS).sort(), ids);
-  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), ids);
+test("every venue with a coast is in the catalog and has a water look", () => {
+  const ids = catalog.venues.map((v) => v.id);
+  for (const id of Object.keys(SITE_LAYOUTS)) assert.ok(ids.includes(id), `${id} isn't in the catalog`);
+  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), Object.keys(SITE_LAYOUTS).sort());
 });
 
 // Where the local AI sailed in six heats (15–19 kt, targets 30–55): x from

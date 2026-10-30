@@ -110,6 +110,87 @@
           "url": "https://www.sylt.de/poi/musikmuschel"
         }
       ]
+    },
+    {
+      "id": "neusiedler-see-podersdorf",
+      "name": "Podersdorf, Neusiedler See",
+      "place": "Podersdorf am See, Burgenland, Austria",
+      "locations": [
+        "Neusiedler See, Podersdorf, Austria"
+      ],
+      "gameConditions": {
+        "knots": 18,
+        "gustKnots": 6
+      },
+      "character": "A shallow steppe lake: short, steep chop, no swell, and gusty north-westerlies that blow in over land.",
+      "confidence": "qualitative",
+      "profileNote": "No scenery yet: the game's own open water, in Podersdorf's usual wind.",
+      "sources": [
+        {
+          "title": "Surf magazin: spot guide to Lake Neusiedl and Lake Zicksee",
+          "accessed": "2026-10-30",
+          "url": "https://www.surf-magazin.de/en/spots-and-areas/lakes/spot-guide-austria-lake-neusiedl-and-lake-zicksee-these-are-the-best-windsurfing-spots/"
+        },
+        {
+          "title": "Windfinder: Podersdorf spot guide",
+          "accessed": "2026-10-30",
+          "url": "https://www.windfinder.com/spotguide/podersdorf_neusiedler_see"
+        }
+      ]
+    },
+    {
+      "id": "pozo-izquierdo-gran-canaria",
+      "name": "Pozo Izquierdo, Gran Canaria",
+      "place": "Pozo Izquierdo, Gran Canaria, Spain",
+      "locations": [
+        "Pozo Izquierdo, Gran Canaria"
+      ],
+      "gameConditions": {
+        "knots": 28,
+        "gustKnots": 6
+      },
+      "character": "Very strong, gusty side-shore trades over deep Atlantic water and swell, off a boulder beach. Summer trades often blow above 30 kt, beyond the game's 28.",
+      "confidence": "qualitative",
+      "profileNote": "No scenery yet: the game's own open water, in Pozo's usual wind.",
+      "sources": [
+        {
+          "title": "Surf magazin: the best windsurfing spots on Gran Canaria",
+          "accessed": "2026-10-30",
+          "url": "https://www.surf-magazin.de/en/spots-and-areas/international/spain/pozo-vargas-and-co-the-best-windsurfing-spots-on-gran-canaria/"
+        },
+        {
+          "title": "Hello Canary Islands: windsurfing at Pozo Izquierdo",
+          "accessed": "2026-10-30",
+          "url": "https://www.hellocanaryislands.com/windsurfing/gran-canaria/windsurfing-at-pozo-izquierdo"
+        }
+      ]
+    },
+    {
+      "id": "sorobon-bonaire",
+      "name": "Sorobon, Bonaire",
+      "place": "Lac Bay, Bonaire, Caribbean Netherlands",
+      "locations": [
+        "Sorbon Beach, Bonaire, Dutch Netherlands Antilles"
+      ],
+      "gameConditions": {
+        "knots": 18,
+        "gustKnots": 0
+      },
+      "character": "Steady easterly trades, side-shore, over a flat, shallow turquoise lagoon behind a reef.",
+      "confidence": "qualitative",
+      "profileNote": "No scenery yet: the game's own open water, in Sorobon's usual wind.",
+      "sources": [
+        {
+          "title": "Bonaire.com: Lac Bay windsurfing and kitesurfing guide",
+          "accessed": "2026-10-30",
+          "url": "https://bonaire.com/en/blog/lac-bay-windsurfing-kitesurfing-guide-bonaire/"
+        },
+        {
+          "title": "Surf magazin: the best windsurfing spots on Bonaire",
+          "accessed": "2026-10-30",
+          "url": "https://www.surf-magazin.de/reisen/international/karibik/spot-guide-die-besten-windsurf-spots-auf-bonaire/"
+        }
+      ]
     }
   ]
 }
