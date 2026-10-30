@@ -1,11 +1,12 @@
 // The developer panel's data: the files with a draft laid over them.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createDevData } from "../server/dev.mjs";
+import { DATA_FILES, createDevData, formatJson } from "../server/dev.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { tempDir, writeDataFiles, writeTour } from "./helpers.mjs";
+import { ROOT, tempDir, writeDataFiles, writeTour } from "./helpers.mjs";
 
 const SOTAVENTO = "sotavento-fuerteventura";
 
@@ -90,4 +91,34 @@ test("without the dev mod there is no draft to set", (t) => {
   const { data } = setup(t, { dev: false });
   assert.throws(() => data.setDraft({ tuning: { aiTargetOffset: 1 } }), /dev mod is off/);
   assert.equal(data.values().tuning.aiTargetOffset, 0);
+});
+
+test("writing puts only the changed files in the panel's layout, and clears the draft", (t) => {
+  const { data, paths } = setup(t);
+  const before = readFileSync(paths.venues, "utf8");
+  data.setDraft({ eventWinds: { 378: { knots: 22 } } });
+  assert.deepEqual(data.write(), ["eventWinds"]);
+  const text = readFileSync(paths.eventWinds, "utf8");
+  assert.equal(JSON.parse(text).events[0].knots, 22);
+  assert.equal(text, formatJson(JSON.parse(text)));
+  assert.equal(readFileSync(paths.venues, "utf8"), before, "files the draft doesn't change are left alone");
+  assert.deepEqual(data.draft(), {});
+  assert.equal(data.values().eventWinds.byEvent.get(378).knots, 22);
+});
+
+test("a write that fails keeps the draft and says which files were written", (t) => {
+  const { data, paths } = setup(t);
+  mkdirSync(`${paths.venues}.tmp`);
+  data.setDraft({ eventWinds: { 378: { knots: 22 } }, venues: { [SOTAVENTO]: { gameConditions: { knots: 20 } } } });
+  assert.throws(() => data.write(), (error) => error.message.startsWith(`Couldn't write ${paths.venues}`) && error.written.join() === "eventWinds");
+  assert.equal(JSON.parse(readFileSync(paths.eventWinds, "utf8")).events[0].knots, 22);
+  assert.ok(data.draft().venues, "the draft is kept");
+  assert.equal(data.values().venues.byId.get(SOTAVENTO).gameConditions.knots, 20);
+});
+
+test("the data files are in the panel's layout, so its writes show only real changes", () => {
+  for (const file of Object.values(DATA_FILES)) {
+    const text = readFileSync(join(ROOT, file), "utf8").replace(/\r\n/g, "\n");
+    assert.equal(text, formatJson(JSON.parse(text)), file);
+  }
 });

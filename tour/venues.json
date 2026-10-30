@@ -13,7 +13,13 @@
         "knots": 19,
         "gustKnots": 6
       },
-      "windZones": { "gain": 4, "from": 300, "over": 120, "lee": 3, "note": "The trades accelerate along Jandía's coast and blow harder out beyond the Playa Barca sandbar; close to the beach the wind is lighter and gustier. A qualitative mapping: about 4 kt more over the outer half of the heat (from 300 m out), 3 kt less within 90 m of the beach." },
+      "windZones": {
+        "gain": 4,
+        "from": 300,
+        "over": 120,
+        "lee": 3,
+        "note": "The trades accelerate along Jandía's coast and blow harder out beyond the Playa Barca sandbar; close to the beach the wind is lighter and gustier. A qualitative mapping: about 4 kt more over the outer half of the heat (from 300 m out), 3 kt less within 90 m of the beach."
+      },
       "character": "Steady summer NE trades, a bright low-tide lagoon and small left-breaking shore waves near the main break.",
       "confidence": "qualitative",
       "profileNote": "The heat is framed against Playa Barca: lagoon and sandbar out front, the judging tower and René Egli beach centre on shore, and the Jandía ridges behind. The water stays calmer landward of the bar and roughens toward the Atlantic.",
@@ -68,7 +74,13 @@
         "knots": 17,
         "gustKnots": 4
       },
-      "windZones": { "gain": 2, "from": 380, "over": 80, "lee": 0, "note": "An onshore westerly arrives evenly over open water; out over the sand ridge it is a little stronger. A qualitative mapping: about 2 kt more from 380 m out." },
+      "windZones": {
+        "gain": 2,
+        "from": 380,
+        "over": 80,
+        "lee": 0,
+        "note": "An onshore westerly arrives evenly over open water; out over the sand ridge it is a little stronger. A qualitative mapping: about 2 kt more from 380 m out."
+      },
       "character": "Exposed west-facing North Sea water; onshore westerlies can bring steep shorebreak, while offshore easterlies can leave the nearshore water much flatter.",
       "confidence": "qualitative",
       "profileNote": "The heat faces Westerland's open beach: the sand ridge and trough sit offshore, rocky groynes cross the shorebreak, and the Musikmuschel and promenade mark the town side. Wave size and water state vary sharply with wind and tide.",
