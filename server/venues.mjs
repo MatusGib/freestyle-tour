@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { coastFor } from "../mods/venues/coast.js";
 
 const normalize = (value) =>
   String(value ?? "")
@@ -21,7 +22,7 @@ export function loadVenueCatalog(file) {
       throw new Error(`${file} has an incomplete venue`);
     }
     const { knots, gustKnots } = venue.gameConditions;
-    if (!Number.isInteger(knots) || knots < 15 || knots > 19 || !Number.isInteger(gustKnots) || (gustKnots !== 0 && gustKnots < 2) || gustKnots > 6) {
+    if (!Number.isInteger(knots) || knots < 12 || knots > 28 || !Number.isInteger(gustKnots) || (gustKnots !== 0 && gustKnots < 2) || gustKnots > 6) {
       throw new Error(`${file} has unsupported conditions for ${venue.id}`);
     }
     const zones = venue.windZones;
@@ -45,8 +46,10 @@ export function venueForLocation(catalog, location) {
   return catalog?.byLocation.get(normalize(location)) ?? null;
 }
 
+// What the browser gets of a venue. scenery: whether the venues mod has a
+// coast for it; the others sail in the game's own scene.
 export function publicVenue(venue) {
   if (!venue) return null;
   const { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources } = venue;
-  return { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources };
+  return { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources, scenery: Boolean(coastFor(id)) };
 }

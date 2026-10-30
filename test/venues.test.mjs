@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { handleApi } from "../server/api/index.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { loadVenueCatalog, venueForLocation } from "../server/venues.mjs";
+import { loadVenueCatalog, publicVenue, venueForLocation } from "../server/venues.mjs";
 import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
 import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, venueConditions } from "../mods/venues/venue.js";
@@ -43,11 +43,25 @@ test("a catalog with a missing file, an unsupported wind, a repeated id or a sha
     writeFileSync(file, JSON.stringify({ version: 1, venues }));
     return assert.throws(() => loadVenueCatalog(file));
   };
-  refused([venue("a", ["A"], { knots: 25, gustKnots: 4 })]);
+  refused([venue("a", ["A"], { knots: 29, gustKnots: 4 })]);
+  refused([venue("a", ["A"], { knots: 11, gustKnots: 4 })]);
   refused([venue("a", ["A"], { knots: 17, gustKnots: 1 })]);
   refused([venue("a", ["A"]), venue("a", ["B"])]);
   refused([venue("a", ["A"]), venue("b", ["a"])]);
   refused([{ ...venue("a", ["A"]), windZones: { gain: 12, from: 300, over: 120, lee: 0 } }]);
+});
+
+test("a venue's usual wind can be anything the game's practice takes, 12–28 kt", (t) => {
+  const file = join(tempDir(t), "venues.json");
+  const venue = (id, knots) => ({ id, name: id, locations: [id], gameConditions: { knots, gustKnots: 0 } });
+  writeFileSync(file, JSON.stringify({ version: 2, venues: [venue("light", 12), venue("strong", 28)] }));
+  assert.deepEqual(loadVenueCatalog(file).venues.map((v) => v.gameConditions.knots), [12, 28]);
+});
+
+test("only venues with a coast are marked as having scenery", () => {
+  const venue = (id) => ({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
+  assert.equal(publicVenue(venue(SYLT)).scenery, true);
+  assert.equal(publicVenue(venue("pozo-izquierdo-gran-canaria")).scenery, false);
 });
 
 test("a venue heat keeps the room's seed and takes the venue's wind", () => {
