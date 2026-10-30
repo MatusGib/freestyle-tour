@@ -5,7 +5,7 @@
 // affects your physics or score.
 import { claimOpponent, releaseOpponent } from "../lib/opponent.js";
 import { createRunner } from "../lib/replay.js";
-import { clearPlannedHeat, rememberPlannedHeat } from "../venues/venue.js";
+import { clearPlannedHeat, rememberPlannedHeat, windText } from "../venues/venue.js";
 import { aiSample, isSoloHeatStart, isStale, nextHeatText, planningText, resultText, riderLine } from "./challenge.js";
 
 const PANEL_STYLE =
@@ -19,7 +19,6 @@ const getJson = async (url, init) => {
   return body;
 };
 const postJson = (url, body) => getJson(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-const windText = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt, gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt, steady wind`);
 const el = (tag, props = {}, ...children) => {
   const node = Object.assign(document.createElement(tag), props);
   node.append(...children.filter((child) => child !== null));

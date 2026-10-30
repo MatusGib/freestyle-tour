@@ -18,8 +18,6 @@ export const SIGNATURES = {
     heatInit: (v) => /^function [\w$]+\(e=!1\)\{return\{enabled:e,warmup:/.test(src(v)),
     isAir: (v) => /^function [\w$]+\(e\)\{return e\.air\|\|[\w$]+\(e\)\}$/.test(src(v)),
     inArea: (v) => /\{let r=[\w$]+\(n,e,t\);return Math\.abs\(r\.downwind\)<=n\.depth\/2/.test(src(v)),
-    course: (v) => v && typeof v === "object" && Object.keys(v).sort().join(",") === "angle,depth,length,x,z" &&
-      Number.isFinite(v.x) && Number.isFinite(v.z) && Number.isFinite(v.depth) && Number.isFinite(v.length) && Number.isFinite(v.angle),
     tricks: (v) => !!v?.flaka?.scoring && !!v?.culo?.scoring,
     heatRules: (v) => typeof v?.attemptsPerTack === "number" && typeof v?.seconds === "number",
   },

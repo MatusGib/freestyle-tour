@@ -1,0 +1,121 @@
+// Lets a venue change how the game's water and sky look (water.js sets them).
+// - The water shader's fixed colours become uniforms, and it gains wind chop,
+//   whitecaps that grow with the local wind, and a venue's shallows, sandbar
+//   and shorebreak. Every new uniform starts at the value that reproduces the
+//   game's own look, so nothing changes until a venue is chosen.
+// - The water gets the heat's wind speed along with its gusts.
+// - The sky dome's two colours become uniforms, and the dome a name to find.
+// - The Game class carries the CanvasTexture class, for the beach's sand.
+// The minified names (f, ve, r, n) are the 2026-10-24 snapshot's; a game
+// update that changes them makes these patches fail loudly.
+const WATER = "uniform float uGustDrift;";
+const SKY = "varying vec3 vP;void main(){float h=normalize(vP).y;vec3 col=mix(vec3(.77,.87,.78),vec3(.91,.94,.81),";
+
+// The game's own colours, as its shaders write them (sRGB, 0–1).
+export const GAME_COLOURS = {
+  deep: [.035, .43, .49], light: [.18, .70, .68], sky: [.72, .85, .75], haze: [.73, .85, .76],
+  skyLow: [.77, .87, .78], skyHigh: [.91, .94, .81],
+};
+const glsl = (rgb) => `[${rgb.join(",")}]`;
+
+const UNIFORMS = `
+uniform float uKnots;
+uniform vec3 uDeep;
+uniform vec3 uLight;
+uniform vec3 uShallow;
+uniform vec3 uSky;
+uniform vec3 uHaze;
+uniform float uChop;
+uniform float uCaps;
+uniform float uSurf;
+uniform vec4 uShore;
+uniform vec4 uBar;`;
+
+// Short crests across the wind (+x) that run downwind; shading only, like the
+// game's own ripples, so the wave geometry and the rider are unchanged.
+const CHOP = "float chop(vec2 p){vec2 q=p-vec2(uTime*2.4,0.);return (noise(q*vec2(.85,.4))-.5)*.55+(noise(q*vec2(2.,1.1)+3.7)-.5)*.3+sin(p.x*1.7+p.y*.5-uTime*4.2)*.06;}\n";
+
+// off: metres out from the venue's shoreline (uShore: inland direction xy,
+// shoreline distance z). uBar: sandbar distance out, its width, the width of
+// the shallows, how much the water inside the sandbar is sheltered.
+const SHALLOWS = `
+ float coast=step(1.,uShore.z);
+ float off=uShore.z-dot(p,uShore.xy);
+ float shallow=coast*(1.-smoothstep(uBar.z*.5,uBar.z+1.,off))*(.75+.25*noise(p*.035));
+ float bar=coast*(1.-smoothstep(0.,uBar.y+1.,abs(off-uBar.x)));
+ float shelter=coast*uBar.w*(1.-smoothstep(uBar.x-40.,uBar.x+5.,off));
+ col=mix(col,uShallow*(.92+.16*n),clamp(max(shallow*.9,bar*.65),0.,1.));`;
+
+// The local wind, gusts included, drives the chop and the whitecaps.
+const LOCAL_WIND = `
+ float localKnots=uKnots+(uGustKnots>0.?shape*extra:0.);
+ float choppy=uChop*(1.-shelter)*clamp((localKnots-8.)/12.,0.,1.8)*(1.-smoothstep(150.,600.,dist));`;
+
+// Whitecaps cover W=3.84e-6*U^3.41 of the sea (Monahan and O'Muircheartaigh
+// 1980, U in m/s): about 0.4% at 15 kt, 1.3% at 21 kt, 3.4% at 28 kt. Each
+// 9 x 5 m cell may hold one breaking crest every 3.3 s, brightest at its
+// downwind front, which spreads into lacy, fading foam; on average a crest whitens about 7%
+// of its cell, which sets the chance. Far off the crests are smaller than a
+// pixel, so the water there just pales by the cover. Above about 24 kt foam
+// streaks run along the wind. Then the shorebreak, and waves breaking on the
+// sandbar.
+const WHITECAPS = `
+ float cover=uCaps*(1.-shelter*.8)*3.84e-6*pow(localKnots*.5144,3.41);
+ vec2 cq=(p-vec2(uTime*1.8,0.))/vec2(9.,5.);
+ vec2 cell=floor(cq);
+ float cycle=uTime*.3+hash(cell+3.1);
+ float life=fract(cycle);
+ float on=step(hash(cell+floor(cycle)*1.7),cover/.07);
+ vec2 at=(fract(cq)-.5-(vec2(hash(cell+11.),hash(cell+23.))*.3-.15))*vec2(9.,5.)/vec2(1.2+2.2*life,.6+.9*life);
+ float ragged=length(at)+(noise(p*1.3)-.5)*.6+(noise(p*4.2)-.5)*.35;
+ float lace=smoothstep(.2,.55,noise(p*2.4)+.45*(1.-life));
+ float crest=on*(1.-smoothstep(.55,.95,ragged))*(1.-life*life)*mix(.45,1.,smoothstep(-1.,.6,at.x))*lace;
+ float far=smoothstep(250.,600.,dist);
+ float caps=cover>0.?crest*(1.-far)+cover*1.5*far+clamp((localKnots-24.)/6.,0.,1.)*.25*smoothstep(.7,.9,noise(cq*vec2(.27,3.75))):0.;
+ float swash=smoothstep(.8,1.,sin(off*.45+uTime*1.5+noise(p*.04)*4.));
+ caps+=coast*uSurf*(1.-smoothstep(3.,40.,off))*step(0.,off)*(swash*.8+.4*(1.-smoothstep(0.,5.,off)));
+ caps+=bar*uSurf*.5*smoothstep(.85,1.,sin(off*.3+uTime*1.1+noise(p*.03)*5.));
+ col=mix(col,vec3(.93,.96,.95),clamp(caps,0.,1.));`;
+
+const DEFAULTS = [
+  "uKnots:{value:18}",
+  `uDeep:{value:${glsl(GAME_COLOURS.deep)}}`,
+  `uLight:{value:${glsl(GAME_COLOURS.light)}}`,
+  `uShallow:{value:${glsl(GAME_COLOURS.light)}}`,
+  `uSky:{value:${glsl(GAME_COLOURS.sky)}}`,
+  `uHaze:{value:${glsl(GAME_COLOURS.haze)}}`,
+  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}",
+  "uShore:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
+].join(",");
+
+export const patches = [
+  { marker: WATER, find: "uniform float uGustPhase[${e}];", replace: "uniform float uGustPhase[${e}];" + UNIFORMS, expect: 1 },
+  { marker: WATER, find: "float surface(vec2 p,float wrinkle){return waves(p)+wrinkle*(", replace: `${CHOP}float surface(vec2 p,float wrinkle,float c){return c*chop(p)+waves(p)+wrinkle*(`, expect: 1 },
+  { marker: WATER, find: ",wrinkle)", replace: ",wrinkle,choppy)", expect: 3 },
+  {
+    marker: WATER,
+    find: "vec3 col=mix(vec3(.035,.43,.49),vec3(.18,.70,.68),smoothstep(.16,1.1,n));",
+    replace: `vec3 col=mix(uDeep,uLight,smoothstep(.16,1.1,n));${SHALLOWS}`,
+    expect: 1,
+  },
+  { marker: WATER, find: "float wrinkle=gust*(1.-smoothstep(60.,260.,dist));", replace: `float wrinkle=gust*(1.-smoothstep(60.,260.,dist));${LOCAL_WIND}`, expect: 1 },
+  { marker: WATER, find: "col=mix(col,vec3(.72,.85,.75),fresnel*", replace: "col=mix(col,uSky,fresnel*", expect: 1 },
+  { marker: WATER, find: "col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;", replace: `col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;${WHITECAPS}`, expect: 1 },
+  { marker: WATER, find: "col=mix(col,vec3(.73,.85,.76),fog);", replace: "col=mix(col,uHaze,fog);", expect: 1 },
+  { marker: WATER, find: "uGustPhase:{value:Array.from({length:e},()=>0)}}", replace: `uGustPhase:{value:Array.from({length:e},()=>0)},${DEFAULTS}}`, expect: 1 },
+  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uGustKnots.value=n.gustKnots", expect: 1 },
+  {
+    marker: SKY,
+    find: SKY,
+    replace: `uniform vec3 uSkyLow;uniform vec3 uSkyHigh;${SKY.replace("vec3(.77,.87,.78),vec3(.91,.94,.81),", "uSkyLow,uSkyHigh,")}`,
+    expect: 1,
+  },
+  {
+    marker: SKY,
+    find: "new _({side:1,depthTest:!1,depthWrite:!1,vertexShader:",
+    replace: `new _({uniforms:{uSkyLow:{value:${glsl(GAME_COLOURS.skyLow)}},uSkyHigh:{value:${glsl(GAME_COLOURS.skyHigh)}}},side:1,depthTest:!1,depthWrite:!1,vertexShader:`,
+    expect: 1,
+  },
+  { marker: SKY, find: "e.renderOrder=-1,e.frustumCulled=!1", replace: 'e.name="sky",e.renderOrder=-1,e.frustumCulled=!1', expect: 1 },
+  { part: "scene", find: "export{ve as Game}", replace: "ve.three={CanvasTexture:f};export{ve as Game}", expect: 1 },
+];

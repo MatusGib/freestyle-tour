@@ -72,6 +72,9 @@ export function takePlannedHeat() {
   }
 }
 
+// The wind as the game writes it.
+export const windText = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt, gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt, steady wind`);
+
 export function venueConditions(roomConditions, venue, roomId) {
   return { ...roomConditions(roomId), ...venue.gameConditions };
 }

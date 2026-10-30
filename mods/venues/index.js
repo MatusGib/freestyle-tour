@@ -4,8 +4,10 @@ import {
   takePlannedHeat,
   venueConditions,
   venueRoomId,
+  windText,
 } from "./venue.js";
-import { applyVenueCourse, createVenueTextures, mountVenueScenery, resolveVenueCollision } from "./scenery.js";
+import { createVenueTextures, mountVenueScenery, resolveVenueCollision } from "./scenery.js";
+import { applyVenueLook } from "./water.js";
 
 const getJson = async (url) => {
   const res = await fetch(url);
@@ -18,7 +20,6 @@ const el = (tag, props = {}, ...children) => {
   node.append(...children.filter((child) => child !== null));
   return node;
 };
-const windLabel = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt · gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt · steady wind`);
 
 const PANEL_STYLE =
   "position:fixed;right:12px;bottom:12px;z-index:100000;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;" +
@@ -27,17 +28,8 @@ const BUTTON_STYLE = "border:0;border-radius:8px;padding:7px 10px;background:#17
 
 export default {
   name: "venues",
-  async setup({ engine, overlay, whenGame, onStep, log, threeUrl }) {
+  async setup({ engine, overlay, whenGame, onStep, log }) {
     let textures = { sand: null };
-    if (threeUrl) {
-      try {
-        const three = await import(threeUrl);
-        const CanvasTexture = Object.values(three).find((value) => typeof value === "function" && value.toString().includes("isCanvasTexture=!0"));
-        textures = createVenueTextures(CanvasTexture);
-      } catch (error) {
-        log("could not create local terrain textures; using vertex-colour terrain", error);
-      }
-    }
     const holder = overlay("venues");
     holder.style.cssText = "font:12px/1.4 system-ui,sans-serif;background:rgba(10,40,40,.85);color:#e8f4f2;padding:4px 10px;border-radius:8px;pointer-events:auto";
     const open = el("button", {
@@ -75,6 +67,11 @@ export default {
       setStatus(venue?.name ?? "Weekly wind");
     };
     const selected = () => venues.find((venue) => venue.id === selectedVenueId()) ?? null;
+    // The coast, its water and its sky, or the game's own look without a venue.
+    const showVenue = (found, venue) => {
+      mountVenueScenery(found, venue, textures);
+      if (!applyVenueLook(found, venue)) log("the water patch is missing; keeping the game's water");
+    };
 
     function renderPanel() {
       const active = selected();
@@ -93,7 +90,7 @@ export default {
             alt: `${venue.name} shoreline illustration`,
             style: "display:block;width:100%;height:112px;object-fit:cover;margin:8px 0;border-radius:8px;background:#dcebe5",
           }),
-          el("p", { textContent: `${windLabel(venue.gameConditions)} · ${venue.character}`, style: "margin:4px 0" }),
+          el("p", { textContent: `${windText(venue.gameConditions)} · ${venue.character}`, style: "margin:4px 0" }),
           el("small", { textContent: venue.profileNote, style: "display:block;color:#50636a;margin-bottom:8px" }),
           venue.courseNote ? el("small", { textContent: `Heat position: ${venue.courseNote}`, style: "display:block;color:#31565e;margin-bottom:7px" }) : null,
           venue.landmarks?.length ? el("small", { textContent: `Look for: ${venue.landmarks.join(" · ")}`, style: "display:block;color:#31565e;margin-bottom:5px" }) : null,
@@ -138,24 +135,21 @@ export default {
     function choose(venue) {
       saveSelectedVenue(venue.id);
       setVenueStatus(venue);
-      applyVenueCourse(engine, venue);
-      if (game) mountVenueScenery(game, venue, textures);
       panel.hidden = true;
+      if (!game) return;
+      showVenue(game, venue);
       // Update the current practice water if the game is idling on the water.
       // The same profile is applied again at start, including for a solo heat.
-      if (game) {
-        const conditions = venueConditions(engine.roomConditions, venue, venueRoomId(venue.id));
-        game.setPracticeConditions(conditions, false);
-      }
+      game.setPracticeConditions(venueConditions(engine.roomConditions, venue, venueRoomId(venue.id)), false);
     }
 
     function clearChoice() {
       saveSelectedVenue(null);
       setVenueStatus(null);
-      applyVenueCourse(engine, null);
-      if (game) mountVenueScenery(game, null, textures);
       panel.hidden = true;
-      if (game) game.setPracticeConditions(engine.weekConditions(engine.weekStart(Date.now())), false);
+      if (!game) return;
+      showVenue(game, null);
+      game.setPracticeConditions(engine.weekConditions(engine.weekStart(Date.now())), false);
     }
 
     function applyAtHeatStart(found) {
@@ -167,14 +161,12 @@ export default {
         const planned = takePlannedHeat();
         if (planned) {
           setVenueStatus(planned.venue);
-          applyVenueCourse(engine, planned.venue);
-          mountVenueScenery(found, planned.venue, textures);
+          showVenue(found, planned.venue);
           return originalStart.call(this, heat, clock, state, planned.conditions);
         }
 
         const venue = selected();
-        applyVenueCourse(engine, venue);
-        mountVenueScenery(found, venue, textures);
+        showVenue(found, venue);
         if (!venue) return originalStart.apply(this, args);
         const conditions = venueConditions(engine.roomConditions, venue, venueRoomId(venue.id));
         setVenueStatus(venue);
@@ -186,11 +178,15 @@ export default {
     whenGame().then(async (found) => {
       await catalogReady;
       game = found;
+      // The sand texture needs the game's own three.js, which the scene patch
+      // hands over; without it the beach keeps its vertex colours.
+      const CanvasTexture = found.constructor.three?.CanvasTexture;
+      if (CanvasTexture) textures = createVenueTextures(CanvasTexture);
+      else log("the scene patch is missing; the beach has no sand texture");
       applyAtHeatStart(found);
       await onStep((state, input) => resolveVenueCollision(state, input, game?.__venueSceneryVenueId));
       const venue = selected();
-      applyVenueCourse(engine, venue);
-      mountVenueScenery(found, venue, textures);
+      showVenue(found, venue);
       setVenueStatus(venue);
     }).catch((error) => log("could not attach venue conditions", error));
   },

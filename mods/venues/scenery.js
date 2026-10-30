@@ -1,21 +1,26 @@
 // Venue environments use BufferGeometry and lit materials taken from the
-// running game. No external renderer or remote assets are loaded. The shore
-// runs across the camera's default sightline, but all props remain stationary
-// in world space while the rider and camera move.
+// running game. No external renderer or remote assets are loaded. The game's
+// wind always blows along +x and its heat area never moves, so a venue turns
+// its coast around the course instead: the beach lies at the venue's angle to
+// the wind, beyond the course and the water AI riders sail. All props remain
+// stationary in world space while the rider and camera move.
 
-const SHORE = { rightX: 0.802, rightZ: -0.597, inX: -0.597, inZ: -0.802 };
-const COURSE_DEPTH = 220;
-const COURSE_LENGTH = 420;
+// The game's heat area: depth along the wind (x), length across it (z).
+const COURSE = { depth: 220, length: 420 };
 const LAND_CLEARANCE_D = 1.5;
 const SHORE_HALF_LENGTH = 4200;
 const SHORE_COLS = 1200;
-const point = (s, d, y = 0) => [SHORE.rightX * s + SHORE.inX * d, y, SHORE.rightZ * s + SHORE.inZ * d];
 const pendingBatches = new WeakMap();
 
-const SITE_LAYOUTS = {
+// inland: the direction from the water to the beach, measured from the wind:
+// 0 is onshore, ±90° side-shore, beyond ±90° a little offshore. Negative
+// angles put the beach on the far side of the course from the camera, so the
+// coast is in view. That mirrors both venues: there the wind comes from the
+// left as you look out to sea, here from the right.
+export const SITE_LAYOUTS = {
   "sotavento-fuerteventura": {
-    courseWindOffset: .42,
-    shoreBuffer: 80,
+    inland: -100 * Math.PI / 180, // side-shore, slightly offshore
+    shoreBuffer: 90,
     sandbarOffshore: 280,
     curveAmplitude: 5.5,
     curveFrequency: .0036,
@@ -23,7 +28,7 @@ const SITE_LAYOUTS = {
     curveSecondaryFrequency: .011,
   },
   "westerland-sylt": {
-    courseWindOffset: 0,
+    inland: -45 * Math.PI / 180, // side-onshore
     shoreBuffer: 100,
     sandbarOffshore: 400,
     curveAmplitude: 3.2,
@@ -32,59 +37,47 @@ const SITE_LAYOUTS = {
     curveSecondaryFrequency: .013,
   },
 };
-
-const shoreAngle = () => Math.atan2(SHORE.inZ, SHORE.inX);
-const courseAngle = (layout) => shoreAngle() + layout.courseWindOffset;
-function courseInlandExtent(angle) {
-  const along = SHORE.inX * Math.cos(angle) + SHORE.inZ * Math.sin(angle);
-  const across = -SHORE.inX * Math.sin(angle) + SHORE.inZ * Math.cos(angle);
-  return COURSE_DEPTH / 2 * Math.abs(along) + COURSE_LENGTH / 2 * Math.abs(across);
+// s runs along the shore, d inland from the water.
+for (const layout of Object.values(SITE_LAYOUTS)) {
+  const inX = Math.cos(layout.inland), inZ = Math.sin(layout.inland);
+  layout.frame = { rightX: -inZ, rightZ: inX, inX, inZ };
 }
+
+// The coast being built (its frame); point() places (s, d, height) on it.
+let building = null;
+const point = (s, d, y = 0) => [building.rightX * s + building.inX * d, y, building.rightZ * s + building.inZ * d];
+
+// The shoreline sits shoreBuffer beyond the course's corner nearest the beach.
 function shorelineBase(layout) {
-  return courseInlandExtent(courseAngle(layout)) + layout.shoreBuffer;
+  const { inX, inZ } = layout.frame;
+  return COURSE.depth / 2 * Math.abs(inX) + COURSE.length / 2 * Math.abs(inZ) + layout.shoreBuffer;
 }
 function shorelineOffset(s, layout) {
   return Math.sin(s * layout.curveFrequency) * layout.curveAmplitude +
     Math.sin(s * layout.curveSecondaryFrequency + .7) * layout.curveSecondary;
 }
-function shorelineAt(venueId, s) {
+export function shorelineAt(venueId, s) {
   const layout = SITE_LAYOUTS[venueId];
   return layout ? shorelineBase(layout) + shorelineOffset(s, layout) : 0;
 }
-export function applyVenueCourse(engine, venue) {
-  const course = engine?.course;
-  if (!course || typeof course !== "object") return false;
-  if (!engine.__venueOriginalCourse) engine.__venueOriginalCourse = { ...course };
-  const layout = SITE_LAYOUTS[venue?.id];
-  if (layout) course.angle = courseAngle(layout);
-  else Object.assign(course, engine.__venueOriginalCourse);
-  return true;
+
+// Where the water shader draws a venue's shallows: the inland direction, the
+// straight shoreline's distance from the course centre and the sandbar's
+// distance out from it.
+export function coastFor(venueId) {
+  const layout = SITE_LAYOUTS[venueId];
+  if (!layout) return null;
+  return { inX: layout.frame.inX, inZ: layout.frame.inZ, shoreline: shorelineBase(layout), sandbar: layout.sandbarOffshore };
 }
 
-function setVenueWaterline(game, venue) {
-  const water = game.water;
-  if (!water || typeof water.fragmentShader !== "string") return;
-  if (game.__venueOriginalWaterShader === undefined) game.__venueOriginalWaterShader = water.fragmentShader;
-  const original = game.__venueOriginalWaterShader;
-  // Keep the shipped fragment shader intact. Venue water character is built
-  // from shallow scene bands; editing this runtime shader could blank every
-  // water fragment on a graphics driver that rejects the patched GLSL.
-  if (water.fragmentShader !== original) {
-    water.fragmentShader = original;
-    water.needsUpdate = true;
-  }
-  game.__venueWaterVenueId = venue?.id ?? null;
-  game.__venueWaterPatchError = null;
+function writeLocalPosition(state, frame, s, d) {
+  state.x = frame.rightX * s + frame.inX * d;
+  state.z = frame.rightZ * s + frame.inZ * d;
 }
 
-function writeLocalPosition(state, s, d) {
-  state.x = SHORE.rightX * s + SHORE.inX * d;
-  state.z = SHORE.rightZ * s + SHORE.inZ * d;
-}
-
-function stopLocalVelocity(state, input, axis, direction) {
-  const x = axis === "s" ? SHORE.rightX : SHORE.inX;
-  const z = axis === "s" ? SHORE.rightZ : SHORE.inZ;
+function stopLocalVelocity(state, input, frame, axis, direction) {
+  const x = axis === "s" ? frame.rightX : frame.inX;
+  const z = axis === "s" ? frame.rightZ : frame.inZ;
   const velocity = state.vx * x + state.vz * z;
   if (direction * velocity < 0) {
     state.vx -= x * velocity;
@@ -92,33 +85,34 @@ function stopLocalVelocity(state, input, axis, direction) {
     state.speed = Math.hypot(state.vx, state.vz);
   }
   const forward = axis === "s"
-    ? Math.sin(state.heading) * SHORE.rightX - Math.cos(state.heading) * SHORE.rightZ
-    : Math.sin(state.heading) * SHORE.inX - Math.cos(state.heading) * SHORE.inZ;
+    ? Math.sin(state.heading) * frame.rightX - Math.cos(state.heading) * frame.rightZ
+    : Math.sin(state.heading) * frame.inX - Math.cos(state.heading) * frame.inZ;
   if (input && direction * forward < 0 && input.power > 0) input.power = 0;
 }
 
 export function resolveVenueCollision(state, input, venueId) {
-  if (!state || !SITE_LAYOUTS[venueId]) return;
-  const s = SHORE.rightX * state.x + SHORE.rightZ * state.z;
-  const d = SHORE.inX * state.x + SHORE.inZ * state.z;
-  const vs = SHORE.rightX * state.vx + SHORE.rightZ * state.vz;
-  const vd = SHORE.inX * state.vx + SHORE.inZ * state.vz;
+  const layout = SITE_LAYOUTS[venueId];
+  if (!state || !layout) return;
+  const frame = layout.frame;
+  const s = frame.rightX * state.x + frame.rightZ * state.z;
+  const d = frame.inX * state.x + frame.inZ * state.z;
+  const vd = frame.inX * state.vx + frame.inZ * state.vz;
   const dt = 1 / 120;
   const landStopD = shorelineAt(venueId, s) - LAND_CLEARANCE_D;
-  const headingD = Math.sin(state.heading) * SHORE.inX - Math.cos(state.heading) * SHORE.inZ;
+  const headingD = Math.sin(state.heading) * frame.inX - Math.cos(state.heading) * frame.inZ;
   const drivingInland = (input?.power ?? 0) > 0 && headingD > .08;
   const insideLand = d >= landStopD;
   const approachingShore = d > landStopD - .2 && (vd > .05 || drivingInland || d + Math.max(0, vd) * dt >= landStopD);
   if (insideLand || approachingShore) {
-    if (insideLand) writeLocalPosition(state, s, landStopD);
-    stopLocalVelocity(state, input, "d", -1);
+    if (insideLand) writeLocalPosition(state, frame, s, landStopD);
+    stopLocalVelocity(state, input, frame, "d", -1);
   }
 
   if (venueId !== "westerland-sylt" || (state.air && state.height >= 1.05)) return;
-  const playerS = SHORE.rightX * state.x + SHORE.rightZ * state.z;
-  const playerD = SHORE.inX * state.x + SHORE.inZ * state.z;
-  const playerVs = SHORE.rightX * state.vx + SHORE.rightZ * state.vz;
-  const playerVd = SHORE.inX * state.vx + SHORE.inZ * state.vz;
+  const playerS = frame.rightX * state.x + frame.rightZ * state.z;
+  const playerD = frame.inX * state.x + frame.inZ * state.z;
+  const playerVs = frame.rightX * state.vx + frame.rightZ * state.vz;
+  const playerVd = frame.inX * state.vx + frame.inZ * state.vz;
   const nearestGroynes = Math.round(playerS / 140) * 140;
   const halfWidth = 1.12;
   const boardRadius = .6;
@@ -133,12 +127,12 @@ export function resolveVenueCollision(state, input, venueId) {
     const overlapsGroyne = Math.max(Math.min(playerS, nextS), groyneS - halfWidth - boardRadius) <=
       Math.min(Math.max(playerS, nextS), groyneS + halfWidth + boardRadius);
     if (!overlapsCoast || !overlapsGroyne) continue;
-    const headingS = Math.sin(state.heading) * SHORE.rightX - Math.cos(state.heading) * SHORE.rightZ;
+    const headingS = Math.sin(state.heading) * frame.rightX - Math.cos(state.heading) * frame.rightZ;
     const preferredSide = Math.sign(playerVs) || Math.sign(headingS) || -1;
     const side = playerS < groyneS ? -1 : playerS > groyneS ? 1 : preferredSide;
     const boundary = groyneS + side * (halfWidth + boardRadius);
-    if (Math.abs(playerS - groyneS) <= halfWidth + boardRadius) writeLocalPosition(state, boundary, playerD);
-    stopLocalVelocity(state, input, "s", side);
+    if (Math.abs(playerS - groyneS) <= halfWidth + boardRadius) writeLocalPosition(state, frame, boundary, playerD);
+    stopLocalVelocity(state, input, frame, "s", side);
     break;
   }
 }
@@ -331,15 +325,6 @@ function addSurface(group, template, s0, s1, d0, d1, rows, cols, heightAt, color
   return addMesh(group, template, positions, indices, "#ffffff", { ...meshOptions, colors, uvs });
 }
 
-function addWaterBand(group, template, s0, s1, d0, d1, color, opacity = .38, options = {}) {
-  const { height = .05, cols = 800, ...surfaceOptions } = options;
-  return addSurface(group, template, s0, s1, d0, d1, 2, cols,
-    (s, d) => height + .015 * Math.sin(s * .045 + d * .08),
-    (s, d) => ({ color, factor: .96 + .04 * Math.sin(s * .13 + d * .19) }),
-    { transparent: true, opacity, depthWrite: false, ...surfaceOptions },
-  );
-}
-
 function addGrass(group, template, placements, color, seed = 1, groundAt = () => 0) {
   const positions = [], indices = [];
   let random = seed;
@@ -420,12 +405,8 @@ function buildSotavento(group, template, textures) {
     return { color, factor: .93 + .07 * Math.sin(s * .071 + d * .12) };
   };
 
-  // A shallow overlay gives Playa Barca's lagoon a turquoise read without
-  // changing the game's shared shader; both edges follow the curved sandbar.
-  addWaterBand(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore - layout.sandbarOffshore + 8, shore,
-    "#43c8c0", .26, { height: .045, coastOffset, coastOffsetEnd: coastOffset });
-  addWaterBand(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore - layout.sandbarOffshore - 5, shore - layout.sandbarOffshore + 5,
-    "#d7e1d1", .22, { height: .05, coastOffset, coastOffsetEnd: coastOffset });
+  // The Playa Barca lagoon and its sandbar are drawn by the water shader
+  // (water.js), so they move with the waves.
   addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore, shore + 88, 16, SHORE_COLS,
     groundAt,
     sandColor,
@@ -492,7 +473,6 @@ function buildSylt(group, template, textures) {
   const venueId = "westerland-sylt";
   const layout = SITE_LAYOUTS["westerland-sylt"];
   const shore = shorelineBase(layout);
-  const reef = shore - layout.sandbarOffshore;
   const coastOffset = (s) => shorelineOffset(s, layout);
   const smooth = (a, b, x) => {
     const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
@@ -527,9 +507,7 @@ function buildSylt(group, template, textures) {
 
   // Westerland faces the open North Sea. A long submerged sand ridge sits
   // roughly 400 m out; a shallow trough and the steep shorebreak lie inshore.
-  addWaterBand(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, reef - 30, reef + 26, "#cbd4cf", .2);
-  addWaterBand(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, reef + 26, shore - 122, "#35545e", .13);
-  addWaterBand(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore - 76, shore - 8, "#d8e0dc", .24);
+  // The water shader draws them (water.js), so they move with the waves.
   addSurface(group, template, -SHORE_HALF_LENGTH, SHORE_HALF_LENGTH, shore, shore + 112, 24, SHORE_COLS,
     groundAt,
     sandColor,
@@ -654,26 +632,7 @@ export function createVenueTextures(CanvasTexture) {
 }
 
 export function mountVenueScenery(game, venue, textures = { sand: null }) {
-  setVenueWaterline(game, venue);
   if (game.__venueSceneryVenueId === venue?.id && game.__venueScenery) return;
-  if (!game.__venueOriginalAtmosphere) {
-    const color = game.scene?.fog?.color;
-    if (color && game.renderer?.getClearColor) {
-      game.__venueOriginalAtmosphere = {
-        fog: color.clone(),
-        clear: game.renderer.getClearColor(new color.constructor()).clone(),
-        alpha: game.renderer.getClearAlpha?.() ?? 1,
-      };
-    }
-  }
-  if (venue && game.scene?.fog?.color && game.renderer?.setClearColor) {
-    const tone = venue.id === "sotavento-fuerteventura" ? "#e8c999" : "#b9d0d5";
-    game.scene.fog.color.set(tone);
-    game.renderer.setClearColor(tone, 1);
-  } else if (!venue && game.__venueOriginalAtmosphere) {
-    game.scene.fog.color.copy(game.__venueOriginalAtmosphere.fog);
-    game.renderer.setClearColor(game.__venueOriginalAtmosphere.clear, game.__venueOriginalAtmosphere.alpha);
-  }
   if (game.__venueScenery) {
     game.__venueScenery.parent?.remove(game.__venueScenery);
     game.__venueScenery.traverse((object) => {
@@ -684,7 +643,7 @@ export function mountVenueScenery(game, venue, textures = { sand: null }) {
   }
   game.__venueScenery = null;
   game.__venueSceneryVenueId = null;
-  if (!venue || !game.scene || !game.areaArrow?.fill || !game.areaArrow?.group || !game.buoys?.buoys?.length) return;
+  if (!SITE_LAYOUTS[venue?.id] || !game.scene || !game.areaArrow?.fill || !game.areaArrow?.group || !game.buoys?.buoys?.length) return;
 
   const template = game.buoys.buoys[0].buoy.children.find((object) => object.isMesh);
   if (!template?.material?.color || !template.material.clone) return;
@@ -692,6 +651,7 @@ export function mountVenueScenery(game, venue, textures = { sand: null }) {
   const group = new game.areaArrow.group.constructor();
   group.name = `venue:${venue.id}`;
   pendingBatches.set(group, new Map());
+  building = SITE_LAYOUTS[venue.id].frame;
   try {
     if (venue.id === "sotavento-fuerteventura") buildSotavento(group, template, textures);
     if (venue.id === "westerland-sylt") buildSylt(group, template, textures);
@@ -707,6 +667,8 @@ export function mountVenueScenery(game, venue, textures = { sand: null }) {
     delete template.__venueBufferGeometry;
     console.error(`[venues] Could not build ${venue.id} scenery; leaving the sailing scene usable`, error);
     return;
+  } finally {
+    building = null;
   }
   delete template.__venueBufferGeometry;
   game.scene.add(group);

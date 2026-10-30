@@ -76,15 +76,7 @@ export async function createApp({ root, snapshot: name, mods, dataFile, modsDir 
   const weekRooms = createWeekRooms({ champion, game, now, ai, log });
   const patched = patchSnapshot(snapshot, await loadPatches(modsDir, mods), log);
   const page = prepareHtml(readFileSync(join(snapshot.dir, "index.html"), "utf8"));
-  let threeUrl = null;
-  if (mods?.includes("venues") && snapshot.manifest.parts.scene) {
-    const sceneSource = readFileSync(join(snapshot.dir, fileFor(snapshot.manifest.parts.scene)), "utf8");
-    const threeImport = sceneSource.match(/from["']([^"']*dispose-model-[^"']+\.js)["']/)?.[1];
-    threeUrl = threeImport ? new URL(threeImport, `http://localhost${snapshot.manifest.parts.scene}`).pathname : null;
-  }
-  const configObject = { snapshot: snapshot.name, parts: snapshot.manifest.parts, mods };
-  if (threeUrl) configObject.threeUrl = threeUrl;
-  const config = JSON.stringify(configObject);
+  const config = JSON.stringify({ snapshot: snapshot.name, parts: snapshot.manifest.parts, mods });
   const files = new Set(snapshot.manifest.files.map((f) => f.path));
   const modsRoot = resolve(modsDir) + sep;
   const ctx = { store, game, now, tour, venues, mods, ai, aiHeats, snapshot: snapshot.name, lobby, relay, weekly, champion, weekRooms, log };
