@@ -2,12 +2,13 @@
 // tools/spot.mjs) as samplers in the game frame: heights in metres (the
 // seabed under water), depth, ground type and land. fetchBytes(url) →
 // Uint8Array; decodeImage(bytes) → { width, height, channels, data }.
-import { bilinear, fillPolygons } from "./raster.js";
+import { bilinear, distanceTransform, fillPolygons, imagePoint } from "./raster.js";
 
 const LAGOON_FLOOR = 0.8; // the colour method can't resolve Lac Bay's floor (PR #2)
 const LAND_CELL = 2; // metres
 const SHORE = 8; // metres either side of the shoreline that are shaped by it
 const SHORE_SLOPE = 0.2; // rise of the beach and the shallows, m per m
+const DISTANCE_MAX = 80; // metres the water map's distances reach
 
 export async function loadSpot(id, { fetchBytes, decodeImage }) {
   const base = `/__mods/venues/spots/${id}/`;
@@ -72,6 +73,38 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
       return groundType.data[(Math.min(groundType.height - 1, j) * groundType.width + Math.min(groundType.width - 1, i)) * groundType.channels];
     },
   };
+}
+
+// The water's map of the detail area, for the water shader and the waves
+// (waves.js): RGBA bytes, row 0 at -z. R the depth the colour method
+// measured (0–depth.max m; 0 on land and on dark lagoon floor), G the
+// distance to the reef line and B to the shore (land or mangroves), each
+// 0–DISTANCE_MAX m.
+export function waterMap(spot, size = 1024) {
+  const { half } = spot.manifest.detail, cell = (2 * half) / size, depth = spot.images.depth;
+  const land = new Uint8Array(size * size), reef = new Uint8Array(size * size), data = new Uint8Array(size * size * 4);
+  for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
+    const { x, z } = imagePoint(i, j, half, size);
+    land[j * size + i] = spot.isLand(x, z) ? 1 : 0;
+  }
+  for (const line of spot.features.reefs) for (let k = 0; k + 1 < line.length; k++) {
+    const [x1, z1] = line[k], [x2, z2] = line[k + 1], steps = Math.ceil(Math.hypot(x2 - x1, z2 - z1) / (cell / 2));
+    for (let s = 0; s <= steps; s++) {
+      const i = Math.floor((x1 + ((x2 - x1) * s) / steps + half) / cell), j = Math.floor((z1 + ((z2 - z1) * s) / steps + half) / cell);
+      if (i >= 0 && j >= 0 && i < size && j < size) reef[j * size + i] = 1;
+    }
+  }
+  const toReef = distanceTransform(reef, size, size), toShore = distanceTransform(land, size, size);
+  const byte = (cells) => Math.round(Math.min(255, ((cells * cell) / DISTANCE_MAX) * 255));
+  for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
+    const p = j * size + i, { x, z } = imagePoint(i, j, half, size);
+    const u = ((x + half) * depth.width) / (2 * half) - 0.5, v = ((z + half) * depth.height) / (2 * half) - 0.5;
+    data[p * 4] = Math.round(bilinear(depth.data, depth.width, depth.height, u, v, depth.channels, 0));
+    data[p * 4 + 1] = byte(toReef[p]);
+    data[p * 4 + 2] = byte(toShore[p]);
+    data[p * 4 + 3] = 255;
+  }
+  return { data, size, half, depthMax: spot.manifest.depth.max, distanceMax: DISTANCE_MAX, floor: LAGOON_FLOOR };
 }
 
 // The browser's decoder, keeping the files' raw values (no colour management).

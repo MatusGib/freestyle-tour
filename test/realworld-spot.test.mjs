@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadSpot } from "../mods/venues/realworld/spot.js";
+import { loadSpot, waterMap } from "../mods/venues/realworld/spot.js";
 import { decodePng } from "../tools/spot/png.mjs";
 import { ROOT } from "./helpers.mjs";
 
@@ -46,6 +46,21 @@ test("on a 5 m grid the waterline still falls where the map's shoreline is, not 
 test("mangroves standing in the water count as land, so they stop a board too", () => {
   assert.ok(spot.isLand(465, -297), "a mangrove beyond the mapped shoreline");
   assert.equal(spot.depthAt(465, -297), 0);
+});
+
+test("the water map holds the depth, and how far each point is from the reef and the shore", () => {
+  const map = waterMap(spot, 256);
+  assert.equal(map.data.length, 256 * 256 * 4);
+  const at = (x, z) => {
+    const i = Math.floor(((x + map.half) * map.size) / (2 * map.half)), j = Math.floor(((z + map.half) * map.size) / (2 * map.half)), k = (j * map.size + i) * 4;
+    return { depth: (map.data[k] / 255) * map.depthMax, reef: (map.data[k + 1] / 255) * map.distanceMax, shore: (map.data[k + 2] / 255) * map.distanceMax };
+  };
+  const [rx, rz] = spot.features.reefs[0][36];
+  assert.ok(at(rx, rz).reef < 15, "on the reef line");
+  assert.ok(at(0, 0).reef > map.distanceMax - 1, "the course is far from the reef");
+  assert.equal(at(240, -330).shore, 0, "on land");
+  assert.ok(at(0, 0).shore > map.distanceMax - 1, "the course is far from the shore");
+  assert.ok(Math.abs(at(0, 0).depth - 2.7) < 0.5, `the measured depth, ${at(0, 0).depth}`);
 });
 
 test("the lagoon inside the reef is never read shallower than 0.8 m", () => {

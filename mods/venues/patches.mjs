@@ -15,7 +15,7 @@
 //   these patches to the AI's engine too, so it feels the same wind.
 // The minified names (f, ve, r, n, j, k, h, O, E) are the 2026-10-24 snapshot's;
 // a game update that changes them makes these patches fail loudly.
-import { SHORE_GLSL, WAVE_GLSL } from "./waves.js";
+import { SHORE_GLSL, SPOT_GLSL, WAVE_GLSL } from "./waves.js";
 
 const WATER = "uniform float uGustDrift;";
 const HEIGHTS = "function j(e,t,n){return O.reduce(";
@@ -57,7 +57,9 @@ uniform vec4 uZone;
 uniform vec4 uShore;
 uniform vec4 uCurve;
 uniform vec4 uBar;
-${SHORE_GLSL}`;
+uniform vec3 uSeagrass;
+${SHORE_GLSL}
+${SPOT_GLSL}`;
 
 // Short crests across the wind (+x) that run downwind; shading only, like the
 // game's own ripples, so the wave geometry and the rider are unchanged.
@@ -66,14 +68,22 @@ const CHOP = "float chop(vec2 p){vec2 q=p-vec2(uTime*2.4,0.);return (noise(q*vec
 // off: metres out from the venue's curved shoreline (uShore: inland direction
 // xy, shoreline distance z; uCurve: its bends). uBar: sandbar distance out, its
 // width, the width of the shallows, how much the water inside the sandbar is
-// sheltered.
+// sheltered. At a real-world spot (spotWater) the depth sets the colour
+// instead: the bed shows through below about 7 m, white sand as uShallow and
+// the dark floor the colour method reads as 0 m, away from the shore, as
+// uSeagrass; inside the reef the water is sheltered.
 const SHALLOWS = `
  float coast=step(1.,uShore.z);
  float off=shoreOff(p);
  float shallow=coast*(1.-smoothstep(uBar.z*.5,uBar.z+1.,off))*(.75+.25*noise(p*.035));
  float bar=coast*(1.-smoothstep(0.,uBar.y+1.,abs(off-uBar.x)));
  float shelter=coast*uBar.w*(1.-smoothstep(uBar.x-40.,uBar.x+5.,off));
- col=mix(col,uShallow*(.92+.16*n),clamp(max(shallow*.9,bar*.65),0.,1.));`;
+ col=mix(col,uShallow*(.92+.16*n),clamp(max(shallow*.9,bar*.65),0.,1.));
+ vec4 spot=spotWater(p);
+ float spotDepth=max(spot.x,uSpotFloor);
+ float seagrass=(1.-smoothstep(.2,.7,spot.x))*smoothstep(12.,35.,spot.z);
+ col=mix(col,mix(uShallow,uSeagrass,seagrass)*(.92+.16*n),spot.w*(1.-smoothstep(1.5,7.,spotDepth)));
+ shelter=max(shelter,spot.w*uBar.w*(1.-smoothstep(3.,8.,spotDepth)));`;
 
 // The local wind, gusts included, drives the chop and the whitecaps. uZone is
 // the heat's wind zones (zones.js zoneKnots, which the rider feels): uZone.x
@@ -92,7 +102,9 @@ const LOCAL_WIND = `
 // of its cell, which sets the chance. Far off the crests are smaller than a
 // pixel, so the water there just pales by the cover. Above about 24 kt foam
 // streaks run along the wind. Then the shorebreak, and waves breaking on the
-// sandbar.
+// sandbar. At a real-world spot: a ragged white line on the reef, pulsing as
+// the swell runs downwind across it, faint foam drifting behind it, and a
+// little swash at the shore.
 const WHITECAPS = `
  float cover=uCaps*(1.-shelter*.8)*3.84e-6*pow(localKnots*.5144,3.41);
  vec2 cq=(p-vec2(uTime*1.8,0.))/vec2(9.,5.);
@@ -109,6 +121,11 @@ const WHITECAPS = `
  float swash=smoothstep(.8,1.,sin(off*.45+uTime*1.5+noise(p*.04)*4.));
  caps+=coast*uSurf*(1.-smoothstep(3.,40.,off))*step(0.,off)*(swash*.8+.4*(1.-smoothstep(0.,5.,off)));
  caps+=bar*uSurf*.5*smoothstep(.85,1.,sin(off*.3+uTime*1.1+noise(p*.03)*5.));
+ float reefCrest=spot.w*(1.-smoothstep(2.,12.,spot.y+(noise(p*.07)-.5)*9.));
+ float swellPulse=smoothstep(.5,1.,sin(p.x*.09-uTime*1.05+noise(p*.02)*4.));
+ float behindReef=spot.w*(1.-smoothstep(3.,8.,spotDepth))*(1.-smoothstep(8.,45.,spot.y));
+ caps+=uSurf*(reefCrest*(.6+.4*swellPulse)*(.7+.3*noise(p*.3-vec2(uTime*.5,0.)))+behindReef*.18*smoothstep(.55,.85,noise(p*vec2(.08,.5)-vec2(uTime*.4,0.))));
+ caps+=uSurf*.35*spot.w*(1.-smoothstep(1.,7.,spot.z))*smoothstep(.75,1.,sin(spot.z*.9+uTime*1.6+noise(p*.05)*4.));
  col=mix(col,vec3(.93,.96,.95),clamp(caps,0.,1.));`;
 
 const DEFAULTS = [
@@ -120,6 +137,7 @@ const DEFAULTS = [
   `uHaze:{value:${glsl(GAME_COLOURS.haze)}}`,
   "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}", "uZone:{value:[0,0,0,0]}",
   "uShore:{value:[0,0,0,0]}", "uCurve:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
+  `uSeagrass:{value:${glsl(GAME_COLOURS.light)}}`, "uSpotWater:{value:null}", "uSpotBox:{value:[0,0,0,0]}", "uSpotFloor:{value:.8}",
   `uWave:{value:[${new Array(16).fill(0).join(",")}]}`,
 ].join(",");
 

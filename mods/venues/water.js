@@ -4,7 +4,7 @@
 // so its own look is unchanged.
 import { GAME_COLOURS } from "./patches.mjs";
 import { coastFor } from "./coast.js";
-import { currentWaves, setSea } from "./waves.js";
+import { currentWaves, setSea, setSpotWater } from "./waves.js";
 
 export const GAME_LOOK = { ...GAME_COLOURS, shallow: GAME_COLOURS.light, chop: 0, caps: 0, surf: 0, barWidth: 0, shallowWidth: 0, shelter: 0, cloud: 0, cloudTint: [1, 1, 1], haziness: .0026 };
 const GAME_FOG = .0035;
@@ -38,14 +38,29 @@ export const VENUE_LOOKS = {
     fetch: 60000, swell: { length: 80, height: .6 },
     cloud: .72, cloudTint: [.86, .88, .89], haziness: .0022, landHaze: .0016,
   },
+  // Lac Bay, from its depth map: deep Caribbean blue beyond the reef, bright
+  // turquoise over the lagoon's white sand, dark green-blue over its
+  // seagrass, surf breaking on the reef and a calm lagoon behind it. The
+  // trades: a swell running downwind, high scattered white cumulus, clear air.
+  // seagrass: the colour over the dark lagoon floor.
+  "sorobon-bonaire": {
+    deep: [.02, .2, .45], light: [.05, .42, .62], shallow: [.42, .86, .84], seagrass: [.1, .4, .42],
+    sky: [.72, .84, .93], haze: [.78, .86, .92], skyLow: [.82, .88, .93], skyHigh: [.36, .6, .9],
+    chop: 1, caps: 1, surf: 1, shelter: .8,
+    fetch: 100000, swell: { length: 70, height: .5 },
+    cloud: .25, cloudTint: [1, 1, 1], haziness: .0006, landHaze: .00012,
+  },
 };
 
+// spotWater: a real-world spot's water map (realworld/spot.js waterMap) with
+// its texture, once the spot has loaded; its water then reads the depth.
 // Returns false when the water patch is missing (the game then keeps its look).
-export function applyVenueLook(game, venue) {
+export function applyVenueLook(game, venue, spotWater = null) {
   const water = game.water?.uniforms;
   if (!water?.uDeep) return false;
   const look = VENUE_LOOKS[venue?.id] ?? GAME_LOOK;
   const coast = VENUE_LOOKS[venue?.id] ? coastFor(venue.id) : null;
+  const spot = VENUE_LOOKS[venue?.id] && !coast ? spotWater : null;
   water.uDeep.value = look.deep;
   water.uLight.value = look.light;
   water.uShallow.value = look.shallow;
@@ -55,11 +70,19 @@ export function applyVenueLook(game, venue) {
   water.uCaps.value = look.caps;
   water.uSurf.value = look.surf;
   water.uFogRate.value = look.haziness;
-  const bar = coast ? [coast.sandbar, look.barWidth, look.shallowWidth, look.shelter] : [0, 0, 0, 0];
+  const bar = coast ? [coast.sandbar, look.barWidth, look.shallowWidth, look.shelter] : spot ? [0, 0, 0, look.shelter] : [0, 0, 0, 0];
   water.uShore.value = coast ? [coast.inX, coast.inZ, coast.shoreline, 0] : [0, 0, 0, 0];
   water.uCurve.value = coast ? coast.curve : [0, 0, 0, 0];
   water.uBar.value = bar;
-  setSea(coast && { fetch: look.fetch, swell: look.swell, inX: coast.inX, inZ: coast.inZ, shoreline: coast.shoreline, curve: coast.curve, bar, surf: look.surf });
+  water.uSeagrass.value = look.seagrass ?? look.shallow;
+  water.uSpotWater.value = spot?.texture ?? null;
+  water.uSpotBox.value = spot ? [spot.half, 1, spot.depthMax, spot.distanceMax] : [0, 0, 0, 0];
+  water.uSpotFloor.value = spot?.floor ?? .8;
+  setSpotWater(spot);
+  // A spot's swell runs downwind, as the trades blow, and dies on its reef
+  // and shores (waves.js spotWaves) rather than on an analytic beach.
+  if (coast) setSea({ fetch: look.fetch, swell: look.swell, inX: coast.inX, inZ: coast.inZ, shoreline: coast.shoreline, curve: coast.curve, bar, surf: look.surf });
+  else setSea(spot && { fetch: look.fetch, swell: look.swell, inX: 1, inZ: 0, shoreline: 0, curve: [0, 0, 0, 0], bar, surf: look.surf });
   water.uWave.value = currentWaves();
   const sky = game.scene?.getObjectByName("sky")?.material?.uniforms;
   if (sky?.uSkyLow) {
@@ -72,9 +95,9 @@ export function applyVenueLook(game, venue) {
   const fog = game.scene?.fog;
   if (fog?.color) {
     game.__venueGameFog ??= fog.color.clone();
-    if (coast) fog.color.setRGB(...look.haze, "srgb");
+    if (coast || spot) fog.color.setRGB(...look.haze, "srgb");
     else fog.color.copy(game.__venueGameFog);
-    fog.density = coast ? look.landHaze : GAME_FOG;
+    fog.density = coast || spot ? look.landHaze : GAME_FOG;
   }
   return true;
 }
