@@ -33,10 +33,12 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
   them. The local server sails their heat first (about 20 seconds) with the
   Freestajlo planner, aiming for the score their rating says. Needs the tour
   data (`npm run tour-data`).
-- `venues`: choose Sotavento or Sylt for your practice and solo heats. The
-  profile builds a distinct coastal scene and uses the game's existing wind
-  and water response; mapped tour-event challenges give the player and AI the
-  same conditions.
+- `venues`: choose a venue for your practice and solo heats. Sotavento and
+  Sylt have their own coastal scenes; Podersdorf, Pozo and Bonaire (Sorobon)
+  have their usual winds in the game's own scene. Tour-event challenges at
+  those five venues sail in each event's reported wind
+  (`tour/event-winds.json`), or the venue's usual wind where the reports give
+  none; the player and the AI get the same conditions.
 - `champion`: the Champion's challenge. Race Lennart Neubauer at one of his
   PWA wins in the game's own 1v1 heat, for a Red Bull helmet. See
   [the Champion's challenge](#the-champions-challenge) below.
@@ -52,6 +54,13 @@ The venue and challenge mods use `GET /api/local/venues`,
 `POST /api/local/ai-heats`. AI heats are cached in `data/ai-heats.json`.
 `node tools/ai-check.mjs` sails 25 heats at several targets in five weeks'
 winds and checks that the AI lands within 1.0 of its target on average.
+
+Event winds are in `tour/event-winds.json`, curated by hand from each event's
+PWA reports and kept apart from the crawled results: the wind on the day of
+the final elimination, at its real strength within the game's 12–28 kt, with
+its source, and whether it was reported, read from sail sizes or words, or
+inferred. `node tools/ai-check.mjs --winds 12,16,20,24,28` shows how the AI
+scores across wind strengths.
 
 The venue profiles are in `tour/venues.json`. They are curated separately
 from the crawled event results, with PWA source links and notes explaining how

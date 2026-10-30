@@ -64,6 +64,12 @@ Scene layout references:
 - [Sylt tourism: Musikmuschel on the Westerland promenade](https://www.sylt.de/poi/musikmuschel)
 - [2026 Westerland World Cup site layout](https://sylt-soel.de/magazin/wenn-die-promenade-wieder-strae-wird/)
 
+Event winds (`docs/superpowers/specs/2026-10-30-event-winds-design.md`) add
+Podersdorf, Pozo and Sorobon (Bonaire) as venues with a usual wind and no
+scenery, and each of the 43 events at the five venues has its reported wind,
+or a note that its reports give none. The scenery outline for the rest is
+`docs/superpowers/plans/2026-10-30-venue-scenery.md`.
+
 ## Scope and ground rules
 
 - Cover PWA freestyle events from 2006–2026 first. Add earlier freestyle venues

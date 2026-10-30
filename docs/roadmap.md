@@ -105,7 +105,7 @@ Built in three pieces, each with its own spec, in this order:
      Bull helmet as the prize.
      Spec: `docs/superpowers/specs/2026-10-25-champions-challenge-design.md`.
      Plan: `docs/superpowers/plans/2026-10-25-champions-challenge.md`.
-  2. **Event winds:** each event's wind from its PWA reports, at its real
+  2. **Event winds (done):** each event's wind from its PWA reports, at its real
      strength within the game's 12–28 kt, for the 43 events at Sotavento, Sylt,
      Podersdorf, Pozo and Bonaire, with a developer panel to change winds,
      venues, the champion and AI targets.
