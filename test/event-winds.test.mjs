@@ -6,7 +6,8 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { checkEventWinds, eventWind, indexEventWinds, loadEventWinds } from "../server/event-winds.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { tempDir, writeTour } from "./helpers.mjs";
+import { loadVenueCatalog, venueForLocation } from "../server/venues.mjs";
+import { ROOT, tempDir, writeTour } from "./helpers.mjs";
 
 const SOURCE = { title: "2025 Sylt report", date: "2025-09-30", url: "https://example.test/report" };
 const entry = (over = {}) => ({ event: 378, slug: "e378", knots: 18, gustKnots: 6, reported: "18–25 kt, gusty", confidence: "reported", sources: [SOURCE], ...over });
@@ -61,4 +62,12 @@ test("a refused entry names its field, so the developer panel can show the reaso
 
 test("indexing checks nothing and finds entries by event", () => {
   assert.equal(indexEventWinds({ version: 1, events: [entry()] }).byEvent.get(378).knots, 18);
+});
+
+test("every event at the five venues has an entry, with a wind or with none found", () => {
+  const tour = loadTour(join(ROOT, "tour"));
+  const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
+  const winds = loadEventWinds(join(ROOT, "tour", "event-winds.json"), tour);
+  const missing = [...tour.events.values()].filter((e) => venueForLocation(catalog, e.location) && !winds.byEvent.has(e.id)).map((e) => e.slug);
+  assert.deepEqual(missing, []);
 });

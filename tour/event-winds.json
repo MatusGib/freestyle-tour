@@ -1,0 +1,689 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "event": 111,
+      "slug": "pozo-gran-canaria-2",
+      "knots": 20,
+      "gustKnots": 6,
+      "reported": "The women's freestyle final was sailed in lighter than normal Pozo wind, building to strong by the afternoon's racing; no number given.",
+      "day": "2006-07-16",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2006 Gran Canaria PWA Grand Slam, day nine",
+          "date": "2006-07-16",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2006-gran-canaria-pwa-grand-slam-day-nine/"
+        }
+      ]
+    },
+    {
+      "event": 127,
+      "slug": "2007-pozo-gran-canaria",
+      "knots": 28,
+      "gustKnots": 6,
+      "reported": "Very choppy, around 35 kt, when the double elimination was re-sailed; the women were on 3.0 m² sails. Beyond the game's 28 kt.",
+      "day": "2007-07-16",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2007 Gran Canaria PWA Grand Slam, day 7",
+          "date": "2007-07-16",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2007-gran-canaria-pwa-grand-slam-day-7/"
+        }
+      ]
+    },
+    {
+      "event": 128,
+      "slug": "2007-sotavento-fuerteventura",
+      "knots": 16,
+      "gustKnots": 6,
+      "reported": "Offshore and gusty for the double elimination: strong in the gusts outside the course, light and choppy inside; the wind shut down later in the day. No number given.",
+      "day": "2007-07-27",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2007 Fuerteventura PWA Grand Slam, day 7",
+          "date": "2007-07-27",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2007-fuerteventura-pwa-grand-slam-day-7/"
+        }
+      ]
+    },
+    {
+      "event": 130,
+      "slug": "2007-colgate-world-cup-sylt-germany",
+      "knots": null,
+      "reported": "The report covers the freestyle double elimination and the world title, but not its wind.",
+      "day": "2007-09-28",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2007 Colgate World Cup Sylt, day 7",
+          "date": "2007-09-28",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2007-colgate-world-cup-sylt-day-7/"
+        }
+      ]
+    },
+    {
+      "event": 137,
+      "slug": "2008-podersdorf-austria-men-only",
+      "knots": 17,
+      "gustKnots": 4,
+      "reported": "After two windless hours a line of wind crossed the lake, and the semi-final started in a gusty 17 kt breeze.",
+      "day": "2008-05-04",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2008 PWA Surf World Cup Podersdorf, day six",
+          "date": "2008-05-04",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2008-pwa-surf-world-cup-podersdorf-day-six/"
+        }
+      ]
+    },
+    {
+      "event": 141,
+      "slug": "2008-pozo-gran-canaria",
+      "knots": 28,
+      "gustKnots": 6,
+      "reported": "The sail-off for third in the women's freestyle was in about 50 kt, on 3.5–3.7 m² sails. Beyond the game's 28 kt.",
+      "day": "2008-07-12",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2008 Gran Canaria PWA Grand Slam, day nine",
+          "date": "2008-07-12",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2008-gran-canaria-pwa-grand-slam-day-nine/"
+        }
+      ]
+    },
+    {
+      "event": 142,
+      "slug": "2008-sotavento-fuerteventura",
+      "knots": 28,
+      "gustKnots": 6,
+      "reported": "On the first freestyle day riders were overpowered on 3.7 m² sails in choppy, gusty water; the reports of the later eliminations don't describe the wind.",
+      "day": "2008-07-24",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2008 Fuerteventura PWA Grand Slam, day six",
+          "date": "2008-07-24",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2008-fuerteventura-pwa-grand-slam-day-six/"
+        }
+      ]
+    },
+    {
+      "event": 145,
+      "slug": "2008-sylt-germany",
+      "knots": 13,
+      "gustKnots": 6,
+      "reported": "Onshore, from marginal to howling, with a big shore break, for the only freestyle elimination; the wind dropped as it went on.",
+      "day": "2008-09-30",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2008 PWA Colgate World Cup Sylt, day four",
+          "date": "2008-09-30",
+          "url": "https://www.pwaworldtour.com/news/detail/the-2008-pwa-colgate-world-cup-sylt-day-four/"
+        }
+      ]
+    },
+    {
+      "event": 156,
+      "slug": "2009-sotavento-fuerteventura",
+      "knots": 28,
+      "gustKnots": 6,
+      "reported": "The double elimination started in 35 kt over flat water, then the wind faltered and came back as a late-afternoon sea breeze for the finals. Beyond the game's 28 kt.",
+      "day": "2009-07-29",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura Grand Slam 2009, day 7",
+          "date": "2009-07-29",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-grand-slam-8/"
+        }
+      ]
+    },
+    {
+      "event": 159,
+      "slug": "2009-sylt-germany",
+      "knots": 21,
+      "gustKnots": 6,
+      "reported": "Plenty of wind all day and difficult, choppy freestyle conditions, enough for a full single and double elimination. No number given.",
+      "day": "2009-09-28",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Colgate World Cup Sylt 2009, day 3",
+          "date": "2009-09-28",
+          "url": "https://www.pwaworldtour.com/news/detail/colgate-world-cup-sylt-4/"
+        }
+      ]
+    },
+    {
+      "event": 161,
+      "slug": "2010-podersdorf-austria",
+      "knots": 13,
+      "gustKnots": 0,
+      "reported": "After five windless days, a light wind let a full single elimination run.",
+      "day": "2010-05-05",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Surf World Cup Podersdorf 2010, day six",
+          "date": "2010-05-05",
+          "url": "https://www.pwaworldtour.com/news/detail/surf-world-cup-podersdorf-6/"
+        }
+      ]
+    },
+    {
+      "event": 166,
+      "slug": "2010-sotavento-fuerteventura",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "Strong wind for the deciding double elimination; the day before gusted over 40 kt and overpowered the lighter riders.",
+      "day": "2010-08-02",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura Grand Slam 2010, day 10",
+          "date": "2010-08-02",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-grand-slam-24/"
+        }
+      ]
+    },
+    {
+      "event": 169,
+      "slug": "2010-colgate-world-cup-sylt-germany",
+      "knots": 12,
+      "gustKnots": 6,
+      "reported": "Gusty 12–24 kt for the last freestyle heats of the year.",
+      "day": "2010-10-03",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: Colgate World Cup Sylt 2010, day 9",
+          "date": "2010-10-03",
+          "url": "https://www.pwaworldtour.com/news/detail/colgate-world-cup-sylt-22/"
+        }
+      ]
+    },
+    {
+      "event": 175,
+      "slug": "2011-podersdorf-austria",
+      "knots": 12,
+      "gustKnots": 6,
+      "reported": "Side-shore wind gusting 10–17 kt to finish the double elimination; the 10 kt lulls are under the game's 12 kt.",
+      "day": "2011-05-04",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2011 PWA Surf World Cup Podersdorf, final day",
+          "date": "2011-05-04",
+          "url": "https://www.pwaworldtour.com/news/detail/2011-pwa-surf-world-cup-6/"
+        }
+      ]
+    },
+    {
+      "event": 178,
+      "slug": "2011-bonaire",
+      "knots": 15,
+      "gustKnots": 6,
+      "reported": "Five days of 15–25 kt in Lac Bay; the deciding second single elimination was sailed in lighter, fading cross-shore wind.",
+      "day": "2011-06-16",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: 2011 Bonaire World Cup, event summary",
+          "date": "2011-06-18",
+          "url": "https://www.pwaworldtour.com/news/detail/2011-bonaire-world-cup-5/"
+        }
+      ]
+    },
+    {
+      "event": 183,
+      "slug": "2011-sotavento-fuerteventura",
+      "knots": 20,
+      "gustKnots": 5,
+      "reported": "20–25 kt for the final day.",
+      "day": "2011-07-27",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura Grand Slam 2011, final day",
+          "date": "2011-07-27",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-grand-slam-32/"
+        }
+      ]
+    },
+    {
+      "event": 189,
+      "slug": "2012-podersdorf-austria",
+      "knots": 13,
+      "gustKnots": 4,
+      "reported": "Wind all day but light and gusty, with riders often underpowered, as the single elimination that decided the event was finished.",
+      "day": "2012-04-29",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Surf World Cup Podersdorf 2012, day three",
+          "date": "2012-04-29",
+          "url": "https://www.pwaworldtour.com/news/detail/surf-world-cup-podersdorf-12/"
+        }
+      ]
+    },
+    {
+      "event": 198,
+      "slug": "2012-sotavento-fuerteventura",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "The howling Sotavento wind returned on the last day for the double elimination finals, after days of light, offshore wind. No number given.",
+      "day": "2012-07-30",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: PWA Fuerteventura 2012, final day",
+          "date": "2012-07-30",
+          "url": "https://www.pwaworldtour.com/news/detail/pwa-fuerteventura-11/"
+        }
+      ]
+    },
+    {
+      "event": 201,
+      "slug": "2012-sylt-germany",
+      "knots": 17,
+      "gustKnots": 6,
+      "reported": "17–25 kt, side-shore, over flat water: some of the best freestyle conditions of the year.",
+      "day": "2012-10-03",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: PWA Sylt World Cup 2012, day five",
+          "date": "2012-10-03",
+          "url": "https://www.pwaworldtour.com/news/detail/pwa-sylt-world-cup-6/"
+        }
+      ]
+    },
+    {
+      "event": 205,
+      "slug": "2013-gp-joule-windsurf-world-cup-sylt",
+      "knots": 17,
+      "gustKnots": 4,
+      "reported": "Light, gusty wind for the winners' final and super final, sailed on the finalists' biggest sails, 5.2 and 5.4 m².",
+      "day": "2013-10-04",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: PWA Sylt World Cup 2013, day seven",
+          "date": "2013-10-04",
+          "url": "https://www.pwaworldtour.com/news/detail/pwa-sylt-world-cup-19/"
+        }
+      ]
+    },
+    {
+      "event": 210,
+      "slug": "2013-fuerteventura",
+      "knots": 25,
+      "gustKnots": 5,
+      "reported": "The trades kept blowing 25–30 kt for both double eliminations.",
+      "day": "2013-07-25",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: PWA Fuerteventura World Cup 2013, day six",
+          "date": "2013-07-25",
+          "url": "https://www.pwaworldtour.com/news/detail/pwa-fuerteventura-20/"
+        }
+      ]
+    },
+    {
+      "event": 214,
+      "slug": "2013-surf-world-cup-podersdorf-austria",
+      "knots": 25,
+      "gustKnots": 5,
+      "reported": "25–30 kt on day two, when both the single and the double elimination were sailed; the rest of the week was too light.",
+      "day": "2013-04-27",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: Surf World Cup Podersdorf 2013, event summary",
+          "date": "2013-04-30",
+          "url": "https://www.pwaworldtour.com/news/detail/surf-world-cup-podersdorf-19/"
+        }
+      ]
+    },
+    {
+      "event": 219,
+      "slug": "2014-bonaire-world-cup",
+      "knots": 20,
+      "gustKnots": 3,
+      "reported": "Lighter than the day before, with most riders on 4.8–5.2 m² sails for the last eliminations.",
+      "day": "2014-06-25",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: PWA Bonaire World Cup 2014, final day",
+          "date": "2014-06-25",
+          "url": "https://www.pwaworldtour.com/news/detail/pwa-bonaire-world-cup-5/"
+        }
+      ]
+    },
+    {
+      "event": 222,
+      "slug": "2014-fuerteventura-pwa-grand-slam",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "Stronger, more consistent trades for the single eliminations, with more forecast for the double elimination. No number given.",
+      "day": "2014-07-31",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2014, day seven",
+          "date": "2014-07-31",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-7/"
+        }
+      ]
+    },
+    {
+      "event": 226,
+      "slug": "davidoff-cool-water-windsurf-world-cup-sylt-2014",
+      "knots": 20,
+      "gustKnots": 4,
+      "reported": "The men's single elimination finished in good wind, the winner fully powered to overpowered on a 5.2 m² sail; the double elimination was then abandoned as it turned inconsistent.",
+      "day": "2014-10-04",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: DAVIDOFF Cool Water Sylt World Cup 2014, day nine",
+          "date": "2014-10-04",
+          "url": "https://www.pwaworldtour.com/news/detail/davidoff-cool-water-sylt-world-cup-9/"
+        }
+      ]
+    },
+    {
+      "event": 237,
+      "slug": "2015-fuerteventura",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "Five days of freestyle in Fuerteventura's usual strong trades, with howling wind forecast for the racing that followed. No number given for the deciding day.",
+      "day": "2015-07-28",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2015, last freestyle day",
+          "date": "2015-07-28",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-15/"
+        }
+      ]
+    },
+    {
+      "event": 246,
+      "slug": "2016-podersdorf-austria",
+      "knots": 12,
+      "gustKnots": 6,
+      "reported": "12–20 kt to finish the double elimination, after 40 kt the day before.",
+      "day": "2016-05-05",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: PWA Surf World Cup Podersdorf 2016, day two",
+          "date": "2016-05-05",
+          "url": "https://www.pwaworldtour.com/news/detail/pwa-surf-world-cup-podersdorf-8/"
+        }
+      ]
+    },
+    {
+      "event": 251,
+      "slug": "2016-sotavento-fuerteventura",
+      "knots": 13,
+      "gustKnots": 4,
+      "reported": "Light, shifty wind on the last day of the freestyle, after a week that often blew over 40 kt.",
+      "day": "2016-07-26",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2016, last freestyle day",
+          "date": "2016-07-26",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-37/"
+        }
+      ]
+    },
+    {
+      "event": 256,
+      "slug": "2016-mercedes-benz-world-cup-sylt",
+      "knots": 13,
+      "gustKnots": 4,
+      "reported": "An early flutter of wind let the men's double elimination finish before the wind dropped again. No number given.",
+      "day": "2016-10-09",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Mercedes-Benz Sylt PWA Grand Slam 2016, final day",
+          "date": "2016-10-09",
+          "url": "https://www.pwaworldtour.com/news/detail/mercedes-benz-sylt-pwa-grand-slam-26/"
+        }
+      ]
+    },
+    {
+      "event": 265,
+      "slug": "2017-fuerteventura",
+      "knots": 25,
+      "gustKnots": 6,
+      "reported": "Ten days of 25–45 kt winds through the freestyle and the racing.",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2017, event summary",
+          "date": "2017-08-01",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-85/"
+        }
+      ]
+    },
+    {
+      "event": 268,
+      "slug": "2017-mercedes-benz-world-cup-sylt",
+      "knots": 15,
+      "gustKnots": 6,
+      "reported": "The men's freestyle was finished in challenging, gusty conditions, with lulls where riders struggled to get planing. No number given.",
+      "day": "2017-10-06",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Mercedes-Benz Sylt PWA Super Grand Slam 2017, day 8",
+          "date": "2017-10-06",
+          "url": "https://www.pwaworldtour.com/news/detail/mercedes-benz-sylt-pwa-super-grand-slam-23/"
+        }
+      ]
+    },
+    {
+      "event": 276,
+      "slug": "2018-fuerteventura",
+      "knots": 13,
+      "gustKnots": 4,
+      "reported": "Light, on-and-off wind through the freestyle; on the last day it kicked in only briefly, so the results stood. No number given.",
+      "day": "2018-07-30",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2018, last freestyle day",
+          "date": "2018-07-30",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-100/"
+        }
+      ]
+    },
+    {
+      "event": 278,
+      "slug": "2018-mercedes-benz-world-cup-sylt",
+      "knots": 27,
+      "gustKnots": 6,
+      "reported": "The most hardcore conditions of the event as the North Sea brewed up a storm, on the day the freestyle elimination was sailed.",
+      "day": "2018-10-02",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Mercedes-Benz Sylt PWA Super Grand Slam 2018, day 5",
+          "date": "2018-10-02",
+          "url": "https://www.pwaworldtour.com/news/detail/mercedes-benz-sylt-pwa-super-grand-slam-48/"
+        }
+      ]
+    },
+    {
+      "event": 280,
+      "slug": "2019-forsa-bonaire-pwa-world-cup",
+      "knots": 15,
+      "gustKnots": 5,
+      "reported": "20–30 kt and flat water for the men's elimination on day 4; the final itself was sailed in light wind.",
+      "day": "2019-04-13",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: FORSA Bonaire PWA World Cup 2019, day 4",
+          "date": "2019-04-13",
+          "url": "https://www.pwaworldtour.com/news/detail/forsa-bonaire-pwa-world-cup-14/"
+        }
+      ]
+    },
+    {
+      "event": 287,
+      "slug": "2019-fuerteventura-pwa-grand-slam",
+      "knots": 18,
+      "gustKnots": 6,
+      "reported": "Gusty, shifty trades for the last freestyle eliminations, with heats lengthened to 10 minutes. No number given.",
+      "day": "2019-08-01",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA World Cup 2019, day 8",
+          "date": "2019-08-01",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-world-cup-24/"
+        }
+      ]
+    },
+    {
+      "event": 291,
+      "slug": "2019-mercedes-benz-world-cup-sylt",
+      "knots": 18,
+      "gustKnots": 6,
+      "reported": "After a tricky start the wind came good for the double elimination, sailed in bitingly cold, choppy, bolt onshore conditions with a strong current. No number given.",
+      "day": "2019-10-02",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Mercedes-Benz Windsurf World Cup Sylt 2019, day 6",
+          "date": "2019-10-02",
+          "url": "https://www.pwaworldtour.com/news/detail/mercedes-benz-windsurf-world-cup-sylt-13/"
+        }
+      ]
+    },
+    {
+      "event": 332,
+      "slug": "2022-mercedes-benz-world-cup-sylt",
+      "knots": 18,
+      "gustKnots": 6,
+      "reported": "Bolt onshore wind, a shore break, a strong current and confused water for the title decider: extraordinarily difficult freestyle conditions. No number given.",
+      "day": "2022-10-02",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Mercedes-Benz Windsurf World Cup Sylt 2022, day 9",
+          "date": "2022-10-02",
+          "url": "https://www.pwaworldtour.com/news/detail/mercedes-benz-windsurf-world-cup-sylt-46/"
+        }
+      ]
+    },
+    {
+      "event": 340,
+      "slug": "2023-fuerteventura-pwa-grand-slam",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "Gusty for the finals, at a venue that lived up to its windy reputation all week. No number given.",
+      "day": "2023-08-04",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2023, last freestyle day",
+          "date": "2023-08-04",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-100-18/"
+        }
+      ]
+    },
+    {
+      "event": 342,
+      "slug": "schauinslandreisen-windsurf-world-cup-sylt-presented-by-got2b",
+      "knots": 12,
+      "gustKnots": 6,
+      "reported": "Good side-shore wind for the freestyle double elimination; the slalom straight after it was sailed in 8–20 kt, the lulls under the game's 12.",
+      "day": "2023-09-25",
+      "confidence": "reported",
+      "sources": [
+        {
+          "title": "PWA World Tour: schauinslandreisen Windsurf World Cup Sylt 2023, day four",
+          "date": "2023-09-25",
+          "url": "https://www.pwaworldtour.com/news/detail/schauinslandreisen-windsurf-world-cup-sylt-8/"
+        }
+      ]
+    },
+    {
+      "event": 359,
+      "slug": "2024-fuerteventura-pwa-grand-slam",
+      "knots": 18,
+      "gustKnots": 6,
+      "reported": "Rain lingered into the morning; the wind filled in mid-afternoon, lighter than the opening three days, for both double eliminations. No number given.",
+      "confidence": "inferred",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA World Cup 2024, day 4",
+          "date": "2024-07-29",
+          "url": "https://www.pwaworldtour.com/news/detail/default-c4fd0e9683/"
+        }
+      ]
+    },
+    {
+      "event": 363,
+      "slug": "2024-citroen-pwa-windsurf-world-cup-sylt",
+      "knots": 13,
+      "gustKnots": 0,
+      "reported": "Marginal wind: only two freestyle heats were sailed, and the single elimination was never finished.",
+      "day": "2024-10-03",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Citroën Windsurf World Cup Sylt 2024, day seven",
+          "date": "2024-10-03",
+          "url": "https://www.pwaworldtour.com/news/detail/citroen-windsurf-world-cup-sylt-11/"
+        }
+      ]
+    },
+    {
+      "event": 375,
+      "slug": "2025-fuerteventura-grand-slam",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "Sotavento's typically strong winds through the freestyle, which finished on day 7. No number given for that day.",
+      "day": "2025-07-24",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Fuerteventura PWA Grand Slam 2025, event summary",
+          "date": "2025-07-27",
+          "url": "https://www.pwaworldtour.com/news/detail/fuerteventura-pwa-grand-slam-100-39/"
+        }
+      ]
+    },
+    {
+      "event": 378,
+      "slug": "2025-sylt-germany-grand-slam",
+      "knots": 23,
+      "gustKnots": 6,
+      "reported": "World-class freestyle conditions: strong, chilly wind for the day that decided the men's freestyle.",
+      "day": "2025-10-03",
+      "confidence": "bounded",
+      "sources": [
+        {
+          "title": "PWA World Tour: Citroën Windsurf World Cup Sylt 2025, day 8",
+          "date": "2025-10-03",
+          "url": "https://www.pwaworldtour.com/news/detail/citroen-windsurf-world-cup-sylt-31/"
+        }
+      ]
+    }
+  ]
+}
