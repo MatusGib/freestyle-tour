@@ -88,7 +88,7 @@ export default {
         const event = await getJson(`/api/local/tour/events/${eventSelect.value}`);
         riders.replaceChildren(
           el("div", { className: "ft-venue" },
-            event.venue?.scenery && el("img", { src: `/__mods/venues/assets/${event.venue.id}.svg`, alt: "", width: 84, height: 52 }),
+            event.venue?.picture && el("img", { src: event.venue.picture, alt: "", width: 84, height: 52 }),
             el("div", {},
               el("strong", { textContent: event.venue?.name ?? event.location ?? "Venue unknown" }),
               el("div", { className: "ft-muted", textContent: windLine(event) }),

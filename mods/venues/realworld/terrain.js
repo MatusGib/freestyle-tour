@@ -145,9 +145,13 @@ if(spotFade>0.){
 
 // The real size, in metres, each detail texture covers (assets/textures/CREDITS.md).
 const SIZES = { sand: 2, coralRubble: 2, scrubSoil: 3, rock: 2, mangroveMud: 1.3 };
+// The satellite's colours are already lit by the sun; the game's lights light
+// them again, so they are dimmed to keep them from washing out.
+const LAND_TINT = 0.55;
 
 function detailMaterial(map, weights, half, detail) {
   const material = new MeshStandardMaterial({ map, roughness: 1, metalness: 0 });
+  material.color.setScalar(LAND_TINT);
   const uniforms = {
     uWeights: { value: weights }, uWeightsHalf: { value: half },
     uSand: { value: detail.sand }, uCoral: { value: detail.coralRubble }, uSoil: { value: detail.scrubSoil }, uRock: { value: detail.rock }, uMud: { value: detail.mangroveMud },
@@ -168,6 +172,7 @@ function detailMaterial(map, weights, half, detail) {
 
 function farMaterial(map) {
   const material = new MeshStandardMaterial({ map, roughness: 1, metalness: 0 });
+  material.color.setScalar(LAND_TINT);
   material.onBeforeCompile = (shader) => {
     patchWorld(shader);
     shader.fragmentShader = shader.fragmentShader.replace("#include <map_fragment>", () => `#include <map_fragment>\n${UNDER_WATER}`);

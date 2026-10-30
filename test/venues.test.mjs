@@ -79,10 +79,12 @@ test("a refused venue names its field, so the developer panel can show the reaso
   assert.equal(indexVenueCatalog({ version: 2, venues: [venue] }).byId.get("a"), venue);
 });
 
-test("only venues with a coast are marked as having scenery", () => {
-  const venue = (id) => ({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
-  assert.equal(publicVenue(venue(SYLT)).scenery, true);
-  assert.equal(publicVenue(venue("pozo-izquierdo-gran-canaria")).scenery, false);
+test("venues with a coast or a real-world spot's files have scenery, and a picture of it", () => {
+  const venue = (id) => publicVenue({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
+  assert.deepEqual([venue(SYLT).scenery, venue(SYLT).spotFiles, venue(SYLT).picture], [true, false, `/__mods/venues/assets/${SYLT}.svg`]);
+  assert.deepEqual([venue(SOROBON).scenery, venue(SOROBON).spotFiles, venue(SOROBON).picture], [true, true, `/__mods/venues/spots/${SOROBON}/picture.png`]);
+  const pozo = venue("pozo-izquierdo-gran-canaria");
+  assert.deepEqual([pozo.scenery, pozo.spotFiles, pozo.picture], [false, false, null]);
 });
 
 test("a venue heat keeps the room's seed and takes the venue's wind", () => {

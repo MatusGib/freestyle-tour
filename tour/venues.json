@@ -190,7 +190,18 @@
       },
       "character": "Steady easterly trades, side-shore, over a flat, shallow turquoise lagoon behind a reef.",
       "confidence": "qualitative",
-      "profileNote": "No scenery yet: the game's own open water, in Sorobon's usual wind.",
+      "profileNote": "Lac Bay built from map data, the true way round: the shallow lagoon with its sandy shallows and seagrass, the reef across the mouth with surf breaking on it, the mangroves around the bay, and Sorobon beach with its windsurf centres and resort.",
+      "courseNote": "The trade wind blows from the reef across the lagoon towards Sorobon beach, as at the real spot. The heat sits in the lagoon inside the reef, with the beach about 117 m beyond it. Nothing is mirrored: the bay and its landmarks are where a map puts them.",
+      "landmarks": [
+        "Jibe City and the Hang Out Beach Bar, rigs on racks and on the sand",
+        "Sorobon Beach Resort and its palapas",
+        "Mangroves around the bay; scrubland with kadushi cacti and divi-divi trees"
+      ],
+      "waterZones": [
+        "Turquoise shallows over white sand, darker over seagrass",
+        "Surf breaking along the reef across the bay's mouth",
+        "Deep Caribbean blue beyond the reef"
+      ],
       "sources": [
         {
           "title": "Bonaire.com: Lac Bay windsurfing and kitesurfing guide",
