@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TITLE, bestText, failedText, heatText, menuLine, newWin, prizeDue, raceText, readyText, winText } from "../mods/champion/champion.js";
-import { WIND, roomWind } from "../mods/champion/wind.js";
+import { WIND, roomWind, setWind } from "../mods/champion/wind.js";
 
 const info = {
   event: { id: "2025-sylt", name: "2025 Sylt Grand Slam" },
@@ -48,4 +48,13 @@ test("the prize is due when earned and not yet unlocked in this browser", () => 
   assert.equal(prizeDue({ ...info, prize: true }, null), true);
   assert.equal(prizeDue({ ...info, prize: true }, "true"), false);
   assert.equal(prizeDue(info, null), false);
+});
+
+test("the champion's wind can be changed, for the game and for the server", () => {
+  const game = { seed: 7, knots: 16, gustKnots: 4 };
+  assert.deepEqual(roomWind("champion-x-1-2", game, { knots: 25, gustKnots: 4 }), { seed: 7, knots: 25, gustKnots: 4 });
+  setWind({ knots: 14, gustKnots: 0 });
+  assert.equal(roomWind("champion-x-1-2", game).knots, 14);
+  setWind(WIND);
+  assert.equal(roomWind("champion-x-1-2", game).knots, 21);
 });

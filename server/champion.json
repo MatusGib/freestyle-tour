@@ -3,6 +3,7 @@
   "name": "Lennart Neubauer",
   "rating": 1946,
   "target": 45.5,
+  "wind": { "knots": 21, "gustKnots": 6 },
   "events": [
     {
       "id": "2023-sylt",

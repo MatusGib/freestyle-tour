@@ -6,6 +6,7 @@
 // Bull helmet, with a congratulations screen.
 import { SEEN_KEY, TITLE, bestText, failedText, heatText, menuLine, newWin, prizeDue, raceText, readyText, winText } from "./champion.js";
 import { HELMET, WON_KEY, drawHelmetPicture } from "./helmet.js";
+import { setWind } from "./wind.js";
 import { ensureStyles } from "../lib/ui.js";
 
 const PLAYER_KEY = "fristajlo-player-v3"; // the game's own record of your rider
@@ -134,6 +135,9 @@ export default {
     // unlocks the prize in this browser if it was earned elsewhere.
     async function load() {
       info = await getJson("/api/local/weekly");
+      // The game's own room wind passes his rooms through wind.js, the same
+      // module (by URL) as this import.
+      setWind(info.wind);
       if (newWin(info, read(SEEN_KEY))) congratulate();
       else if (prizeDue(info, read(WON_KEY))) write(WON_KEY, "true");
     }

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { seedOf } from "../lib/ai/score.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { LOOK, WIND, championRooms, opponentFor, recordResult, recordRoom, weekOf } from "../server/weekly.mjs";
+import { LOOK, WIND, championRooms, checkChampion, opponentFor, recordResult, recordRoom, weekOf } from "../server/weekly.mjs";
 import { ROOT, WEEK, tempDir } from "./helpers.mjs";
 
 const WEEK_START = 1792360800000;
@@ -81,4 +81,21 @@ test("server/champion.json agrees with the tour data where the tour data has the
   }
   const latest = inTour.at(-1).tourId;
   assert.equal(champion.rating, Math.round(tour.ratings.events[latest].men[champion.rider].rating), "his rating going into his latest event in the tour data");
+});
+
+test("the champion's rooms follow his wind: its knots, and rooms with its gusts", () => {
+  const roomConditions = (id) => {
+    const n = Number(id.split("-").at(-1));
+    return { seed: n, knots: 15, gustKnots: n % 2 ? 6 : 0 };
+  };
+  const rooms = championRooms(roomConditions, "2025-sylt", 99, { knots: 18, gustKnots: 0 });
+  assert.deepEqual(rooms.next().value, { id: "champion-2025-sylt-99-0", conditions: { seed: 0, knots: 18, gustKnots: 0 } });
+});
+
+test("the champion's wind and target must be ones his rooms can sail", () => {
+  const champion = { target: 45.5, wind: { knots: 21, gustKnots: 6 } };
+  assert.equal(checkChampion(champion), champion);
+  assert.throws(() => checkChampion({ ...champion, wind: { knots: 29, gustKnots: 6 } }), { path: "champion.wind.knots" });
+  assert.throws(() => checkChampion({ ...champion, wind: { knots: 21, gustKnots: 3 } }), { path: "champion.wind.gustKnots", message: /0, 4, 5 or 6/ });
+  assert.throws(() => checkChampion({ ...champion, target: 70 }), { path: "champion.target" });
 });

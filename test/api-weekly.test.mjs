@@ -15,6 +15,7 @@ const CHAMPION = {
   name: "Lennart Neubauer",
   rating: 1946,
   target: 45.5,
+  wind: { knots: 21, gustKnots: 6 },
   events: ["2023-sylt", "2025-sylt"].map((id) => ({ id, name: `${id} event`, when: "September 2025", place: "Westerland, Sylt, Germany", podium: ["Lennart Neubauer", "Yentel Caers", "Jacopo Testa"], story: `What happened at ${id}.` })),
 };
 // Room ids ending in a multiple of 3 have the champion's gusts; the rest don't.

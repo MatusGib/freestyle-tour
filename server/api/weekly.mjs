@@ -1,7 +1,7 @@
 // Endpoints for the Champion's challenge mod: this week's event, and starting
 // a heat with the champion in the local 1v1 lobby. Real names: the champion and
 // the podiums are named as they are.
-import { WIND, championRooms, opponentFor, weekOf } from "../weekly.mjs";
+import { championRooms, opponentFor, weekOf } from "../weekly.mjs";
 import { fail, ok } from "./reply.mjs";
 
 // This week's event and its story, the champion, the wind, your best score,
@@ -18,7 +18,7 @@ export function weeklyInfo({ champion, game, now, weekly, weekRooms }) {
     event: { id, name, when, place, podium },
     story,
     opponent: { name: opponent.nickname, target: opponent.target },
-    wind: WIND,
+    wind: champion.wind,
     best: record?.best ?? null,
     won: !!record?.won,
     lastWin: weekly.data.lastWin ?? null,
@@ -71,7 +71,7 @@ export function createWeekRooms({ champion, game, now, ai, log }) {
   };
   let current = null;
   return (week) => {
-    if (current?.weekStart !== week.weekStart) current = { weekStart: week.weekStart, rooms: roomQueue(championRooms(game.roomConditions, week.event.id, now()), heatFor, log) };
+    if (current?.weekStart !== week.weekStart) current = { weekStart: week.weekStart, rooms: roomQueue(championRooms(game.roomConditions, week.event.id, now(), champion.wind), heatFor, log) };
     return current.rooms;
   };
 }
@@ -89,5 +89,5 @@ export async function startWeekly({ champion, game, now, lobby, weekRooms }) {
     return fail(500, `Couldn't get ${opponent.nickname} ready: ${error.message}`);
   }
   lobby.start(opponent, rooms.take, { weekStart: week.weekStart, event: week.event.id });
-  return ok({ name: opponent.nickname, wind: WIND });
+  return ok({ name: opponent.nickname, wind: champion.wind });
 }
