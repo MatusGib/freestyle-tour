@@ -1,5 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { coastFor } from "../mods/venues/coast.js";
+import { isGusts, isKnots } from "./event-winds.mjs";
+import { problem } from "./problem.mjs";
 
 const normalize = (value) =>
   String(value ?? "")
@@ -9,37 +11,39 @@ const normalize = (value) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-export function loadVenueCatalog(file) {
-  if (!existsSync(file)) return null;
-  const catalog = JSON.parse(readFileSync(file, "utf8"));
-  if (!Number.isInteger(catalog.version) || !Array.isArray(catalog.venues)) {
-    throw new Error(`${file} is not a valid venue catalog`);
-  }
+const between = (value, low, high) => typeof value === "number" && value >= low && value <= high;
+const ZONE_RANGES = { gain: [0, 8], from: [0, 1000], over: [1, 1000], lee: [0, 6] };
+
+// Checks a catalog and indexes it by id and by location spelling. Throws a
+// problem() naming the first broken field.
+export function indexVenueCatalog(catalog, name = "tour/venues.json") {
+  if (!Number.isInteger(catalog?.version) || !Array.isArray(catalog.venues)) throw problem("venues", `${name} is not a valid venue catalog`);
   const byId = new Map();
   const byLocation = new Map();
   for (const venue of catalog.venues) {
-    if (!venue.id || !venue.name || !Array.isArray(venue.locations) || !venue.gameConditions) {
-      throw new Error(`${file} has an incomplete venue`);
-    }
+    const path = `venues.${venue.id}`;
+    if (!venue.id || !venue.name || !Array.isArray(venue.locations) || !venue.gameConditions) throw problem(path, `${name} has an incomplete venue`);
     const { knots, gustKnots } = venue.gameConditions;
-    if (!Number.isInteger(knots) || knots < 12 || knots > 28 || !Number.isInteger(gustKnots) || (gustKnots !== 0 && gustKnots < 2) || gustKnots > 6) {
-      throw new Error(`${file} has unsupported conditions for ${venue.id}`);
+    if (!isKnots(knots)) throw problem(`${path}.gameConditions.knots`, `${name} has unsupported conditions for ${venue.id}: knots must be a whole number from 12 to 28`);
+    if (!isGusts(gustKnots)) throw problem(`${path}.gameConditions.gustKnots`, `${name} has unsupported conditions for ${venue.id}: gusts must be 0 or 2\u20136 kt`);
+    for (const [field, [low, high]] of Object.entries(ZONE_RANGES)) {
+      if (venue.windZones && !between(venue.windZones[field], low, high)) throw problem(`${path}.windZones.${field}`, `${name} has unsupported wind zones for ${venue.id}: ${field} must be from ${low} to ${high}`);
     }
-    const zones = venue.windZones;
-    const between = (value, low, high) => typeof value === "number" && value >= low && value <= high;
-    if (zones && !(between(zones.gain, 0, 8) && between(zones.from, 0, 1000) && between(zones.over, 1, 1000) && between(zones.lee, 0, 6))) {
-      throw new Error(`${file} has unsupported wind zones for ${venue.id}`);
-    }
-    if (byId.has(venue.id)) throw new Error(`${file} repeats venue id ${venue.id}`);
+    if (byId.has(venue.id)) throw problem(path, `${name} repeats venue id ${venue.id}`);
     byId.set(venue.id, venue);
     for (const location of venue.locations) {
       const key = normalize(location);
       const previous = byLocation.get(key);
-      if (previous && previous.id !== venue.id) throw new Error(`${file} maps ${location} to more than one venue`);
+      if (previous && previous.id !== venue.id) throw problem(path, `${name} maps ${location} to more than one venue`);
       byLocation.set(key, venue);
     }
   }
   return { version: catalog.version, venues: catalog.venues, byId, byLocation };
+}
+
+export function loadVenueCatalog(file) {
+  if (!existsSync(file)) return null;
+  return indexVenueCatalog(JSON.parse(readFileSync(file, "utf8")), file);
 }
 
 export function venueForLocation(catalog, location) {

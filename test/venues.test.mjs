@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { handleApi } from "../server/api/index.mjs";
 import { createStore } from "../server/store.mjs";
 import { loadTour } from "../server/tour.mjs";
-import { loadVenueCatalog, publicVenue, venueForLocation } from "../server/venues.mjs";
+import { indexVenueCatalog, loadVenueCatalog, publicVenue, venueForLocation } from "../server/venues.mjs";
 import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
 import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, takePlannedHeatFor, venueConditions } from "../mods/venues/venue.js";
@@ -66,6 +66,16 @@ test("a venue's usual wind can be anything the game's practice takes, 12–28 kt
   const venue = (id, knots) => ({ id, name: id, locations: [id], gameConditions: { knots, gustKnots: 0 } });
   writeFileSync(file, JSON.stringify({ version: 2, venues: [venue("light", 12), venue("strong", 28)] }));
   assert.deepEqual(loadVenueCatalog(file).venues.map((v) => v.gameConditions.knots), [12, 28]);
+});
+
+test("a refused venue names its field, so the developer panel can show the reason there", () => {
+  const venue = { id: "a", name: "A", locations: ["A"], gameConditions: { knots: 17, gustKnots: 4 }, windZones: { gain: 4, from: 300, over: 120, lee: 3 } };
+  const refused = (change, path) => assert.throws(() => indexVenueCatalog({ version: 2, venues: [{ ...venue, ...change }] }), { path });
+  refused({ gameConditions: { knots: 30, gustKnots: 4 } }, "venues.a.gameConditions.knots");
+  refused({ gameConditions: { knots: 17, gustKnots: 1 } }, "venues.a.gameConditions.gustKnots");
+  refused({ windZones: { ...venue.windZones, lee: 9 } }, "venues.a.windZones.lee");
+  refused({ windZones: { ...venue.windZones, over: 0 } }, "venues.a.windZones.over");
+  assert.equal(indexVenueCatalog({ version: 2, venues: [venue] }).byId.get("a"), venue);
 });
 
 test("only venues with a coast are marked as having scenery", () => {
