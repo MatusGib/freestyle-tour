@@ -45,7 +45,7 @@ const glsl = (rgb) => `[${rgb.join(",")}]`;
 // Sunlight focused by the ripples into a moving web of bright lines on a
 // shallow sandy floor: a few rounds of the point swirled by sines, bright
 // where the swirl folds.
-const CAUSTIC_GLSL = "float spotCaustic(vec2 p,float t){vec2 q=p*.45;float c=0.;for(int i=0;i<3;i++){q+=vec2(sin(q.y*1.3+t*.8),cos(q.x*1.1-t*.6))*.6;c+=abs(sin(q.x+q.y+t*.3))*.34;}return pow(clamp(1.-c,0.,1.),3.);}";
+const CAUSTIC_GLSL = "float spotCaustic(vec2 p,float t){vec2 q=p*1.5;float c=0.;for(int i=0;i<3;i++){q+=vec2(sin(q.y*1.3+t*.8),cos(q.x*1.1-t*.6))*.6;c+=abs(sin(q.x+q.y+t*.3))*.34;}return pow(clamp(1.-c,0.,1.),3.);}";
 
 const UNIFORMS = `
 uniform float uKnots;
@@ -119,7 +119,7 @@ const LOCAL_WIND = `
 // the swell runs downwind across it, faint foam drifting behind it, and a
 // little swash at the shore.
 const WHITECAPS = `
- col+=uCaustics*spot.w*(1.-smoothstep(1.5,5.5,spotDepth))*(1.-smoothstep(25.,150.,dist))*(1.-fresnel)*spotCaustic(p+normal.xz*.8,uTime)*vec3(.85,1.,.95)*.4;
+ col+=uCaustics*spot.w*(1.-smoothstep(1.5,5.5,spotDepth))*(1.-smoothstep(12.,60.,dist))*(1.-fresnel)*spotCaustic(p+normal.xz*.8,uTime)*vec3(.85,1.,.95)*.4;
  float cover=uCaps*(1.-shelter*.8)*3.84e-6*pow(localKnots*.5144,3.41);
  vec2 cq=(p-vec2(uTime*1.8,0.))/vec2(9.,5.);
  vec2 cell=floor(cq);
