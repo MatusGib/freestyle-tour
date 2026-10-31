@@ -6,8 +6,12 @@ import { SPLASH } from "../lib/splash.js";
 export const DOLPHINS_AFTER = 10; // of sailing with nothing pressed
 export const WHALE_AFTER = 20;
 export const LAND = 2.6; // from the whale surfacing to its belly flop
-export const WHALE_GONE = 5; // from the whale surfacing to it sinking out of sight
-export const WHALE_SPLASH = 1.4; // its splash's droplets in the air
+export const WHALE_SUNK = LAND + 2.4; // from the whale surfacing to it sinking out of sight
+const FOAM_LIFE = 4;
+export const WHALE_GONE = LAND + FOAM_LIFE; // its visit ends as its foam fades
+export const SPRAY = 240; // droplets in its splash
+export const SPRAY_LIFE = 2.9;
+export const CROWN_LIFE = 1.6; // its sheet of water
 const LEAP = 1; // a dolphin's leap out of the water
 const UNDER = 1.4; // under the water between leaps
 const DIVE = 1.4; // a leaving dolphin's dive, deep and out of sight
@@ -33,7 +37,8 @@ export const sense = (game) => ({
 // The sea: quiet is when the rider began sailing with nothing pressed (null
 // if not); dolphins { start, leave } with leave null until they go; whale
 // { start, outcome } with outcome null until it lands, then "hit" or
-// "missed".
+// "missed". sense.touching (index.js works it out): the rider touches the
+// whale's body.
 export const START = { quiet: null, dolphins: null, whale: null };
 
 // The next sea, and whether the whale has just landed on the rider.
@@ -48,6 +53,11 @@ export function nextSea(sea, sense, time) {
     hit = !sense.airborne && !sense.crashed;
     whale = { ...whale, outcome: hit ? "hit" : "missed" };
     if (quiet !== null) quiet = time; // the next whale needs another 20 s
+  }
+  // Clearing it takes a jump over its back: touching it is a wipe-out too.
+  if (whale?.outcome === "missed" && sense.touching && !sense.crashed) {
+    hit = true;
+    whale = { ...whale, outcome: "hit" };
   }
   if (whale && time >= whale.start + WHALE_GONE) whale = null;
   const still = quiet === null ? 0 : time - quiet;
@@ -152,7 +162,7 @@ const STEEP = 1.1; // its nose's lift as it leaves the water
 // lands across the rider's path; lift; and pitch, its nose's lift. It flattens
 // out to land on its belly, then sinks. Null when out of sight.
 export function whaleSpot(t) {
-  if (t < 0 || t >= WHALE_GONE) return null;
+  if (t < 0) return null;
   if (t < SURFACE) {
     const k = smooth(t / SURFACE);
     return { across: SIDE, lift: -3 + 2.4 * k, pitch: STEEP * k };
@@ -161,7 +171,8 @@ export function whaleSpot(t) {
     const u = (t - SURFACE) / (LAND - SURFACE);
     return { across: SIDE * (1 - u), lift: -.6 * (1 - u) + 4 * WHALE_HIGH * u * (1 - u), pitch: STEEP * (1 - u) * (1 - u) };
   }
-  const k = (t - LAND) / (WHALE_GONE - LAND);
+  if (t >= WHALE_SUNK) return null;
+  const k = (t - LAND) / (WHALE_SUNK - LAND);
   return { across: 0, lift: -3.5 * k * k, pitch: -.2 * k };
 }
 
@@ -173,14 +184,58 @@ export function aim(rider, whale, time) {
   return { x: rider.x + rider.vx * (left + front), z: rider.z + rider.vz * (left + front) };
 }
 
-// Droplet i of the whale's splash: thrown up and out in a ring, falling back
-// and shrinking away.
-export function whaleSplash(i, count, age) {
-  const angle = i / count * Math.PI * 2, out = (3 + 1.5 * (i % 3)) * age;
+// The whale's body, as model.js builds it: half its length, height and width.
+export const WHALE_BODY = { long: 5, high: 1.5, wide: 1.7 };
+const REACH = .6; // the rider's board reaches this far past their middle
+
+// Whether the rider touches the whale: within its outline (lying along axis,
+// a unit vector, lift above the water) and lower than its back there.
+export function touchesWhale(rider, whale) {
+  const dx = rider.x - whale.x, dz = rider.z - whale.z;
+  const along = (dx * whale.axis.x + dz * whale.axis.z) / (WHALE_BODY.long + REACH);
+  const side = (dz * whale.axis.x - dx * whale.axis.z) / (WHALE_BODY.wide + REACH);
+  const inside = 1 - along * along - side * side;
+  return inside > 0 && rider.height < whale.lift + WHALE_BODY.high * Math.sqrt(inside);
+}
+
+// A repeatable random number in [0, 1) for droplet i.
+const random = (i, salt) => {
+  const s = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
+  return s - Math.floor(s);
+};
+
+// Droplet i of the whale's belly flop, age s after it: thrown up and out from
+// all round its body over the first 0.12 s, the highest from beside its
+// middle, where the most water is pushed aside. In the whale's frame: along
+// its length, side across it, y up from the water. Null before it is thrown
+// and once it is back in the water.
+export function sprayDrop(i, age) {
+  const s = age - .12 * random(i, 1);
+  if (s < 0) return null;
+  const angle = random(i, 2) * Math.PI * 2, ca = Math.cos(angle), sa = Math.sin(angle);
+  const nx = ca / WHALE_BODY.long, nz = sa / WHALE_BODY.wide, n = Math.hypot(nx, nz); // out across its outline
+  const up = (4 + 9 * random(i, 3)) * (1 - .55 * ca * ca), out = 1.5 + 4 * random(i, 4);
+  const y = up * s - 4.9 * s * s;
+  if (s > 0 && y < 0) return null;
   return {
-    x: Math.cos(angle) * out,
-    y: (6.5 + i % 2) * age - 4.9 * age * age,
-    z: Math.sin(angle) * out,
-    size: .35 * Math.max(0, 1 - age / WHALE_SPLASH),
+    along: WHALE_BODY.long * ca + nx / n * out * s,
+    side: WHALE_BODY.wide * sa + nz / n * out * s,
+    y,
+    size: (.1 + .3 * random(i, 5)) * (1 - .4 * s / SPRAY_LIFE),
   };
+}
+
+// The sheet of water thrown up all round the whale: how far it has spread
+// (times its outline), how high, and how see-through. Null once it has fallen.
+export function crown(age) {
+  const k = age / CROWN_LIFE;
+  if (k < 0 || k >= 1) return null;
+  return { grow: 1.05 + .7 * k, height: 3.6 * Math.sin(Math.PI * k ** .7), opacity: .8 * (1 - k) ** 1.5 };
+}
+
+// The foam left on the water, spreading and fading. Null once it has gone.
+export function foam(age) {
+  const k = age / FOAM_LIFE;
+  if (k < 0 || k >= 1) return null;
+  return { grow: 1.1 + 1.3 * (1 - (1 - k) ** 2), opacity: .85 * (1 - k) ** 1.5 };
 }

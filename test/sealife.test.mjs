@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, START, WHALE_AFTER, WHALE_GONE, WHALE_SPLASH, aim, dolphinPose, dolphinSplashes, dolphinSpot,
-  isCalm, isPractice, isSailing, nextSea, sense, whaleSpot, whaleSplash,
+  CROWN_LIFE, DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, SPRAY, SPRAY_LIFE, START, WHALE_AFTER, WHALE_GONE, WHALE_SUNK, aim, crown,
+  dolphinPose, dolphinSplashes, dolphinSpot, foam, isCalm, isPractice, isSailing, nextSea, sense, sprayDrop, touchesWhale, whaleSpot,
 } from "../mods/sealife/sealife.js";
 
 const SAILING = { air: false, sliding: false, landing: false, crashTime: 0, dragging: false };
@@ -239,13 +239,14 @@ test("the whale surfaces 8 m to the side, leaps high and belly-flops flat on the
   assert.ok(Math.abs(flop.across) < .01 && Math.abs(flop.lift) < .05 && Math.abs(flop.pitch) < .05, JSON.stringify(flop));
 });
 
-test("the whale sinks away after its belly flop", () => {
-  assert.ok(whaleSpot(WHALE_GONE - .05).lift < -3);
-  assert.equal(whaleSpot(WHALE_GONE), null);
+test("the whale sinks away after its belly flop, and its visit lasts while its foam fades", () => {
+  assert.ok(whaleSpot(WHALE_SUNK - .05).lift < -3);
+  assert.equal(whaleSpot(WHALE_SUNK), null);
+  assert.ok(WHALE_GONE > WHALE_SUNK);
 });
 
 test("the whale moves smoothly", () => {
-  const most = Math.max(...times(0, WHALE_GONE - .01).map((t) => {
+  const most = Math.max(...times(0, WHALE_SUNK - .01).map((t) => {
     const a = whaleSpot(t), b = whaleSpot(t + .01);
     return b ? Math.hypot(b.across - a.across, b.lift - a.lift) + Math.abs(b.pitch - a.pitch) : 0;
   }));
@@ -262,11 +263,71 @@ test("the whale aims 6 m in front of where the rider will be when it lands", () 
   assert.deepEqual(aim({ x: 1, z: 2, vx: 0, vz: 0 }, { start: 100 }, 101), { x: 1, z: 2 });
 });
 
-test("the whale's splash throws big droplets up and out in a ring, which fall back and shrink away", () => {
-  const start = whaleSplash(0, 12, 0), mid = whaleSplash(0, 12, WHALE_SPLASH * .3), end = whaleSplash(0, 12, WHALE_SPLASH);
-  assert.ok(Math.hypot(start.x, start.y, start.z) < 1e-9);
-  assert.ok(mid.y > 1.5 && Math.hypot(mid.x, mid.z) > 1);
-  assert.ok(end.y < 0 && end.size === 0);
-  const ring = Array.from({ length: 12 }, (_, i) => whaleSplash(i, 12, WHALE_SPLASH * .3));
-  assert.ok(Math.abs(ring.reduce((sum, d) => sum + d.x, 0)) < 1e-9 && Math.abs(ring.reduce((sum, d) => sum + d.z, 0)) < 1e-9);
+test("the whale's splash throws hundreds of droplets from all round its body, highest from beside its middle", () => {
+  assert.ok(SPRAY >= 200);
+  const thrown = Array.from({ length: SPRAY }, (_, i) => sprayDrop(i, .15));
+  assert.ok(thrown.every(Boolean), "all thrown by 0.15 s");
+  for (const drop of thrown) {
+    const out = Math.hypot(drop.along / 5, drop.side / 1.7);
+    assert.ok(out > .9 && out < 1.6, `from round the body: ${out}`);
+  }
+  assert.ok(thrown.some((d) => d.side > 1) && thrown.some((d) => d.side < -1) && thrown.some((d) => d.along > 4) && thrown.some((d) => d.along < -4));
+  const peak = (i) => Math.max(...times(0, SPRAY_LIFE).map((t) => sprayDrop(i, t)?.y ?? 0));
+  const peaks = thrown.map((drop, i) => ({ along: Math.abs(drop.along), peak: peak(i) }));
+  const mean = (list) => list.reduce((sum, p) => sum + p.peak, 0) / list.length;
+  assert.ok(Math.max(...peaks.map((p) => p.peak)) > 6, "some fly over 6 m up");
+  assert.ok(mean(peaks.filter((p) => p.along < 1.5)) > mean(peaks.filter((p) => p.along > 3.5)) + 1);
+});
+
+test("the spray stays above the water and is all back in by its end", () => {
+  for (let i = 0; i < SPRAY; i++) {
+    for (const t of [.3, .9, 1.6, 2.3]) {
+      const drop = sprayDrop(i, t);
+      if (drop) assert.ok(drop.y >= 0 && drop.size > 0, `droplet ${i} at ${t}`);
+    }
+    assert.equal(sprayDrop(i, SPRAY_LIFE), null);
+  }
+});
+
+test("a sheet of water rises all round the whale, spreads and falls back, fading", () => {
+  const rising = crown(.1), top = crown(.6), falling = crown(CROWN_LIFE - .05);
+  assert.ok(top.height > rising.height && top.height > 2.5 && falling.height < top.height * .4);
+  assert.ok(rising.grow >= 1 && falling.grow > rising.grow);
+  assert.ok(falling.opacity < rising.opacity);
+  assert.equal(crown(CROWN_LIFE), null);
+});
+
+test("foam spreads over the water where the whale landed and fades by the end of its visit", () => {
+  const fresh = foam(.1), later = foam(2);
+  assert.ok(later.grow > fresh.grow && later.opacity < fresh.opacity);
+  assert.ok(foam(WHALE_GONE - LAND - .05));
+  assert.equal(foam(WHALE_GONE - LAND + 1e-9), null);
+});
+
+test("a rider touches the whale only within its outline and lower than its back", () => {
+  const whale = { x: 0, z: 0, axis: { x: 1, z: 0 }, lift: 0 };
+  assert.equal(touchesWhale({ x: 0, z: 1, height: 0 }, whale), true, "on the water against its side");
+  assert.equal(touchesWhale({ x: 0, z: 0, height: 1.2 }, whale), true, "a low jump into its back");
+  assert.equal(touchesWhale({ x: 0, z: 0, height: 1.7 }, whale), false, "a jump that clears it");
+  assert.equal(touchesWhale({ x: 0, z: 3, height: 0 }, whale), false, "beside it");
+  assert.equal(touchesWhale({ x: 6, z: 0, height: 0 }, whale), false, "past its tail");
+  assert.equal(touchesWhale({ x: 0, z: 0, height: 0 }, { ...whale, lift: -2 }), false, "once it has sunk");
+  assert.equal(touchesWhale({ x: 0, z: 4, height: 0 }, { ...whale, axis: { x: 0, z: 1 } }), true, "lying the other way");
+});
+
+test("a rider in the air when the whale lands is still knocked over if they hit it", () => {
+  const AIR = { ...CALM, calm: false, sailing: false, airborne: true };
+  const jumpLow = (time) => (time >= 22 && time < 22.9 ? AIR : time >= 22.9 && time < 23.1 ? { ...AIR, touching: true } : CALM);
+  const { sea, hits } = run(23.5, jumpLow);
+  assert.equal(hits.length, 1);
+  assert.ok(near(hits[0], 22.9), `hit at ${hits[0]}`);
+  assert.equal(sea.whale.outcome, "hit");
+});
+
+test("touching the whale before it lands, or while already down, doesn't count", () => {
+  const AIR = { ...CALM, calm: false, sailing: false, airborne: true };
+  const early = (time) => (time >= 21 && time < 22 ? { ...CALM, touching: true } : time >= 22.4 && time < 22.8 ? AIR : CALM);
+  assert.deepEqual(run(23, early).hits, []);
+  const down = (time) => (time >= 22 ? { ...CALM, sailing: false, crashed: true, touching: true } : CALM);
+  assert.deepEqual(run(23, down).hits, []);
 });
