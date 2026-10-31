@@ -124,8 +124,3 @@ export function droplet(i, count, age) {
     size: .09 * Math.max(0, 1 - age / SPLASH),
   };
 }
-
-// The game's water height, j(x, z, time), with the venues mod's waves when
-// that mod has added them.
-const WATER_HEIGHT = /^function [\w$]+\(e,t,n\)\{return (?:[\w$]+\(e,t,n,)?[\w$]+\.reduce\(\(r,i\)=>r\+Math\.sin\(e\*i\.x\+t\*i\.z\+n\*i\.speed\)\*i\.amplitude,0\)\)?\}$/;
-export const isWaterHeight = (value) => typeof value === "function" && WATER_HEIGHT.test(value.toString());
