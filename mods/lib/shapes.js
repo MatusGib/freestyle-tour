@@ -8,13 +8,39 @@ import {
 const matrix = new Matrix4(), rotation = new Quaternion(), euler = new Euler(), at = new Vector3(), size = new Vector3();
 const colour = new Color();
 
+// A smooth body along x: a ring at each station [x, half height, half width,
+// raise], closed at both ends; rings of `around` points.
+export function bodyGeometry(stations, around = 12) {
+  const positions = [], index = [];
+  for (const [x, high, wide, raise] of stations) {
+    for (let j = 0; j < around; j++) {
+      const angle = j / around * Math.PI * 2;
+      positions.push(x, raise + high * Math.sin(angle), wide * Math.cos(angle));
+    }
+  }
+  const rings = stations.length, nose = rings * around, tail = nose + 1;
+  const [first, last] = [stations[0], stations[rings - 1]];
+  positions.push(first[0] + first[1] * .5, first[3], 0, last[0] - last[1] * .5, last[3], 0);
+  const at = (ring, j) => ring * around + (j % around);
+  for (let ring = 0; ring < rings - 1; ring++) {
+    for (let j = 0; j < around; j++) {
+      index.push(at(ring, j), at(ring + 1, j + 1), at(ring + 1, j), at(ring, j), at(ring, j + 1), at(ring + 1, j + 1));
+    }
+  }
+  for (let j = 0; j < around; j++) index.push(nose, at(0, j + 1), at(0, j), tail, at(rings - 1, j), at(rings - 1, j + 1));
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+  geometry.setIndex(index);
+  return geometry;
+}
+
 // Bakes parts into one geometry coloured by its vertices. Each part is scaled,
 // turned and moved; with under, its faces lower than split below its middle
 // take that colour, for a pale belly.
 export function bake(parts) {
   const positions = [], colours = [];
   for (const { geometry, fill, under = fill, split = 0, move = [0, 0, 0], turn = [0, 0, 0], scale = [1, 1, 1] } of parts) {
-    const flat = geometry.toNonIndexed();
+    const flat = geometry.index ? geometry.toNonIndexed() : geometry.clone();
     flat.applyMatrix4(matrix.compose(at.set(...move), rotation.setFromEuler(euler.set(...turn)), size.set(...scale)));
     const position = flat.getAttribute("position");
     for (let i = 0; i < position.count; i += 3) {

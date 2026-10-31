@@ -1,8 +1,8 @@
 // The dolphins and the whale, built with three.js's own geometry (the venues
 // mod's copy of the r185 the game runs), nose on +x: one flat-shaded mesh
 // coloured by its vertices each, and the tail flukes apart so they can beat.
-import { ConeGeometry, Group, IcosahedronGeometry, Mesh, SphereGeometry } from "../venues/lib/three.core.min.js";
-import { bake } from "../lib/shapes.js";
+import { ConeGeometry, ExtrudeGeometry, Group, IcosahedronGeometry, Mesh, Shape, SphereGeometry } from "../venues/lib/three.core.min.js";
+import { bake, bodyGeometry } from "../lib/shapes.js";
 
 // Dark eyes of radius r at (x, y, ±z), each with a glint.
 const eyes = (x, y, z, r) => [1, -1].flatMap((side) => [
@@ -15,24 +15,45 @@ const flukes = (span, length, fill, material) => new Mesh(bake([
   { geometry: new ConeGeometry(span, length, 4), fill, move: [-length / 2, 0, 0], turn: [0, 0, -Math.PI / 2], scale: [.25, 1, 1] },
 ]), material);
 
-// A bottlenose dolphin, 2.2 m long: grey-blue with a pale belly, a beak, a
-// curved back fin and two flippers.
+// A thin cut-out of a shape drawn in x (forward) and y, depth thick, centred.
+const cutOut = (draw, depth) => {
+  const shape = new Shape();
+  draw(shape);
+  return new ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 6 }).translate(0, 0, -depth / 2);
+};
+
+// A bottlenose dolphin's shape, nose to tail, 2.5 m: a short beak, the
+// rounded melon above it, thickest a third of the way back, then a long taper
+// to a narrow tail stock, taller than it is wide. [x, half height, half width,
+// raise]
+const DOLPHIN_BODY = [
+  [1.25, .025, .025, -.06], [1.17, .045, .045, -.055], [1.07, .06, .06, -.05], [1.02, .1, .09, -.01],
+  [.95, .17, .15, .03], [.82, .23, .2, .03], [.6, .28, .25, .02], [.35, .31, .27, .01], [.1, .31, .27, 0],
+  [-.2, .28, .23, 0], [-.5, .22, .16, 0], [-.75, .15, .09, 0], [-.95, .1, .05, 0], [-1.12, .055, .03, 0],
+  [-1.22, .03, .02, 0],
+];
+
+// A bottlenose dolphin, 2.5 m long: dark grey above and pale below, with a
+// hooked back fin, swept-back flippers and crescent flukes.
 export function makeDolphin(material) {
-  const body = "#7b8ea6", belly = "#e3eaf1";
+  const back = "#5d6874", belly = "#dde3e8";
   const flippers = [1, -1].map((side) => ({
-    geometry: new ConeGeometry(.09, .34, 3), fill: body, move: [.3, -.2, .26 * side], turn: [0, .6 * side, 2.1], scale: [1, 1, .3],
+    geometry: cutOut((s) => s.moveTo(.07, 0).quadraticCurveTo(.02, -.16, -.2, -.26).quadraticCurveTo(-.08, -.1, -.07, 0).lineTo(.07, 0), .025),
+    fill: back, move: [.55, -.17, .2 * side], turn: [-.7 * side, 0, .15],
   }));
   const dolphin = new Group();
   dolphin.add(new Mesh(bake([
-    { geometry: new IcosahedronGeometry(1, 1), fill: body, under: belly, split: -.06, scale: [1, .32, .3] },
-    { geometry: new ConeGeometry(.11, .34, 6), fill: body, under: belly, move: [1.08, -.05, 0], turn: [0, 0, -Math.PI / 2] },
-    { geometry: new ConeGeometry(.2, .52, 6), fill: body, move: [-1.1, 0, 0], turn: [0, 0, Math.PI / 2], scale: [1, 1, .7] },
-    { geometry: new ConeGeometry(.15, .42, 3), fill: body, move: [-.1, .4, 0], turn: [0, 0, .6], scale: [1, 1, .3] },
+    { geometry: bodyGeometry(DOLPHIN_BODY, 12), fill: back, under: belly, split: -.06 },
+    { geometry: cutOut((s) => s.moveTo(.2, 0).quadraticCurveTo(.1, .3, -.18, .36).quadraticCurveTo(-.1, .16, -.2, 0).lineTo(.2, 0), .035), fill: back, move: [-.05, .25, 0] },
     ...flippers,
-    ...eyes(.7, .06, .19, .045),
+    ...eyes(.88, 0, .165, .022),
   ]), material));
-  const tail = flukes(.32, .3, body, material);
-  tail.position.x = -1.3;
+  const tail = new Mesh(bake([{
+    geometry: cutOut((s) => s.moveTo(0, .05).quadraticCurveTo(-.1, .22, -.26, .4).quadraticCurveTo(-.24, .18, -.34, .05).lineTo(-.3, 0)
+      .lineTo(-.34, -.05).quadraticCurveTo(-.24, -.18, -.26, -.4).quadraticCurveTo(-.1, -.22, 0, -.05).lineTo(0, .05), .03),
+    fill: back, turn: [Math.PI / 2, 0, 0],
+  }]), material);
+  tail.position.x = -1.2;
   dolphin.add(tail);
   return { animal: dolphin, flukes: tail };
 }
