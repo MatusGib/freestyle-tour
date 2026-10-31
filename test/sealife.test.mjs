@@ -209,13 +209,13 @@ test("the whale moves smoothly", () => {
   assert.ok(most < .2, `${most} in 0.01 s`);
 });
 
-test("the whale aims 4 m in front of where the rider will be when it lands", () => {
+test("the whale aims 6 m in front of where the rider will be when it lands", () => {
   const rider = { x: 10, z: 5, vx: 8, vz: -2 }, speed = Math.hypot(8, -2);
   const at = aim(rider, { start: 100 }, 101);
-  assert.ok(Math.abs(at.x - (10 + 8 * (LAND - 1) + 4 * 8 / speed)) < 1e-9);
-  assert.ok(Math.abs(at.z - (5 - 2 * (LAND - 1) - 4 * 2 / speed)) < 1e-9);
+  assert.ok(Math.abs(at.x - (10 + 8 * (LAND - 1) + 6 * 8 / speed)) < 1e-9);
+  assert.ok(Math.abs(at.z - (5 - 2 * (LAND - 1) - 6 * 2 / speed)) < 1e-9);
   const late = aim(rider, { start: 100 }, 100 + LAND + 1);
-  assert.ok(Math.abs(late.x - (10 + 4 * 8 / speed)) < 1e-9);
+  assert.ok(Math.abs(late.x - (10 + 6 * 8 / speed)) < 1e-9);
   assert.deepEqual(aim({ x: 1, z: 2, vx: 0, vz: 0 }, { start: 100 }, 101), { x: 1, z: 2 });
 });
 
