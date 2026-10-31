@@ -6,7 +6,8 @@
 import { Box3, Group, Matrix4, Quaternion, Vector3 } from "../venues/lib/three.core.min.js";
 import { bakedMaterial, makeDroplets } from "../lib/shapes.js";
 import { findWaterHeight } from "../lib/water.js";
-import { FISH, droplet, fishPose, nextVisit, splashes, wipedOut } from "./fish.js";
+import { droplet } from "../lib/splash.js";
+import { FISH, fishPose, nextVisit, splashes, wipedOut } from "./fish.js";
 import { makeFish } from "./model.js";
 
 const SIZE = 1.3; // like the game's rider, a little larger than life
