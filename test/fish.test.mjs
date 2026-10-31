@@ -60,6 +60,11 @@ test("the jumps start after the jumper has swum in", () => {
   for (const fish of jumpers) assert.ok(fish.jumps[0] >= fish.delay + ARRIVE);
 });
 
+test("the leaps cross the middle while the sail still lies in the water", () => {
+  // The game's water start lifts the sail high from about 2.5 s after the wipe-out.
+  for (const fish of jumpers) for (const at of fish.jumps) assert.ok(at + JUMP / 2 <= 2.5, `the leap at ${at} crosses at ${at + JUMP / 2} s`);
+});
+
 test("a jumping fish leaps across the middle, high over the rider and the sail", () => {
   for (const fish of jumpers) {
     for (const at of fish.jumps) {

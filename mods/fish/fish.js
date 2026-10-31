@@ -18,14 +18,14 @@ const STEP = .02; // to see which way a fish is going
 
 // colours: body, belly, fins. turn: radians a second round the rider, its
 // sign the way round. angle: where it circles from. delay: when it sets off.
-// jumps: when it leaps across.
+// jumps: when it leaps across, while the sail still lies in the water.
 export const FISH = [
   { colours: ["#ff8a3d", "#ffe3c2", "#ffd166"], radius: 3.4, turn: 1.1, angle: 0, delay: 0, jumps: [] },
   { colours: ["#ffd23f", "#fff6cf", "#ff9f1c"], radius: 4.3, turn: -.9, angle: 1.3, delay: .15, jumps: [] },
-  { colours: ["#ff6fa8", "#ffe0ec", "#ffb3d1"], radius: 4.6, turn: 1, angle: 2.4, delay: .3, jumps: [] },
+  { colours: ["#ff6fa8", "#ffe0ec", "#ffb3d1"], radius: 4.6, turn: 1, angle: 2.4, delay: .3, jumps: [1.8] },
   { colours: ["#3fa7ff", "#dcefff", "#ffd23f"], radius: 4.9, turn: -1, angle: 3.6, delay: .1, jumps: [] },
-  { colours: ["#2ec4b6", "#d8f6f2", "#ff8a3d"], radius: 3.7, turn: -1.1, angle: 4.5, delay: 0, jumps: [1.1, 3] },
-  { colours: ["#9b6bff", "#ebe2ff", "#ff6fa8"], radius: 4, turn: 1.05, angle: 5.5, delay: .2, jumps: [2, 3.8] },
+  { colours: ["#2ec4b6", "#d8f6f2", "#ff8a3d"], radius: 3.7, turn: -1.1, angle: 4.5, delay: 0, jumps: [1] },
+  { colours: ["#9b6bff", "#ebe2ff", "#ff6fa8"], radius: 4, turn: 1.05, angle: 5.5, delay: .2, jumps: [1.4] },
 ];
 
 // A visit is null (no fish), or { start, up }: the times (the game's clock)
