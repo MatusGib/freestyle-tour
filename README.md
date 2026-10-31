@@ -45,6 +45,11 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
 - `fish`: when you wipe out, a few friendly fish swim round you and your sail,
   three leap over you with a splash, and they dart off and dive once you are
   back up.
+- `sealife`: in practice, sail 10 s without touching anything and three
+  dolphins swim beside you, leaping, until you load a jump. 10 s more and a
+  whale belly-flops in front of you and knocks you over, unless you are in the
+  air from a jump when it lands. It hands the game's own wipe-out to mods with
+  a small patch.
 - `dev`: the developer panel. Try event winds, venues' usual winds and wind
   zones, the champion's wind and target, and an offset on every challenge
   rider's AI target, as a draft used from the next heat; then discard it or
