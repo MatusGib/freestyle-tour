@@ -42,6 +42,9 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
 - `champion`: the Champion's challenge. Race Lennart Neubauer at one of his
   PWA wins in the game's own 1v1 heat, for a Red Bull helmet. See
   [the Champion's challenge](#the-champions-challenge) below.
+- `fish`: when you wipe out, a few friendly fish swim round you and your sail,
+  three leap over you with a splash, and they dart off and dive once you are
+  back up.
 - `dev`: the developer panel. Try event winds, venues' usual winds and wind
   zones, the champion's wind and target, and an offset on every challenge
   rider's AI target, as a draft used from the next heat; then discard it or
