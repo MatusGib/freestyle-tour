@@ -12,8 +12,8 @@ import { indexVenueCatalog, loadVenueCatalog, publicVenue, venueForLocation } fr
 import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
 import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, takePlannedHeatFor, venueConditions } from "../mods/venues/venue.js";
-import { VENUE_LOOKS } from "../mods/venues/water.js";
-import { setKnots, setSea, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
+import { VENUE_LOOKS, applyVenueLook } from "../mods/venues/water.js";
+import { setKnots, setSea, setSpotWater, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
 import { zoneKnots, zonesFor } from "../mods/venues/zones.js";
 import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
@@ -21,6 +21,7 @@ import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
 const SOTAVENTO = "sotavento-fuerteventura";
 const SYLT = "westerland-sylt";
+const SOROBON = "sorobon-bonaire";
 
 test("the tour's events at the five venues find their venue, and no other event does", () => {
   const tour = loadTour(join(ROOT, "tour"));
@@ -78,10 +79,12 @@ test("a refused venue names its field, so the developer panel can show the reaso
   assert.equal(indexVenueCatalog({ version: 2, venues: [venue] }).byId.get("a"), venue);
 });
 
-test("only venues with a coast are marked as having scenery", () => {
-  const venue = (id) => ({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
-  assert.equal(publicVenue(venue(SYLT)).scenery, true);
-  assert.equal(publicVenue(venue("pozo-izquierdo-gran-canaria")).scenery, false);
+test("venues with a coast or a real-world spot's files have scenery, and a picture of it", () => {
+  const venue = (id) => publicVenue({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
+  assert.deepEqual([venue(SYLT).scenery, venue(SYLT).spotFiles, venue(SYLT).picture], [true, false, `/__mods/venues/assets/${SYLT}.svg`]);
+  assert.deepEqual([venue(SOROBON).scenery, venue(SOROBON).spotFiles, venue(SOROBON).picture], [true, true, `/__mods/venues/spots/${SOROBON}/picture.png`]);
+  const pozo = venue("pozo-izquierdo-gran-canaria");
+  assert.deepEqual([pozo.scenery, pozo.spotFiles, pozo.picture], [false, false, null]);
 });
 
 test("a venue heat keeps the room's seed and takes the venue's wind", () => {
@@ -172,10 +175,59 @@ test("without the venues mod, events name no venue and AI heats sail this week's
   assert.deepEqual(calls, [fakeGame.weekConditions()]);
 });
 
-test("every venue with a coast is in the catalog and has a water look", () => {
+test("every venue with a coast, and Sorobon, is in the catalog and has a water look", () => {
   const ids = catalog.venues.map((v) => v.id);
   for (const id of Object.keys(SITE_LAYOUTS)) assert.ok(ids.includes(id), `${id} isn't in the catalog`);
-  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), Object.keys(SITE_LAYOUTS).sort());
+  assert.ok(ids.includes(SOROBON));
+  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), [...Object.keys(SITE_LAYOUTS), SOROBON].sort());
+});
+
+// The water's uniforms and the sky as the patches give them, any name a
+// { value } holder.
+const fakeLookGame = () => ({ water: { uniforms: new Proxy({}, { get: (all, name) => (all[name] ??= { value: null }) }) }, scene: { getObjectByName: () => null } });
+// A spot's water map over ±100 m, 10 px: deep sea (20 m) for x < 0, a 1 m
+// lagoon for x > 0, land in the last column; reef and shore far except there.
+function fakeSpotWater() {
+  const size = 10, data = new Uint8Array(size * size * 4).fill(255);
+  for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
+    const k = (j * size + i) * 4;
+    data[k] = i < 5 ? 255 : 13;
+    data[k + 2] = i === size - 1 ? 0 : i === size - 2 ? 32 : 255;
+  }
+  return { texture: { isTexture: true }, colour: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8 };
+}
+
+test("the water reads a spot's depth map only at a real-world spot", (t) => {
+  t.after(() => { setSpotWater(null); setSea(null); });
+  const game = fakeLookGame(), spotWater = fakeSpotWater();
+  applyVenueLook(game, catalog.byId.get(SOROBON), spotWater);
+  assert.equal(game.water.uniforms.uSpotBox.value[1], 1);
+  assert.equal(game.water.uniforms.uSpotWater.value, spotWater.texture);
+  assert.equal(game.water.uniforms.uSpotColour.value, spotWater.colour, "the satellite's pattern of the floor");
+  assert.ok(game.water.uniforms.uCaustics.value > 0 && game.water.uniforms.uMarks.value < 1, "sunlight on the shallow floor, fewer stylised crest marks");
+  applyVenueLook(game, catalog.byId.get(SOTAVENTO), spotWater);
+  assert.equal(game.water.uniforms.uSpotBox.value[1], 0, "an analytic coast keeps its own shallows");
+  assert.deepEqual([game.water.uniforms.uSpotColour.value, game.water.uniforms.uCaustics.value, game.water.uniforms.uMarks.value], [null, 0, 1], "and its look");
+  applyVenueLook(game, null);
+  assert.equal(game.water.uniforms.uSpotBox.value[1], 0);
+});
+
+test("at a spot, waves are much smaller in the lagoon than on the open sea, and die at the shore", (t) => {
+  t.after(() => { setSpotWater(null); setSea(null); });
+  const spotWater = fakeSpotWater();
+  applyVenueLook(fakeLookGame(), catalog.byId.get(SOROBON), spotWater);
+  setKnots(20);
+  const range = (x) => {
+    let low = Infinity, high = -Infinity;
+    for (let s = 0; s < 40; s += .25) { const h = venueWater(x, 0, s, 0); low = Math.min(low, h); high = Math.max(high, h); }
+    return high - low;
+  };
+  const lagoon = range(30), sea = range(-60), land = range(95);
+  setSpotWater(null);
+  assert.ok(lagoon < range(30) / 4, `lagoon ${lagoon}, the same place with no reef ${range(30)}`);
+  assert.ok(Math.abs(sea - range(-60)) < 1e-9, "the open sea keeps all its waves");
+  assert.ok(sea > .3);
+  assert.equal(land, 0, "on land, none");
 });
 
 // Where the local AI sailed in six heats (15–19 kt, targets 30–55): x from

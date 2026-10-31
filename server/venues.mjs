@@ -50,10 +50,21 @@ export function venueForLocation(catalog, location) {
   return catalog?.byLocation.get(normalize(location)) ?? null;
 }
 
-// What the browser gets of a venue. scenery: whether the venues mod has a
-// coast for it; the others sail in the game's own scene.
+// Whether tools/spot.mjs has built a real-world spot's files for a venue id.
+const spotFiles = new Map();
+const hasSpotFiles = (id) => {
+  if (!spotFiles.has(id)) spotFiles.set(id, existsSync(new URL(`../mods/venues/spots/${id}/spot.json`, import.meta.url)));
+  return spotFiles.get(id);
+};
+
+// What the browser gets of a venue. scenery: whether the venues mod builds
+// it, from an analytic coast or, with spotFiles, from a real-world spot's
+// map data; picture: its picture for the chooser and the event card. The
+// others sail in the game's own scene.
 export function publicVenue(venue) {
   if (!venue) return null;
   const { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources } = venue;
-  return { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources, scenery: Boolean(coastFor(id)) };
+  const spot = hasSpotFiles(id), coast = Boolean(coastFor(id));
+  const picture = spot ? `/__mods/venues/spots/${id}/picture.png` : coast ? `/__mods/venues/assets/${id}.svg` : null;
+  return { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources, scenery: coast || spot, spotFiles: spot, picture };
 }
