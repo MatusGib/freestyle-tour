@@ -33,17 +33,18 @@ const DOLPHIN_BODY = [
   [-1.22, .03, .02, 0],
 ];
 
-// A bottlenose dolphin, 2.5 m long: dark grey above and pale below, with a
-// hooked back fin, swept-back flippers and crescent flukes.
+// A bottlenose dolphin, 2.5 m long: shaded from a dark grey back through grey
+// sides to a pale belly, with a hooked back fin, swept-back flippers and
+// crescent flukes.
 export function makeDolphin(material) {
-  const back = "#5d6874", belly = "#dde3e8";
+  const back = "#424b55";
   const flippers = [1, -1].map((side) => ({
     geometry: cutOut((s) => s.moveTo(.07, 0).quadraticCurveTo(.02, -.16, -.2, -.26).quadraticCurveTo(-.08, -.1, -.07, 0).lineTo(.07, 0), .025),
     fill: back, move: [.55, -.17, .2 * side], turn: [-.7 * side, 0, .15],
   }));
   const dolphin = new Group();
   dolphin.add(new Mesh(bake([
-    { geometry: bodyGeometry(DOLPHIN_BODY, 12), fill: back, under: belly, split: -.06 },
+    { geometry: bodyGeometry(DOLPHIN_BODY, 12), shade: [[-.17, "#e4e8eb"], [-.09, "#a9b2bb"], [0, "#69737e"], [.12, back]] },
     { geometry: cutOut((s) => s.moveTo(.2, 0).quadraticCurveTo(.1, .3, -.18, .36).quadraticCurveTo(-.1, .16, -.2, 0).lineTo(.2, 0), .035), fill: back, move: [-.05, .25, 0] },
     ...flippers,
     ...eyes(.88, 0, .165, .022),
@@ -67,7 +68,7 @@ export function makeWhale(material) {
   }));
   const whale = new Group();
   whale.add(new Mesh(bake([
-    { geometry: new IcosahedronGeometry(1, 2), fill: body, under: belly, split: -.4, scale: [5, 1.5, 1.7] },
+    { geometry: new IcosahedronGeometry(1, 2), shade: [[-.9, belly], [-.3, "#8e9aa8"], [.3, body]], scale: [5, 1.5, 1.7] },
     { geometry: new ConeGeometry(.8, 2.4, 8), fill: body, move: [-5.4, 0, 0], turn: [0, 0, Math.PI / 2], scale: [1, 1, .9] },
     { geometry: new ConeGeometry(.35, .7, 4), fill: body, move: [-2.4, 1.4, 0], turn: [0, 0, .6], scale: [1, 1, .5] },
     ...flippers,

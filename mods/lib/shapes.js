@@ -34,19 +34,33 @@ export function bodyGeometry(stations, around = 12) {
   return geometry;
 }
 
+const next = new Color();
+// The colour at height y between shade's stops, [[y, colour], ...] from low to high.
+function shadeAt(shade, y) {
+  if (y <= shade[0][0]) return colour.set(shade[0][1]);
+  for (let i = 1; i < shade.length; i++) {
+    const [[low, from], [high, to]] = [shade[i - 1], shade[i]];
+    if (y <= high) return colour.set(from).lerp(next.set(to), (y - low) / (high - low));
+  }
+  return colour.set(shade.at(-1)[1]);
+}
+
 // Bakes parts into one geometry coloured by its vertices. Each part is scaled,
 // turned and moved; with under, its faces lower than split below its middle
-// take that colour, for a pale belly.
+// take that colour, for a pale belly. With shade instead, each corner takes
+// the colour at its height, blending smoothly, as an animal's countershading.
 export function bake(parts) {
   const positions = [], colours = [];
-  for (const { geometry, fill, under = fill, split = 0, move = [0, 0, 0], turn = [0, 0, 0], scale = [1, 1, 1] } of parts) {
+  for (const { geometry, fill, under = fill, split = 0, shade, move = [0, 0, 0], turn = [0, 0, 0], scale = [1, 1, 1] } of parts) {
     const flat = geometry.index ? geometry.toNonIndexed() : geometry.clone();
     flat.applyMatrix4(matrix.compose(at.set(...move), rotation.setFromEuler(euler.set(...turn)), size.set(...scale)));
     const position = flat.getAttribute("position");
     for (let i = 0; i < position.count; i += 3) {
       const low = (position.getY(i) + position.getY(i + 1) + position.getY(i + 2)) / 3 < move[1] + split;
-      colour.set(low ? under : fill);
-      for (let corner = 0; corner < 3; corner++) colours.push(colour.r, colour.g, colour.b);
+      for (let corner = 0; corner < 3; corner++) {
+        const { r, g, b } = shade ? shadeAt(shade, position.getY(i + corner)) : colour.set(low ? under : fill);
+        colours.push(r, g, b);
+      }
     }
     positions.push(...position.array);
     geometry.dispose();
