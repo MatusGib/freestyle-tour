@@ -1,14 +1,16 @@
 // Dolphins and a whale for a rider who sails along doing nothing, in
 // practice: when they come and go, and where they swim. Pure helpers, shared
 // with the tests; index.js draws them. Times are the game's clock, in seconds.
+import { SPLASH } from "../lib/splash.js";
 
 export const DOLPHINS_AFTER = 10; // of sailing with nothing pressed
 export const WHALE_AFTER = 20;
 export const LAND = 2.6; // from the whale surfacing to its belly flop
 export const WHALE_GONE = 5; // from the whale surfacing to it sinking out of sight
 export const WHALE_SPLASH = 1.4; // its splash's droplets in the air
-const LEAP = 1.1; // a dolphin's leap
-const DIVE = 1.2; // a leaving dolphin's dive out of sight
+const LEAP = 1; // a dolphin's leap out of the water
+const UNDER = 1.4; // under the water between leaps
+const DIVE = 1.4; // a leaving dolphin's dive, deep and out of sight
 export const DOLPHINS_LEAVE = LEAP + DIVE;
 const STEP = .02; // to see which way a dolphin is going
 
@@ -57,63 +59,88 @@ export function nextSea(sea, sense, time) {
 const smooth = (k) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
 
 // The dolphins, in the rider's frame: side metres to the rider's side (one
-// way or the other), forward metres ahead. delay: when each sets off; first:
-// its first leap, after it has swum in, then one every EVERY s.
+// way or the other), forward metres ahead. Each porpoises like a dolphin
+// keeping pace with a boat: a leap out of the water every EVERY s from first,
+// high metres high, in again nose first, down under the water and up into
+// the next leap. delay: when it sets off from behind.
 export const DOLPHINS = [
-  { side: 4.2, forward: 1, delay: 0, first: 1.6 },
-  { side: 5.8, forward: -1.5, delay: .3, first: 2.4 },
-  { side: -4.6, forward: 0, delay: .6, first: 3.2 },
+  { side: 4.2, forward: 1, high: 1.3, delay: 0, first: 1.6 },
+  { side: 5.8, forward: -1.5, high: 1.1, delay: .3, first: 2.4 },
+  { side: -4.6, forward: 0, high: 1.45, delay: .6, first: 3.2 },
 ];
-const ARRIVE = 1.5; // to swim in from 12 m behind and 2 m down
-const EVERY = 2.6;
-const HIGH = 1.7; // a leap's height
-const AHEAD = 2.5; // a leap carries a dolphin this far ahead; it drops back after
+const ARRIVE = 1.5; // to swim in from 12 m behind
+const EVERY = LEAP + UNDER;
+const AHEAD = 1.5; // a leap carries a dolphin this far ahead; it drops back under the water
 
-// Swimming just under the surface, back fin out.
-const swim = (dolphin, t) => -.25 + .06 * Math.sin(3 * t + dolphin.side);
-
-// How far through its leap cycle a dolphin is: surge 0 to 1, rising through a
-// leap and easing back after it; start is the leap it is in, or null.
-function cycle(dolphin, t) {
-  if (t < dolphin.first) return { surge: 0, start: null };
-  const start = dolphin.first + Math.floor((t - dolphin.first) / EVERY) * EVERY, into = t - start;
-  return into < LEAP ? { surge: into / LEAP, start } : { surge: 1 - smooth((into - LEAP) / (EVERY - LEAP)), start: null };
+// The start of the leap a dolphin is in at t, or null.
+function leapAt(dolphin, t) {
+  if (t < dolphin.first) return null;
+  const start = dolphin.first + Math.floor((t - dolphin.first) / EVERY) * EVERY;
+  return t - start < LEAP ? start : null;
 }
 
+// Out of the water the leap is a parabola; under it the dolphin follows the
+// same curve upside down, stretched over UNDER, so it goes in and comes out
+// at the leap's angle, high * UNDER / LEAP deep at the bottom. Before its
+// first leap it swims at that depth.
 function swimming(dolphin, t) {
   if (t <= dolphin.delay) return null;
   const near = smooth((t - dolphin.delay) / ARRIVE);
-  const { surge, start } = cycle(dolphin, t);
-  let lift = -2 + (swim(dolphin, t) + 2) * near;
-  if (start !== null) {
-    const u = (t - start) / LEAP;
-    lift = swim(dolphin, start) * (1 - u) + swim(dolphin, start + LEAP) * u + 4 * HIGH * u * (1 - u);
+  const deep = dolphin.high * UNDER / LEAP;
+  let lift = -deep, surge = 0;
+  if (t >= dolphin.first - UNDER / 2) {
+    const start = dolphin.first + Math.floor((t - dolphin.first) / EVERY) * EVERY, into = t - start;
+    if (into < LEAP) {
+      const u = into / LEAP;
+      [lift, surge] = [4 * dolphin.high * u * (1 - u), u];
+    } else {
+      const v = (into - LEAP) / UNDER;
+      [lift, surge] = [-4 * deep * v * (1 - v), t < dolphin.first ? 0 : 1 - smooth(v)];
+    }
   }
   return { forward: dolphin.forward - 12 * (1 - near) + AHEAD * surge, side: dolphin.side, lift };
 }
 
 // Where a dolphin is t s after the dolphins came, or null when out of sight.
 // From leave (t too) the rider is loading a jump: the dolphin finishes the
-// leap it is in, then dives, dropping behind, and doesn't come up again.
+// leap it is in, then dives on down, 4.5 m deep, dropping behind, and
+// doesn't come up again.
 export function dolphinSpot(dolphin, t, leave = null) {
   if (leave === null || t < leave) return swimming(dolphin, t);
-  const { start } = cycle(dolphin, leave);
+  const start = leapAt(dolphin, leave);
   const end = start === null ? leave : start + LEAP;
   if (t < end) return swimming(dolphin, t);
   const from = swimming(dolphin, end), s = t - end;
   if (!from || s >= DIVE) return null;
-  const k = s / DIVE;
-  return { forward: from.forward - 2 * s * s, side: from.side, lift: from.lift - (2.5 + from.lift) * k * k };
+  // On from the way it was going, never up, and curving down to 4.5 m.
+  const slope = Math.min(0, (from.lift - (swimming(dolphin, end - STEP) ?? from).lift) / STEP);
+  const v = s / DIVE, toward = v * v * (3 - 2 * v), onward = v * (1 - v) * (1 - v);
+  return { forward: from.forward - 2 * s * s, side: from.side, lift: from.lift + (-4.5 - from.lift) * toward + DIVE * slope * onward };
 }
 
 // The dolphin's place and how far its nose is lifted, the rider sailing at
-// speed (m/s).
+// speed (m/s): its body follows its path.
 export function dolphinPose(dolphin, t, leave, speed) {
   const here = dolphinSpot(dolphin, t, leave);
   if (!here) return null;
   const ahead = dolphinSpot(dolphin, t + STEP, leave);
   const [from, to] = ahead ? [here, ahead] : [dolphinSpot(dolphin, t - STEP, leave), here];
   return { ...here, pitch: Math.atan2(to.lift - from.lift, speed * STEP + to.forward - from.forward) };
+}
+
+// The splashes a dolphin makes at t, where it left the water and where it went
+// back in, by how far ahead they were then and their age. With leave, leaps
+// after it never happen.
+export function dolphinSplashes(dolphin, t, leave = null) {
+  const out = [];
+  for (let start = dolphin.first; start <= t; start += EVERY) {
+    if (leave !== null && start >= leave) break;
+    for (const when of [start, start + LEAP]) {
+      const age = t - when;
+      if (age >= 0 && age <= SPLASH) out.push({ forward: swimming(dolphin, when).forward, age });
+    }
+  }
+  return out;
 }
 
 const SURFACE = .8; // the whale's head rising before it leaps

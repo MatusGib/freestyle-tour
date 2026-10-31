@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, START, WHALE_AFTER, WHALE_GONE, WHALE_SPLASH, aim, dolphinPose, dolphinSpot,
+  DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, START, WHALE_AFTER, WHALE_GONE, WHALE_SPLASH, aim, dolphinPose, dolphinSplashes, dolphinSpot,
   isCalm, isPractice, isSailing, nextSea, sense, whaleSpot, whaleSplash,
 } from "../mods/sealife/sealife.js";
 
@@ -125,41 +125,63 @@ const highest = (spot, from, to) => Math.max(...times(from, to).map((t) => spot(
 const steps = (spot, from, to) => times(from, to).map((t) => [spot(t), spot(t + .01)]).filter(([a, b]) => a && b)
   .map(([a, b]) => Math.hypot(b.forward - a.forward, b.side - a.side, b.lift - a.lift));
 
-test("the dolphins swim in from behind and below", () => {
+// When a dolphin rises through the surface into a leap, and when it comes back in.
+const crossings = (dolphin, from, to, leave = null, up = true) => times(from, to).filter((t) => {
+  const a = dolphinSpot(dolphin, t, leave), b = dolphinSpot(dolphin, t + .01, leave);
+  return a && b && (up ? a.lift <= 1e-9 && b.lift > 1e-9 : a.lift > 1e-9 && b.lift <= 1e-9);
+});
+const lowest = (spot, from, to) => Math.min(...times(from, to).map((t) => spot(t)?.lift ?? Infinity));
+
+test("the dolphins swim in from behind, deep under the water, out of sight until they leap", () => {
   for (const dolphin of DOLPHINS) {
     assert.equal(dolphinSpot(dolphin, dolphin.delay), null);
     const early = dolphinSpot(dolphin, dolphin.delay + .05);
-    assert.ok(early.forward < dolphin.forward - 10 && early.lift < -1.5, JSON.stringify(early));
+    assert.ok(early.forward < dolphin.forward - 10 && early.lift < -1, JSON.stringify(early));
+    assert.ok(highest((t) => dolphinSpot(dolphin, t), dolphin.delay, dolphin.first - .01) < 0);
   }
 });
 
-test("the dolphins swim beside the rider, two on one side and one on the other, fins showing", () => {
+test("the dolphins keep beside the rider, two on one side and one on the other", () => {
   assert.equal(DOLPHINS.filter((d) => d.side > 0).length, 2);
   assert.equal(DOLPHINS.filter((d) => d.side < 0).length, 1);
   for (const dolphin of DOLPHINS) {
     for (const t of times(dolphin.first, 12)) {
       const spot = dolphinSpot(dolphin, t);
       assert.equal(spot.side, dolphin.side);
-      assert.ok(spot.forward >= dolphin.forward - .01 && spot.forward <= dolphin.forward + 2.51, `${t}: ${spot.forward}`);
-      assert.ok(spot.lift > -.32, `${t}: ${spot.lift}`);
+      assert.ok(spot.forward >= dolphin.forward - .01 && spot.forward <= dolphin.forward + 1.51, `${t}: ${spot.forward}`);
     }
   }
 });
 
-test("each dolphin leaps every few seconds, at least 1.2 m high, in turn with the others", () => {
+test("each dolphin leaps out every couple of seconds, 1 to 1.6 m high, in turn with the others", () => {
   assert.equal(new Set(DOLPHINS.map((d) => d.first)).size, DOLPHINS.length);
   for (const dolphin of DOLPHINS) {
-    const lifts = times(0, 12).map((t) => dolphinSpot(dolphin, t)?.lift ?? -9);
-    const leaps = lifts.filter((lift, i) => i && lift > .5 && lifts[i - 1] <= .5).length;
-    assert.ok(leaps >= 3, `${leaps} leaps`);
-    assert.ok(highest((t) => dolphinSpot(dolphin, t), dolphin.first, dolphin.first + 1.5) > 1.2);
+    const leaps = crossings(dolphin, 0, 12);
+    assert.ok(leaps.length >= 4, `${leaps.length} leaps`);
+    for (let i = 1; i < leaps.length; i++) assert.ok(leaps[i] - leaps[i - 1] > 2 && leaps[i] - leaps[i - 1] < 3);
+    const high = highest((t) => dolphinSpot(dolphin, t), leaps[0], leaps[0] + 1.2);
+    assert.ok(high > 1 && high < 1.6, `${high} m`);
   }
 });
 
-test("a leaping dolphin points its nose up leaving the water and down coming back", () => {
+test("between leaps a dolphin swims well under the water, out of sight", () => {
+  for (const dolphin of DOLPHINS) {
+    const [out, next] = crossings(dolphin, 0, 12);
+    const [back] = crossings(dolphin, out, next, null, false);
+    assert.ok(next - back > 1, `under for ${next - back} s`);
+    assert.ok(highest((t) => dolphinSpot(dolphin, t), back + .02, next - .02) < 0);
+    assert.ok(lowest((t) => dolphinSpot(dolphin, t), back, next) < -1.2);
+  }
+});
+
+test("a dolphin leaves the water nose up and goes back in nose first, diving on down", () => {
   const dolphin = DOLPHINS[0];
-  assert.ok(dolphinPose(dolphin, dolphin.first + .1, null, 8).pitch > .3);
-  assert.ok(dolphinPose(dolphin, dolphin.first + 1, null, 8).pitch < -.3);
+  const [out] = crossings(dolphin, 0, 6);
+  const [back] = crossings(dolphin, out, 6, null, false);
+  assert.ok(dolphinPose(dolphin, out + .1, null, 8).pitch > .3);
+  assert.ok(dolphinPose(dolphin, back - .05, null, 8).pitch < -.3);
+  assert.ok(dolphinPose(dolphin, back + .1, null, 8).pitch < -.3);
+  assert.ok(dolphinSpot(dolphin, back + .3).lift < -.8);
 });
 
 test("the dolphins move smoothly, swimming in, leaping and leaving", () => {
@@ -171,20 +193,41 @@ test("the dolphins move smoothly, swimming in, leaping and leaving", () => {
   }
 });
 
-test("a dolphin leaping when the rider loads a jump finishes its leap, then dives and is gone", () => {
-  const dolphin = DOLPHINS[0], leave = dolphin.first + .5;
-  assert.ok(dolphinSpot(dolphin, dolphin.first + .8, leave).lift > 1);
-  const lifts = times(leave, leave + DOLPHINS_LEAVE).map((t) => dolphinSpot(dolphin, t, leave)?.lift).filter((lift) => lift !== undefined);
-  assert.ok(Math.min(...lifts) < -2);
+test("a dolphin leaping when the rider loads a jump finishes its leap, then dives deep and is gone", () => {
+  const dolphin = DOLPHINS[0];
+  const [out] = crossings(dolphin, 0, 6);
+  const leave = out + .4;
+  assert.ok(dolphinSpot(dolphin, out + .6, leave).lift > .5);
+  assert.deepEqual(crossings(dolphin, leave, leave + DOLPHINS_LEAVE, leave), []);
+  assert.ok(lowest((t) => dolphinSpot(dolphin, t, leave), leave, leave + DOLPHINS_LEAVE) < -3.5);
   assert.equal(dolphinSpot(dolphin, leave + DOLPHINS_LEAVE, leave), null);
 });
 
-test("a dolphin under water when the rider loads a jump doesn't come up again", () => {
+test("a dolphin under water when the rider loads a jump never comes up again, and dives deep", () => {
   for (const dolphin of DOLPHINS) {
-    const leave = dolphin.first + 1.6;
-    assert.ok(highest((t) => dolphinSpot(dolphin, t, leave), leave, leave + DOLPHINS_LEAVE) < -.15);
-    assert.equal(dolphinSpot(dolphin, leave + DOLPHINS_LEAVE, leave), null);
+    const [out, next] = crossings(dolphin, 0, 12);
+    for (const leave of [out + 1.5, next - .1]) {
+      const spot = (t) => dolphinSpot(dolphin, t, leave);
+      assert.ok(spot(leave).lift < 0);
+      assert.ok(highest(spot, leave, leave + DOLPHINS_LEAVE) <= spot(leave).lift + 1e-9, `leaving at ${leave}`);
+      assert.ok(lowest(spot, leave, leave + DOLPHINS_LEAVE) < -3.5);
+      assert.equal(spot(leave + DOLPHINS_LEAVE), null);
+    }
   }
+});
+
+test("a dolphin splashes where it leaves the water and where it goes back in, and not for leaps it never makes", () => {
+  const dolphin = DOLPHINS[0];
+  const [out, next] = crossings(dolphin, 0, 12);
+  const [back] = crossings(dolphin, out, next, null, false);
+  assert.deepEqual(dolphinSplashes(dolphin, out - .2), []);
+  const [leaving] = dolphinSplashes(dolphin, out + .1);
+  assert.ok(Math.abs(leaving.age - .1) < .02 && Math.abs(leaving.forward - dolphinSpot(dolphin, out).forward) < .1);
+  const [entering] = dolphinSplashes(dolphin, back + .1);
+  assert.ok(Math.abs(entering.age - .1) < .02 && Math.abs(entering.forward - dolphinSpot(dolphin, back).forward) < .1);
+  const leave = out + .4;
+  assert.equal(dolphinSplashes(dolphin, back + .1, leave).length, 1);
+  assert.deepEqual(dolphinSplashes(dolphin, next + .1, leave), []);
 });
 
 test("the whale surfaces 8 m to the side, leaps high and belly-flops flat on the landing point", () => {
