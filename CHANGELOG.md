@@ -1,0 +1,48 @@
+# Changelog
+
+Owner-facing summary of game ideas demonstrated in this private prototype. For
+proposal details and status, see the [roadmap](docs/roadmap.md).
+
+## 2026-10-31
+
+- **Sorobon, Bonaire:** Lac Bay reconstructed from map, elevation and satellite
+  data in its true trade-wind orientation. Adds a lagoon with estimated depth,
+  reef surf, mapped terrain and shore landmarks; the 2014 event challenge uses
+  its reported wind. On Radeon 680M at 1080p High, the scene adds 2.3 ms
+  (18.8 ms total); default/balanced runs at 12.4–13 ms.
+- **Wipeout fish:** six colourful fish visit after a crash, circle and leap over
+  the rider and sail with splashes, then dart away and dive as the rider gets
+  back up.
+
+## 2026-10-30
+
+- **Venue conditions:** sourced wind and gust records for 43 events across five
+  venues; venue wind zones and conditions stay consistent for player heats, AI
+  and replays.
+- **Developer tuning panel:** draft and validate event winds, venue profiles,
+  Champion conditions and AI score targets; optionally write approved values to
+  their data files.
+
+## 2026-10-25
+
+- **Champion's challenge:** race Lennart Neubauer in native 1v1 heats at five of his PWA wins, with event context and a helmet unlock.
+
+## 2026-10-24
+
+- **Local mod layer:** run a private copy with independently enabled features while preserving the original game's core play.
+- **Replays and ghosts:** replay stored heats or sail against the week's best local run.
+- **PWA riders and AI challenges:** event and rider records for 2006–2026, with pseudonyms and ratings; AI sails against a chosen score target.
+
+## In progress
+
+- Full tournament brackets and automatic venue selection.
+
+## Next venue work
+
+- Specify water that reveals the seabed, shore reflections and bloom; then build
+  Pozo and Podersdorf scenes. Those venues currently have wind profiles only.
+
+## Planned
+
+- Additional tricks and a career mode.
+A
