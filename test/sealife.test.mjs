@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, START, WHALE_AFTER, WHALE_GONE, isCalm, isPractice, isSailing, nextSea, sense,
+  DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, START, WHALE_AFTER, WHALE_GONE, WHALE_SPLASH, aim, dolphinPose, dolphinSpot,
+  isCalm, isPractice, isSailing, nextSea, sense, whaleSpot, whaleSplash,
 } from "../mods/sealife/sealife.js";
 
 const SAILING = { air: false, sliding: false, landing: false, crashTime: 0, dragging: false };
@@ -116,4 +117,110 @@ test("out of practice, the dolphins and the whale are gone at once", () => {
   const menuAt21 = (time) => (time >= 21 ? { ...CALM, practice: false } : CALM);
   assert.ok(run(20.9, menuAt21).sea.whale);
   assert.deepEqual(run(21, menuAt21).sea, START);
+});
+
+// Times from t to `to` every 0.01 s.
+const times = (from, to) => Array.from({ length: Math.round((to - from) * 100) }, (_, i) => from + i / 100);
+const highest = (spot, from, to) => Math.max(...times(from, to).map((t) => spot(t)?.lift ?? -Infinity));
+const steps = (spot, from, to) => times(from, to).map((t) => [spot(t), spot(t + .01)]).filter(([a, b]) => a && b)
+  .map(([a, b]) => Math.hypot(b.forward - a.forward, b.side - a.side, b.lift - a.lift));
+
+test("the dolphins swim in from behind and below", () => {
+  for (const dolphin of DOLPHINS) {
+    assert.equal(dolphinSpot(dolphin, dolphin.delay), null);
+    const early = dolphinSpot(dolphin, dolphin.delay + .05);
+    assert.ok(early.forward < dolphin.forward - 10 && early.lift < -1.5, JSON.stringify(early));
+  }
+});
+
+test("the dolphins swim beside the rider, two on one side and one on the other, fins showing", () => {
+  assert.equal(DOLPHINS.filter((d) => d.side > 0).length, 2);
+  assert.equal(DOLPHINS.filter((d) => d.side < 0).length, 1);
+  for (const dolphin of DOLPHINS) {
+    for (const t of times(dolphin.first, 12)) {
+      const spot = dolphinSpot(dolphin, t);
+      assert.equal(spot.side, dolphin.side);
+      assert.ok(spot.forward >= dolphin.forward - .01 && spot.forward <= dolphin.forward + 2.51, `${t}: ${spot.forward}`);
+      assert.ok(spot.lift > -.32, `${t}: ${spot.lift}`);
+    }
+  }
+});
+
+test("each dolphin leaps every few seconds, at least 1.2 m high, in turn with the others", () => {
+  assert.equal(new Set(DOLPHINS.map((d) => d.first)).size, DOLPHINS.length);
+  for (const dolphin of DOLPHINS) {
+    const lifts = times(0, 12).map((t) => dolphinSpot(dolphin, t)?.lift ?? -9);
+    const leaps = lifts.filter((lift, i) => i && lift > .5 && lifts[i - 1] <= .5).length;
+    assert.ok(leaps >= 3, `${leaps} leaps`);
+    assert.ok(highest((t) => dolphinSpot(dolphin, t), dolphin.first, dolphin.first + 1.5) > 1.2);
+  }
+});
+
+test("a leaping dolphin points its nose up leaving the water and down coming back", () => {
+  const dolphin = DOLPHINS[0];
+  assert.ok(dolphinPose(dolphin, dolphin.first + .1, null, 8).pitch > .3);
+  assert.ok(dolphinPose(dolphin, dolphin.first + 1, null, 8).pitch < -.3);
+});
+
+test("the dolphins move smoothly, swimming in, leaping and leaving", () => {
+  for (const dolphin of DOLPHINS) {
+    for (const leave of [null, 11.3]) {
+      const most = Math.max(...steps((t) => dolphinSpot(dolphin, t, leave), dolphin.delay, 15));
+      assert.ok(most < .15, `dolphin ${DOLPHINS.indexOf(dolphin)}, leaving at ${leave}: ${most} m in 0.01 s`);
+    }
+  }
+});
+
+test("a dolphin leaping when the rider loads a jump finishes its leap, then dives and is gone", () => {
+  const dolphin = DOLPHINS[0], leave = dolphin.first + .5;
+  assert.ok(dolphinSpot(dolphin, dolphin.first + .8, leave).lift > 1);
+  const lifts = times(leave, leave + DOLPHINS_LEAVE).map((t) => dolphinSpot(dolphin, t, leave)?.lift).filter((lift) => lift !== undefined);
+  assert.ok(Math.min(...lifts) < -2);
+  assert.equal(dolphinSpot(dolphin, leave + DOLPHINS_LEAVE, leave), null);
+});
+
+test("a dolphin under water when the rider loads a jump doesn't come up again", () => {
+  for (const dolphin of DOLPHINS) {
+    const leave = dolphin.first + 1.6;
+    assert.ok(highest((t) => dolphinSpot(dolphin, t, leave), leave, leave + DOLPHINS_LEAVE) < -.15);
+    assert.equal(dolphinSpot(dolphin, leave + DOLPHINS_LEAVE, leave), null);
+  }
+});
+
+test("the whale surfaces 8 m to the side, leaps high and belly-flops flat on the landing point", () => {
+  assert.equal(whaleSpot(-.01), null);
+  const surfacing = whaleSpot(0);
+  assert.ok(surfacing.across === 8 && surfacing.lift < -2);
+  assert.ok(highest(whaleSpot, 0, LAND) > 4);
+  const flop = whaleSpot(LAND);
+  assert.ok(Math.abs(flop.across) < .01 && Math.abs(flop.lift) < .05 && Math.abs(flop.pitch) < .05, JSON.stringify(flop));
+});
+
+test("the whale sinks away after its belly flop", () => {
+  assert.ok(whaleSpot(WHALE_GONE - .05).lift < -3);
+  assert.equal(whaleSpot(WHALE_GONE), null);
+});
+
+test("the whale moves smoothly", () => {
+  const most = Math.max(...times(0, WHALE_GONE - .01).map((t) => {
+    const a = whaleSpot(t), b = whaleSpot(t + .01);
+    return b ? Math.hypot(b.across - a.across, b.lift - a.lift) + Math.abs(b.pitch - a.pitch) : 0;
+  }));
+  assert.ok(most < .2, `${most} in 0.01 s`);
+});
+
+test("the whale aims at where the rider will be when it lands", () => {
+  const rider = { x: 10, z: 5, vx: 8, vz: -2 };
+  const at = aim(rider, { start: 100 }, 101);
+  assert.ok(Math.abs(at.x - (10 + 8 * (LAND - 1))) < 1e-9 && Math.abs(at.z - (5 - 2 * (LAND - 1))) < 1e-9);
+  assert.deepEqual(aim(rider, { start: 100 }, 100 + LAND + 1), { x: 10, z: 5 });
+});
+
+test("the whale's splash throws big droplets up and out in a ring, which fall back and shrink away", () => {
+  const start = whaleSplash(0, 12, 0), mid = whaleSplash(0, 12, WHALE_SPLASH * .3), end = whaleSplash(0, 12, WHALE_SPLASH);
+  assert.ok(Math.hypot(start.x, start.y, start.z) < 1e-9);
+  assert.ok(mid.y > 1.5 && Math.hypot(mid.x, mid.z) > 1);
+  assert.ok(end.y < 0 && end.size === 0);
+  const ring = Array.from({ length: 12 }, (_, i) => whaleSplash(i, 12, WHALE_SPLASH * .3));
+  assert.ok(Math.abs(ring.reduce((sum, d) => sum + d.x, 0)) < 1e-9 && Math.abs(ring.reduce((sum, d) => sum + d.z, 0)) < 1e-9);
 });
