@@ -596,3 +596,17 @@ From Task 1, on the 2026-10-24 snapshot (2026-10-30, Sotavento's menu scene).
 - **Task 9:** instancing uses the vendored `InstancedMesh`.
 - **Task 11:** besides raising `camera.far` (the main camera only; the opponent's picture stays at 1800) and thinning the land haze, `mountSpot` adds **far water**: a ring from ±1300 m to ±12 500 m at 200 m spacing, a child of `game.ocean` sharing `game.water`, its geometry turned +90° about x to undo the ocean's turn, so it follows the rider and matches the near water's colour, waves and haze. Removed on unmount.
 - **Task 12:** measure at `high` and `balanced`, with the GPU timer read as above.
+
+## Results (Task 12, 2026-10-31)
+
+Built as planned, with these changes found along the way:
+
+- **Heights:** the loader keeps the seabed at least 0.8 m down in the water (dark floor read as 0 m rose through it) and shapes heights within 8 m of the shoreline by the distance from it, so the waterline follows the map between the 5 m grid points. Mangroves count as land, even standing in the water, so they stop the rider.
+- **Water:** besides the depth, a water map holds the distance to the reef and to the shore; the surf is also a low ribbon of whitewater along the reef line, since flat foam 700 m away is thinner than a pixel. Later, for realism: the floor's pattern comes from the satellite picture, sunlight ripples (caustics) over the shallow floor near the camera, and the game's stylised crest lines are toned down at Sorobon.
+- **Plants:** 60 mangroves, 15 kadushi, 6 divi-divi and 25 scrub per hectare within 1.5 km, each kind a simple far shape beyond 600 m; the first guess would have been over 250,000 plants.
+- **Terrain:** the 5 m ring reaches ±800 m, not ±1200 m.
+- **Collision:** a rider deep inside land is taken to the nearest water.
+
+Checked in the browser preview: the bay the true way round; the lagoon's colours with darker seagrass; surf on the reef, visible from the course; no seams between the rings; sand grain up close; plants and buildings on the ground; the rider stopping at the beach and at a mangrove edge at 7 m/s; a 2014 Bonaire World Cup challenge heat at Sorobon in the event's wind (20 kt, gusts).
+
+**Frame time** (GPU timer, 1920×1080, integrated Radeon 680M): the game's own scene takes 16.5 ms at `high`, so the 16.7 ms target can't be met there; Sorobon takes 18.8 ms at `high`, about 13 ms at `balanced` and 12.4 ms at the default `auto`. The plants first cost 15 ms; far shapes and lower densities cut that to about 1 ms.

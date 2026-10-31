@@ -34,8 +34,9 @@ The copy never contacts fristajlo.ws. Riders, heats and feedback are stored in
   Freestajlo planner, aiming for the score their rating says. Needs the tour
   data (`npm run tour-data`).
 - `venues`: choose a venue for your practice and solo heats. Sotavento and
-  Sylt have their own coastal scenes; Podersdorf, Pozo and Bonaire (Sorobon)
-  have their usual winds in the game's own scene. Tour-event challenges at
+  Sylt have their own coastal scenes, Sorobon (Bonaire) is Lac Bay built from
+  real map data, and Podersdorf and Pozo have their usual winds in the game's
+  own scene. Tour-event challenges at
   those five venues sail in each event's reported wind
   (`tour/event-winds.json`), or the venue's usual wind where the reports give
   none; the player and the AI get the same conditions.
@@ -93,6 +94,22 @@ the game's wind function adds them (patched in the browser and, through a
 Node module hook, in the AI's engine), the water shows them, and the local
 server stores each solo heat's conditions so replays and ghosts match. The plan for more is
 `docs/superpowers/plans/2026-10-30-venue-water.md`.
+
+Sorobon is the first real-world spot: Lac Bay built from open map data, the
+true way round (the map is turned so the trade wind blows along the course,
+never mirrored). `node tools/spot.mjs sorobon-bonaire` turned OpenStreetMap,
+Terrain Tiles elevation and Sentinel-2 cloudless colour into the files in
+`mods/venues/spots/sorobon-bonaire/`, with the lagoon's depth estimated from
+the colour. Choosing Sorobon loads them (`mods/venues/realworld/`): the
+terrain in the satellite colours with photo-scanned CC0 ground textures up
+close, the lagoon's water coloured by its depth and the satellite's picture of
+its floor, with sunlight rippling over the shallows, surf breaking on the
+reef, mangroves, kadushi cacti, divi-divi trees and scrub generated in code,
+the mapped buildings, and the beach's landmarks by Jibe City and the resort
+(`mods/venues/sites/sorobon-bonaire.js`). The rider stops at the real shore
+and the mangroves. Credits are in `mods/venues/spots/sorobon-bonaire/CREDITS.md`
+and `mods/venues/assets/textures/CREDITS.md`; the spec is
+`docs/superpowers/specs/2026-10-30-real-world-spots-design.md`.
 
 The mods share one look, the game's own (`mods/lib/ui.js`): their chips sit
 in a tray under the wordmark (one Mods chip on a phone), and their panels open
