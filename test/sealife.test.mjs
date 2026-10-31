@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  CROWN_LIFE, DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, SPRAY, SPRAY_LIFE, START, WHALE_AFTER, WHALE_GONE, WHALE_SUNK, aim, crown,
-  dolphinPose, dolphinSplashes, dolphinSpot, foam, isCalm, isPractice, isSailing, nextSea, sense, sprayDrop, touchesWhale, whaleSpot,
+  CROWN_LIFE, DOLPHINS, DOLPHINS_AFTER, DOLPHINS_LEAVE, LAND, SPRAY, SPRAY_LIFE, START, WHALE_AFTER, WHALE_GONE, WHALE_SUNK, WHITE, WHITE_LIFE, aim, crown,
+  dolphinPose, dolphinSplashes, dolphinSpot, foam, isCalm, isPractice, isSailing, nextSea, sense, sprayDrop, touchesWhale, whaleSpot, whiteWater,
 } from "../mods/sealife/sealife.js";
 
 const SAILING = { air: false, sliding: false, landing: false, crashTime: 0, dragging: false };
@@ -286,6 +286,26 @@ test("the spray stays above the water and is all back in by its end", () => {
       if (drop) assert.ok(drop.y >= 0 && drop.size > 0, `droplet ${i} at ${t}`);
     }
     assert.equal(sprayDrop(i, SPRAY_LIFE), null);
+  }
+});
+
+test("the spray is fine: many small droplets, not a few big balls", () => {
+  assert.ok(SPRAY >= 300);
+  const sizes = Array.from({ length: SPRAY }, (_, i) => sprayDrop(i, .15).size);
+  assert.ok(Math.max(...sizes) <= .22 && Math.min(...sizes) >= .04);
+});
+
+test("white water heaves up along the whale's body, swells and falls back in", () => {
+  assert.ok(WHITE >= 10);
+  const starts = Array.from({ length: WHITE }, (_, i) => whiteWater(i, .02));
+  assert.ok(starts.every((blob) => Math.abs(blob.along) <= 5 && Math.abs(blob.side) <= 1.7 && blob.y < .5));
+  assert.ok(starts.some((blob) => blob.along > 2.5) && starts.some((blob) => blob.along < -2.5));
+  for (let i = 0; i < WHITE; i++) {
+    const blobs = times(.02, WHITE_LIFE - .01).map((t) => whiteWater(i, t));
+    const top = blobs.reduce((best, blob) => (blob.y > best.y ? blob : best));
+    assert.ok(top.y > 1, `blob ${i} rises ${top.y} m`);
+    assert.ok(top.size > starts[i].size && blobs.at(-1).size < top.size * .3, `blob ${i} swells then shrinks`);
+    assert.equal(whiteWater(i, WHITE_LIFE), null);
   }
 });
 

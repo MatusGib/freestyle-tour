@@ -9,9 +9,11 @@ export const LAND = 2.6; // from the whale surfacing to its belly flop
 export const WHALE_SUNK = LAND + 2.4; // from the whale surfacing to it sinking out of sight
 const FOAM_LIFE = 4;
 export const WHALE_GONE = LAND + FOAM_LIFE; // its visit ends as its foam fades
-export const SPRAY = 240; // droplets in its splash
+export const SPRAY = 320; // droplets in its splash
 export const SPRAY_LIFE = 2.9;
 export const CROWN_LIFE = 1.6; // its sheet of water
+export const WHITE = 14; // heaps of white water it throws up
+export const WHITE_LIFE = 1.8;
 const LEAP = 1; // a dolphin's leap out of the water
 const UNDER = 1.4; // under the water between leaps
 const DIVE = 1.4; // a leaving dolphin's dive, deep and out of sight
@@ -221,7 +223,22 @@ export function sprayDrop(i, age) {
     along: WHALE_BODY.long * ca + nx / n * out * s,
     side: WHALE_BODY.wide * sa + nz / n * out * s,
     y,
-    size: (.1 + .3 * random(i, 5)) * (1 - .4 * s / SPRAY_LIFE),
+    size: (.05 + .15 * random(i, 5)) * (1 - .4 * s / SPRAY_LIFE),
+  };
+}
+
+// Heap i of white water heaved up along the whale's body by its belly flop,
+// in its frame: it bursts up 1.5-3 m, swells, and falls back in, shrinking.
+// Null once it has gone.
+export function whiteWater(i, age) {
+  const k = age / WHITE_LIFE;
+  if (k < 0 || k >= 1) return null;
+  const rise = Math.sin(Math.PI * k ** .8);
+  return {
+    along: (i / (WHITE - 1) * 2 - 1) * WHALE_BODY.long * .8,
+    side: (i % 2 ? 1 : -1) * WHALE_BODY.wide * (.4 + .3 * random(i, 6)),
+    y: (1.6 + 1.4 * random(i, 7)) * rise - .2 * k,
+    size: (.9 + .8 * random(i, 8)) * (.25 + rise) * (1 - k),
   };
 }
 

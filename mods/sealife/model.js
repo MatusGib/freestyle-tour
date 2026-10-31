@@ -1,7 +1,10 @@
 // The dolphins and the whale, built with three.js's own geometry (the venues
 // mod's copy of the r185 the game runs), nose on +x: one flat-shaded mesh
 // coloured by its vertices each, and the tail flukes apart so they can beat.
-import { ConeGeometry, ExtrudeGeometry, Group, IcosahedronGeometry, Mesh, Shape, SphereGeometry } from "../venues/lib/three.core.min.js";
+import {
+  BufferGeometry, ConeGeometry, DoubleSide, ExtrudeGeometry, Float32BufferAttribute, Group, IcosahedronGeometry, Mesh, MeshStandardMaterial,
+  Shape, SphereGeometry,
+} from "../venues/lib/three.core.min.js";
 import { bake, bodyGeometry } from "../lib/shapes.js";
 
 // Dark eyes of radius r at (x, y, ±z), each with a glint.
@@ -78,4 +81,29 @@ export function makeWhale(material) {
   tail.position.x = -6.4;
   whale.add(tail);
   return { animal: whale, flukes: tail };
+}
+
+// The sheet of water a belly flop throws up all round the whale: a ring 1
+// across at the water, flaring out as it rises to at most 1 high, its top
+// edge ragged and fading away, so it reads as spray rather than glass.
+export function makeSheet() {
+  const around = 48, positions = [], colours = [], index = [];
+  for (let j = 0; j <= around; j++) {
+    const angle = j / around * Math.PI * 2, c = Math.cos(angle), s = Math.sin(angle);
+    const top = .55 + .3 * Math.abs(Math.sin(5 * angle) * Math.cos(3 * angle + 1)) + .15 * (.5 + .5 * Math.sin(11 * angle + 2));
+    positions.push(c, 0, s, c * 1.15, top * .5, s * 1.15, c * 1.3, top, s * 1.3);
+    colours.push(1, 1, 1, .9, 1, 1, 1, .5, 1, 1, 1, 0);
+  }
+  for (let j = 0; j < around; j++) {
+    for (let row = 0; row < 2; row++) {
+      const a = j * 3 + row, b = (j + 1) * 3 + row;
+      index.push(a, b, a + 1, a + 1, b, b + 1);
+    }
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new Float32BufferAttribute(colours, 4));
+  geometry.setIndex(index);
+  geometry.computeVertexNormals();
+  return new Mesh(geometry, new MeshStandardMaterial({ color: "#f1f7f9", vertexColors: true, transparent: true, side: DoubleSide, depthWrite: false, roughness: .3 }));
 }

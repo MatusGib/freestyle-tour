@@ -5,17 +5,16 @@
 // and where; this file builds the models, moves them each frame and makes the
 // rider wipe out. Otherwise nothing is drawn.
 import {
-  CircleGeometry, CylinderGeometry, DoubleSide, Group, IcosahedronGeometry, InstancedMesh, Matrix4, Mesh, MeshStandardMaterial,
-  Quaternion, Vector3,
+  CircleGeometry, Group, IcosahedronGeometry, InstancedMesh, Matrix4, Mesh, MeshStandardMaterial, Quaternion, Vector3,
 } from "../venues/lib/three.core.min.js";
 import { bakedMaterial, makeDroplets } from "../lib/shapes.js";
 import { droplet } from "../lib/splash.js";
 import { findWaterHeight } from "../lib/water.js";
 import {
-  DOLPHINS, LAND, SPRAY, START, WHALE_BODY, aim, crown, dolphinPose, dolphinSplashes, foam, nextSea, sense, sprayDrop, touchesWhale,
-  whaleSpot,
+  DOLPHINS, LAND, SPRAY, START, WHALE_BODY, WHITE, aim, crown, dolphinPose, dolphinSplashes, foam, nextSea, sense, sprayDrop,
+  touchesWhale, whaleSpot, whiteWater,
 } from "./sealife.js";
-import { makeDolphin, makeWhale } from "./model.js";
+import { makeDolphin, makeSheet, makeWhale } from "./model.js";
 
 const DROPS = 8; // in a dolphin's splash
 const DOLPHIN_SPLASHES = 6; // in the air at once, at most
@@ -44,12 +43,14 @@ export default {
       const dolphins = DOLPHINS.map(() => makeDolphin(material));
       const whale = makeWhale(material);
       const drops = makeDroplets(DROPS * DOLPHIN_SPLASHES);
-      // The whale's splash: spray, a sheet of water all round it, and foam.
-      const spray = new InstancedMesh(new IcosahedronGeometry(1, 1), new MeshStandardMaterial({ color: "#f3f8fb", roughness: .2 }), SPRAY);
-      spray.frustumCulled = false;
-      const sheet = new Mesh(new CylinderGeometry(1.12, 1, 1, 40, 1, true).translate(0, .5, 0), water({ side: DoubleSide }));
+      // The whale's splash: fine spray, heaps of white water heaved up along
+      // its body, a sheet of water all round it, and foam left on the water.
+      const spray = new InstancedMesh(new IcosahedronGeometry(1, 1), new MeshStandardMaterial({ color: "#ffffff", emissive: "#bcd9e2", emissiveIntensity: .35, roughness: .2 }), SPRAY);
+      const heaps = new InstancedMesh(new IcosahedronGeometry(1, 2), water({ opacity: .8, roughness: .7 }), WHITE);
+      spray.frustumCulled = heaps.frustumCulled = false;
+      const sheet = makeSheet();
       const foamPatch = new Mesh(new CircleGeometry(1, 48).rotateX(-Math.PI / 2), water({ roughness: .9, polygonOffset: true, polygonOffsetFactor: -2 }));
-      sealife.add(...dolphins.map(({ animal }) => animal), whale.animal, drops, spray, sheet, foamPatch);
+      sealife.add(...dolphins.map(({ animal }) => animal), whale.animal, drops, spray, heaps, sheet, foamPatch);
       game.scene.add(sealife);
 
       // Where the rider is and which way they are going. The dolphins swim in
@@ -120,7 +121,7 @@ export default {
 
         const w = sea.whale;
         whale.animal.visible = sheet.visible = foamPatch.visible = false;
-        spray.count = 0;
+        spray.count = heaps.count = 0;
         if (!w) return;
         if (before?.start !== w.start) {
           const { fx, fz } = riderFrame();
@@ -138,16 +139,21 @@ export default {
         const age = time - w.start - LAND;
         if (age < 0) return;
         const y = height(landing.x, landing.z, time), yaw = Math.atan2(-across.z, across.x);
-        // Spray, in the whale's frame: along its body (across the rider's path) and to its side.
-        let thrown = 0;
-        for (let i = 0; i < SPRAY; i++) {
-          const drop = sprayDrop(i, age);
-          if (!drop) continue;
-          const x = landing.x + across.x * drop.along - across.z * drop.side, z = landing.z + across.z * drop.along + across.x * drop.side;
-          put(spray, thrown++, x, y + drop.y, z, drop.size);
-        }
-        spray.count = thrown;
-        spray.instanceMatrix.needsUpdate = true;
+        // Spray and white water, in the whale's frame: along its body (across
+        // the rider's path) and to its side.
+        const inWhale = (mesh, count, at) => {
+          let shown = 0;
+          for (let i = 0; i < count; i++) {
+            const bit = at(i, age);
+            if (!bit) continue;
+            const x = landing.x + across.x * bit.along - across.z * bit.side, z = landing.z + across.z * bit.along + across.x * bit.side;
+            put(mesh, shown++, x, y + bit.y, z, bit.size);
+          }
+          mesh.count = shown;
+          mesh.instanceMatrix.needsUpdate = true;
+        };
+        inWhale(spray, SPRAY, sprayDrop);
+        inWhale(heaps, WHITE, whiteWater);
         const rise = crown(age);
         if (rise) {
           sheet.visible = true;
