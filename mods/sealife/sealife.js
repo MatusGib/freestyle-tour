@@ -138,11 +138,12 @@ export function whaleSpot(t) {
   return { across: 0, lift: -3.5 * k * k, pitch: -.2 * k };
 }
 
-// Where the rider will be when the whale lands: their place plus their
-// velocity (m/s) times the time left.
+// Where the whale lands: 4 m in front of where the rider will be, their place
+// plus their velocity (m/s) times the time left, so its splash, not its body,
+// hits them.
 export function aim(rider, whale, time) {
-  const left = Math.max(0, whale.start + LAND - time);
-  return { x: rider.x + rider.vx * left, z: rider.z + rider.vz * left };
+  const left = Math.max(0, whale.start + LAND - time), front = 4 / (Math.hypot(rider.vx, rider.vz) || Infinity);
+  return { x: rider.x + rider.vx * (left + front), z: rider.z + rider.vz * (left + front) };
 }
 
 // Droplet i of the whale's splash: thrown up and out in a ring, falling back
