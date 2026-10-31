@@ -194,7 +194,7 @@ function fakeSpotWater() {
     data[k] = i < 5 ? 255 : 13;
     data[k + 2] = i === size - 1 ? 0 : i === size - 2 ? 32 : 255;
   }
-  return { texture: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8 };
+  return { texture: { isTexture: true }, colour: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8 };
 }
 
 test("the water reads a spot's depth map only at a real-world spot", (t) => {
@@ -203,8 +203,11 @@ test("the water reads a spot's depth map only at a real-world spot", (t) => {
   applyVenueLook(game, catalog.byId.get(SOROBON), spotWater);
   assert.equal(game.water.uniforms.uSpotBox.value[1], 1);
   assert.equal(game.water.uniforms.uSpotWater.value, spotWater.texture);
+  assert.equal(game.water.uniforms.uSpotColour.value, spotWater.colour, "the satellite's pattern of the floor");
+  assert.ok(game.water.uniforms.uCaustics.value > 0 && game.water.uniforms.uMarks.value < 1, "sunlight on the shallow floor, fewer stylised crest marks");
   applyVenueLook(game, catalog.byId.get(SOTAVENTO), spotWater);
   assert.equal(game.water.uniforms.uSpotBox.value[1], 0, "an analytic coast keeps its own shallows");
+  assert.deepEqual([game.water.uniforms.uSpotColour.value, game.water.uniforms.uCaustics.value, game.water.uniforms.uMarks.value], [null, 0, 1], "and its look");
   applyVenueLook(game, null);
   assert.equal(game.water.uniforms.uSpotBox.value[1], 0);
 });

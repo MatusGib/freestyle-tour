@@ -6,7 +6,7 @@
 // the game runs the same revision (the plan's Task 1 findings); whatever
 // goes wrong leaves the game's own scene.
 import {
-  BufferAttribute, BufferGeometry, DataTexture, DoubleSide, Group, LinearFilter, Mesh, MeshStandardMaterial, REVISION, RepeatWrapping, SRGBColorSpace, Texture,
+  BufferAttribute, BufferGeometry, DataTexture, DoubleSide, Group, LinearFilter, LinearMipmapLinearFilter, Mesh, MeshStandardMaterial, REVISION, RepeatWrapping, SRGBColorSpace, Texture,
 } from "../lib/three.core.min.js";
 import { buildBuildings } from "./buildings.js";
 import { buildPlants } from "./plants.js";
@@ -103,6 +103,13 @@ async function build(game, venue, log, loading) {
     const map = waterMap(spot), texture = new DataTexture(map.data, map.size, map.size);
     texture.magFilter = texture.minFilter = LinearFilter;
     texture.needsUpdate = true;
+    // The satellite's picture for the water, its raw sRGB values as the
+    // water shader works in them (no colour space, so no decoding).
+    const { ground } = spot.images, colour = new DataTexture(ground.data, ground.width, ground.height);
+    colour.magFilter = LinearFilter;
+    colour.minFilter = LinearMipmapLinearFilter;
+    colour.generateMipmaps = true;
+    colour.needsUpdate = true;
     const group = new Group();
     group.name = `spot:${venue.id}`;
     group.add(buildTerrain(spot, detail), buildPlants(spot), buildBuildings(spot), buildSurf(spot, game.water.uniforms.uTime));
@@ -117,7 +124,7 @@ async function build(game, venue, log, loading) {
     game.__venueGameFar ??= game.camera.far;
     game.camera.far = FAR;
     game.camera.updateProjectionMatrix();
-    Object.assign(game, { __venueSpot: spot, __venueSpotWater: { ...map, texture }, __venueSpotGroup: group, __venueSpotFarWater: far });
+    Object.assign(game, { __venueSpot: spot, __venueSpotWater: { ...map, texture, colour }, __venueSpotGroup: group, __venueSpotFarWater: far });
     detail = null;
     return game.__venueSpotWater;
   } catch (error) {
@@ -149,6 +156,7 @@ export function unmountSpot(game) {
   game.__venueSpotFarWater?.removeFromParent();
   game.__venueSpotFarWater?.geometry.dispose();
   game.__venueSpotWater?.texture.dispose();
+  game.__venueSpotWater?.colour.dispose();
   if (game.__venueSpot && game.__venueGameFar) {
     game.camera.far = game.__venueGameFar;
     game.camera.updateProjectionMatrix();

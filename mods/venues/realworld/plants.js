@@ -122,12 +122,13 @@ export function plantGeometry(kind, variant, { far = false } = {}) {
   return merge(KINDS[kind](random, far), random);
 }
 
-// Densities to start from, tuned by eye against the satellite colours.
+// Densities tuned by eye against the satellite colours, and down for the
+// frame time on the development machine.
 const RULES = {
   mangrove: { ground: [6], perHectare: 60 },
-  kadushi: { ground: [4, 5], perHectare: 25 },
+  kadushi: { ground: [4, 5], perHectare: 15 },
   diviDivi: { ground: [4], perHectare: 6 },
-  scrub: { ground: [4], perHectare: 40 },
+  scrub: { ground: [4], perHectare: 25 },
 };
 const NEAR = 600; // metres from the course within which plants show their detail
 const SHORE_CLEAR = 0.3; // metres above the water a land plant needs

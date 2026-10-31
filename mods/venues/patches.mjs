@@ -42,6 +42,11 @@ export const GAME_COLOURS = {
 };
 const glsl = (rgb) => `[${rgb.join(",")}]`;
 
+// Sunlight focused by the ripples into a moving web of bright lines on a
+// shallow sandy floor: a few rounds of the point swirled by sines, bright
+// where the swirl folds.
+const CAUSTIC_GLSL = "float spotCaustic(vec2 p,float t){vec2 q=p*.45;float c=0.;for(int i=0;i<3;i++){q+=vec2(sin(q.y*1.3+t*.8),cos(q.x*1.1-t*.6))*.6;c+=abs(sin(q.x+q.y+t*.3))*.34;}return pow(clamp(1.-c,0.,1.),3.);}";
+
 const UNIFORMS = `
 uniform float uKnots;
 uniform vec3 uDeep;
@@ -58,8 +63,12 @@ uniform vec4 uShore;
 uniform vec4 uCurve;
 uniform vec4 uBar;
 uniform vec3 uSeagrass;
+uniform sampler2D uSpotColour;
+uniform float uMarks;
+uniform float uCaustics;
 ${SHORE_GLSL}
-${SPOT_GLSL}`;
+${SPOT_GLSL}
+${CAUSTIC_GLSL}`;
 
 // Short crests across the wind (+x) that run downwind; shading only, like the
 // game's own ripples, so the wave geometry and the rider are unchanged.
@@ -69,9 +78,10 @@ const CHOP = "float chop(vec2 p){vec2 q=p-vec2(uTime*2.4,0.);return (noise(q*vec
 // xy, shoreline distance z; uCurve: its bends). uBar: sandbar distance out, its
 // width, the width of the shallows, how much the water inside the sandbar is
 // sheltered. At a real-world spot (spotWater) the depth sets the colour
-// instead: the bed shows through below about 7 m, white sand as uShallow and
-// the dark floor the colour method reads as 0 m, away from the shore, as
-// uSeagrass; inside the reef the water is sheltered.
+// instead: the floor shows through below about 7 m, and the satellite's
+// picture of it (uSpotColour, its raw sRGB) says which floor it is: bright
+// white sand as uShallow, the dark seagrass and channels as uSeagrass. Inside
+// the reef the water is sheltered.
 const SHALLOWS = `
  float coast=step(1.,uShore.z);
  float off=shoreOff(p);
@@ -81,8 +91,9 @@ const SHALLOWS = `
  col=mix(col,uShallow*(.92+.16*n),clamp(max(shallow*.9,bar*.65),0.,1.));
  vec4 spot=spotWater(p);
  float spotDepth=max(spot.x,uSpotFloor);
- float seagrass=(1.-smoothstep(.2,.7,spot.x))*smoothstep(12.,35.,spot.z);
- col=mix(col,mix(uShallow,uSeagrass,seagrass)*(.92+.16*n),spot.w*(1.-smoothstep(1.5,7.,spotDepth)));
+ vec3 seen=texture(uSpotColour,(p+uSpotBox.x)/(2.*uSpotBox.x)).rgb;
+ float sand=smoothstep(.3,.75,dot(seen,vec3(.3,.59,.11)));
+ col=mix(col,mix(uSeagrass,uShallow,sand)*(.94+.12*n),spot.w*(1.-smoothstep(1.5,7.,spotDepth)));
  shelter=max(shelter,spot.w*uBar.w*(1.-smoothstep(3.,8.,spotDepth)));`;
 
 // The local wind, gusts included, drives the chop and the whitecaps. uZone is
@@ -95,6 +106,8 @@ const LOCAL_WIND = `
  float localKnots=uKnots+(uGustKnots>0.?shape*extra:0.)+zoneKnots;
  float choppy=uChop*(1.-shelter)*clamp((localKnots-8.)/12.,0.,1.8)*(1.-smoothstep(150.,600.,dist));`;
 
+// First, at a real-world spot, sunlight rippling over the shallow floor near
+// the camera (uCaustics), less where the surface mirrors the sky.
 // Whitecaps cover W=3.84e-6*U^3.41 of the sea (Monahan and O'Muircheartaigh
 // 1980, U in m/s): about 0.4% at 15 kt, 1.3% at 21 kt, 3.4% at 28 kt. Each
 // 9 x 5 m cell may hold one breaking crest every 3.3 s, brightest at its
@@ -106,6 +119,7 @@ const LOCAL_WIND = `
 // the swell runs downwind across it, faint foam drifting behind it, and a
 // little swash at the shore.
 const WHITECAPS = `
+ col+=uCaustics*spot.w*(1.-smoothstep(1.5,5.5,spotDepth))*(1.-smoothstep(25.,150.,dist))*(1.-fresnel)*spotCaustic(p+normal.xz*.8,uTime)*vec3(.85,1.,.95)*.4;
  float cover=uCaps*(1.-shelter*.8)*3.84e-6*pow(localKnots*.5144,3.41);
  vec2 cq=(p-vec2(uTime*1.8,0.))/vec2(9.,5.);
  vec2 cell=floor(cq);
@@ -138,6 +152,7 @@ const DEFAULTS = [
   "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}", "uZone:{value:[0,0,0,0]}",
   "uShore:{value:[0,0,0,0]}", "uCurve:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
   `uSeagrass:{value:${glsl(GAME_COLOURS.light)}}`, "uSpotWater:{value:null}", "uSpotBox:{value:[0,0,0,0]}", "uSpotFloor:{value:.8}",
+  "uSpotColour:{value:null}", "uMarks:{value:1}", "uCaustics:{value:0}",
   `uWave:{value:[${new Array(16).fill(0).join(",")}]}`,
 ].join(",");
 
@@ -153,7 +168,9 @@ export const patches = [
   },
   { marker: WATER, find: "float wrinkle=gust*(1.-smoothstep(60.,260.,dist));", replace: `float wrinkle=gust*(1.-smoothstep(60.,260.,dist));${LOCAL_WIND}`, expect: 1 },
   { marker: WATER, find: "col=mix(col,vec3(.72,.85,.75),fresnel*", replace: "col=mix(col,uSky,fresnel*", expect: 1 },
-  { marker: WATER, find: "col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;", replace: `col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;${WHITECAPS}`, expect: 1 },
+  // uMarks scales the game's stylised crest lines and foam streaks.
+  { marker: WATER, find: "col+=vec3(.13,.22,.15)*pow(1.-ridge,18.)*.42*patches*detailFade;", replace: "col+=vec3(.13,.22,.15)*pow(1.-ridge,18.)*.42*patches*detailFade*uMarks;", expect: 1 },
+  { marker: WATER, find: "col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade;", replace: `col+=vec3(.25,.3,.24)*foam*.24*patches*detailFade*uMarks;${WHITECAPS}`, expect: 1 },
   { marker: WATER, find: "col=mix(col,vec3(.73,.85,.76),fog);", replace: "col=mix(col,uHaze,fog);", expect: 1 },
   { marker: WATER, find: "float fog=1.-exp(-dist*.0026);", replace: "float fog=1.-exp(-dist*uFogRate);", expect: 1 },
   { marker: WATER, find: "uGustPhase:{value:Array.from({length:e},()=>0)}}", replace: `uGustPhase:{value:Array.from({length:e},()=>0)},${DEFAULTS}}`, expect: 1 },

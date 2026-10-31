@@ -1,5 +1,5 @@
 // A real-world spot's land and seabed as three square rings of decreasing
-// detail: inner (±1200 m, 5 m), middle (±2500 m, 20 m), horizon (±12500 m,
+// detail: inner (±800 m, 5 m), middle (±2500 m, 20 m), horizon (±12500 m,
 // 100 m). Each ring leaves its inner square open; skirts hang below the edges
 // to hide cracks. The land shows the satellite colour; up close, photo-scanned
 // detail textures (assets/textures/) add their grain to it by ground type.
@@ -11,7 +11,7 @@ import {
 } from "../lib/three.core.min.js";
 import { fillPolygons, imagePoint } from "./raster.js";
 
-export const RINGS = [{ outer: 1200, inner: 0, step: 5 }, { outer: 2500, inner: 1200, step: 20 }, { outer: 12500, inner: 2500, step: 100 }];
+export const RINGS = [{ outer: 800, inner: 0, step: 5 }, { outer: 2500, inner: 800, step: 20 }, { outer: 12500, inner: 2500, step: 100 }];
 
 // Positions (x, y, z), uvs over the spot's detail or horizon square, and
 // indices for the ring between `inner` and `outer`.

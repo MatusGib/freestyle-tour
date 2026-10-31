@@ -25,7 +25,7 @@ test("the venues patches give the water and sky uniforms, add the venue's waves 
   const heights = [...patched.values()].find((p) => p.text.includes("__venueWater")).text;
   const scene = patched.get(snapshot.manifest.parts.scene).text;
   assert.ok(scene.includes("ve.three={CanvasTexture:f};export{ve as Game}"));
-  for (const uniform of ["uKnots", "uDeep", "uLight", "uShallow", "uSky", "uHaze", "uChop", "uCaps", "uSurf", "uFogRate", "uShore", "uCurve", "uBar", "uWave", "uSeagrass", "uSpotWater", "uSpotBox", "uSpotFloor"]) {
+  for (const uniform of ["uKnots", "uDeep", "uLight", "uShallow", "uSky", "uHaze", "uChop", "uCaps", "uSurf", "uFogRate", "uShore", "uCurve", "uBar", "uWave", "uSeagrass", "uSpotWater", "uSpotBox", "uSpotFloor", "uSpotColour", "uMarks", "uCaustics"]) {
     assert.ok(water.includes(`${uniform}:{value:`), `${uniform} has a starting value`);
   }
   assert.ok(water.includes("float off=shoreOff(p);") && water.includes("vec4 spot=spotWater(p);"), "the analytic shallows stay, beside a spot's depth map");
@@ -55,6 +55,6 @@ test("the new uniforms start at the colours the game's shaders had, so the game 
     assert.deepEqual(literal.slice(5, -1).split(",").map(Number), GAME_COLOURS[colour]);
     assert.ok(text.includes(`${name}:{value:[${GAME_COLOURS[colour].join(",")}]}`), `${name} starts at ${literal}`);
   }
-  for (const zero of ["uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uShore:{value:[0,0,0,0]}", "uZone:{value:[0,0,0,0]}", "uCloud:{value:0}", "uFogRate:{value:.0026}", "uSpotBox:{value:[0,0,0,0]}"]) assert.ok(text.includes(zero));
+  for (const zero of ["uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uShore:{value:[0,0,0,0]}", "uZone:{value:[0,0,0,0]}", "uCloud:{value:0}", "uFogRate:{value:.0026}", "uSpotBox:{value:[0,0,0,0]}", "uMarks:{value:1}", "uCaustics:{value:0}"]) assert.ok(text.includes(zero), zero);
   assert.ok(original.includes("float fog=1.-exp(-dist*.0026);"), "the game's haze rate is .0026");
 });

@@ -42,11 +42,13 @@ export const VENUE_LOOKS = {
   // turquoise over the lagoon's white sand, dark green-blue over its
   // seagrass, surf breaking on the reef and a calm lagoon behind it. The
   // trades: a swell running downwind, high scattered white cumulus, clear air.
-  // seagrass: the colour over the dark lagoon floor.
+  // seagrass: the colour over the dark lagoon floor; caustics: sunlight
+  // rippling over the shallow floor; marks: how much of the game's stylised
+  // crest lines and streaks show (1 is the game's).
   "sorobon-bonaire": {
-    deep: [.02, .2, .45], light: [.05, .42, .62], shallow: [.42, .86, .84], seagrass: [.1, .4, .42],
+    deep: [.02, .2, .45], light: [.05, .42, .62], shallow: [.44, .81, .79], seagrass: [.09, .36, .38],
     sky: [.72, .84, .93], haze: [.78, .86, .92], skyLow: [.82, .88, .93], skyHigh: [.36, .6, .9],
-    chop: 1, caps: 1, surf: 1, shelter: .8,
+    chop: 1, caps: .7, surf: 1, shelter: .8, caustics: 1, marks: .25,
     fetch: 100000, swell: { length: 70, height: .5 },
     cloud: .25, cloudTint: [1, 1, 1], haziness: .0006, landHaze: .00012,
   },
@@ -78,6 +80,9 @@ export function applyVenueLook(game, venue, spotWater = null) {
   water.uSpotWater.value = spot?.texture ?? null;
   water.uSpotBox.value = spot ? [spot.half, 1, spot.depthMax, spot.distanceMax] : [0, 0, 0, 0];
   water.uSpotFloor.value = spot?.floor ?? .8;
+  water.uSpotColour.value = spot?.colour ?? null;
+  water.uCaustics.value = spot ? look.caustics ?? 0 : 0;
+  water.uMarks.value = look.marks ?? 1;
   setSpotWater(spot);
   // A spot's swell runs downwind, as the trades blow, and dies on its reef
   // and shores (waves.js spotWaves) rather than on an analytic beach.
