@@ -6,11 +6,12 @@
 // the game runs the same revision (the plan's Task 1 findings); whatever
 // goes wrong leaves the game's own scene.
 import {
-  BufferAttribute, BufferGeometry, DataTexture, DoubleSide, Group, LinearFilter, LinearMipmapLinearFilter, Mesh, MeshStandardMaterial, REVISION, RepeatWrapping, SRGBColorSpace, Texture,
+  BufferAttribute, BufferGeometry, Color, DataTexture, DoubleSide, Group, LinearFilter, LinearMipmapLinearFilter, Mesh, MeshStandardMaterial, REVISION, RepeatWrapping, SRGBColorSpace, Texture,
 } from "../lib/three.core.min.js";
 import { buildBuildings } from "./buildings.js";
 import { buildPlants } from "./plants.js";
 import { decodeInBrowser, loadSpot, waterMap } from "./spot.js";
+import { buildSailors } from "./sailors.js";
 import { buildSurf } from "./surf.js";
 import { buildTerrain, ringGeometry } from "./terrain.js";
 
@@ -18,8 +19,8 @@ const FAR = 14000; // metres the camera sees at a spot; the game's is 1800
 // The detail textures (assets/textures/) by the names buildTerrain uses.
 const DETAIL = { sand: "sand", coralRubble: "coral-rubble", scrubSoil: "scrub-soil", rock: "rock", mangroveMud: "mangrove-mud" };
 // A site may also bring its own look: textures (ground type → file, over
-// DETAIL), ground ({ sand }), flora, buildings and surfLines(spot), where its
-// waves break when it has no reef.
+// DETAIL), ground ({ sand }), flora, buildings, surfLines(spot), where its
+// waves break when it has no reef, and sailors(spot), windsurfers' lanes.
 const SITES = { "sorobon-bonaire": () => import("../sites/sorobon-bonaire.js"), "prasonisi-rhodes": () => import("../sites/prasonisi-rhodes.js") };
 
 const fetchBytes = async (url) => {
@@ -52,28 +53,38 @@ function farWater(ocean) {
 }
 
 // What props.js needs to place geometry at a spot: the game's own points (s
-// is x, d is z), batched by colour into meshes.
-function landmarkKit() {
-  const batches = new Map();
+// is x, d is z), in one mesh coloured by its vertices, so a site's hundreds
+// of colours cost one draw call. Each shape's normals are its own.
+export function landmarkKit() {
+  const positions = [], normals = [], colours = [], colour = new Color();
   const kit = {
     point: (s, d, y = 0) => [s, y, d],
-    add(positions, indices, colour) {
-      if (!batches.has(colour)) batches.set(colour, { positions: [], indices: [] });
-      const batch = batches.get(colour), offset = batch.positions.length / 3;
-      for (const v of positions) batch.positions.push(v);
-      for (const i of indices) batch.indices.push(offset + i);
+    add(points, indices, hex) {
+      const part = new BufferGeometry();
+      part.setAttribute("position", new BufferAttribute(Float32Array.from(points), 3));
+      part.setIndex(Array.from(indices));
+      part.computeVertexNormals();
+      const flat = part.toNonIndexed(), p = flat.getAttribute("position"), n = flat.getAttribute("normal");
+      colour.set(hex);
+      for (let i = 0; i < p.count; i++) {
+        positions.push(p.getX(i), p.getY(i), p.getZ(i));
+        normals.push(n.getX(i), n.getY(i), n.getZ(i));
+        colours.push(colour.r, colour.g, colour.b);
+      }
+      part.dispose();
+      flat.dispose();
     },
   };
   const finish = () => {
     const group = new Group();
     group.name = "landmarks";
-    for (const [colour, { positions, indices }] of batches) {
-      const geometry = new BufferGeometry();
-      geometry.setAttribute("position", new BufferAttribute(Float32Array.from(positions), 3));
-      geometry.setIndex(indices);
-      geometry.computeVertexNormals();
-      group.add(new Mesh(geometry, new MeshStandardMaterial({ color: colour, roughness: 0.9, metalness: 0, side: DoubleSide })));
-    }
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new BufferAttribute(Float32Array.from(positions), 3));
+    geometry.setAttribute("normal", new BufferAttribute(Float32Array.from(normals), 3));
+    geometry.setAttribute("color", new BufferAttribute(Float32Array.from(colours), 3));
+    const mesh = new Mesh(geometry, new MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0, side: DoubleSide }));
+    mesh.matrixAutoUpdate = false;
+    group.add(mesh);
     return group;
   };
   return { kit, finish };
@@ -116,6 +127,7 @@ async function build(game, venue, log, loading) {
     const group = new Group();
     group.name = `spot:${venue.id}`;
     group.add(buildTerrain(spot, detail, site?.ground), buildPlants(spot, { flora: site?.flora }), buildBuildings(spot, site?.buildings), buildSurf(spot, game.water.uniforms.uTime, surf));
+    if (site?.sailors) group.add(buildSailors(site.sailors(spot), game.water.uniforms.uTime));
     if (site) {
       const { kit, finish } = landmarkKit();
       site.landmarks(kit, spot);
