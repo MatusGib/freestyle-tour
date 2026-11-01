@@ -149,14 +149,14 @@ const SIZES = { sand: 2, coralRubble: 2, scrubSoil: 3, rock: 2, mangroveMud: 1.3
 // them again, so they are dimmed to keep them from washing out.
 const LAND_TINT = 0.55;
 
-function detailMaterial(map, weights, half, detail) {
+function detailMaterial(map, weights, half, detail, sand) {
   const material = new MeshStandardMaterial({ map, roughness: 1, metalness: 0 });
   material.color.setScalar(LAND_TINT);
   const uniforms = {
     uWeights: { value: weights }, uWeightsHalf: { value: half },
     uSand: { value: detail.sand }, uCoral: { value: detail.coralRubble }, uSoil: { value: detail.scrubSoil }, uRock: { value: detail.rock }, uMud: { value: detail.mangroveMud },
     uSizes: { value: [SIZES.sand, SIZES.coralRubble, SIZES.rock, SIZES.mangroveMud] }, uSoilSize: { value: SIZES.scrubSoil },
-    uSandColour: { value: new Color("#ece3cf") }, uDetail: { value: 0.8 },
+    uSandColour: { value: new Color(sand) }, uDetail: { value: 0.8 },
   };
   material.onBeforeCompile = (shader) => {
     patchWorld(shader);
@@ -194,15 +194,16 @@ function ringMesh(ring, spot, uvHalf, material) {
 }
 
 // detail: { sand, coralRubble, scrubSoil, rock, mangroveMud } textures
-// (repeating, sRGB, with mipmaps). Returns the terrain's group.
-export function buildTerrain(spot, detail) {
+// (repeating, sRGB, with mipmaps); sand: the colour the beaches turn towards
+// (Bonaire's white coral sand by default). Returns the terrain's group.
+export function buildTerrain(spot, detail, { sand = "#ece3cf" } = {}) {
   const { detail: near, horizon } = spot.manifest;
   const weightsSize = 1024;
   const weights = new DataTexture(groundWeights(spot, near.half, weightsSize), weightsSize, weightsSize);
   weights.magFilter = LinearFilter;
   weights.minFilter = LinearFilter;
   weights.needsUpdate = true;
-  const nearMaterial = detailMaterial(colourTexture(spot.images.ground), weights, near.half, detail);
+  const nearMaterial = detailMaterial(colourTexture(spot.images.ground), weights, near.half, detail, sand);
   const group = new Group();
   group.name = "terrain";
   group.add(

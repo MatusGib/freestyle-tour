@@ -25,11 +25,11 @@ test("the venues patches give the water and sky uniforms, add the venue's waves 
   const heights = [...patched.values()].find((p) => p.text.includes("__venueWater")).text;
   const scene = patched.get(snapshot.manifest.parts.scene).text;
   assert.ok(scene.includes("ve.three={CanvasTexture:f};export{ve as Game}"));
-  for (const uniform of ["uKnots", "uDeep", "uLight", "uShallow", "uSky", "uHaze", "uChop", "uCaps", "uSurf", "uFogRate", "uShore", "uCurve", "uBar", "uWave", "uSeagrass", "uSpotWater", "uSpotBox", "uSpotFloor", "uSpotColour", "uMarks", "uCaustics"]) {
+  for (const uniform of ["uKnots", "uDeep", "uLight", "uShallow", "uSky", "uHaze", "uChop", "uCaps", "uSurf", "uFogRate", "uShore", "uCurve", "uBar", "uWave", "uSeagrass", "uSpotWater", "uSpotBox", "uSpotFloor", "uSpotFetch", "uSpotColour", "uSandFloor", "uMarks", "uCaustics"]) {
     assert.ok(water.includes(`${uniform}:{value:`), `${uniform} has a starting value`);
   }
   assert.ok(water.includes("float off=shoreOff(p);") && water.includes("vec4 spot=spotWater(p);"), "the analytic shallows stay, beside a spot's depth map");
-  assert.ok(heights.includes("if(uSpotBox.y>.5)return h*spotWaves(p);"), "the drawn waves read a spot's depth too");
+  assert.ok(heights.includes("if(uSpotBox.y>.5){vec2 lee=spotLee(p);return (y*(.25+.75*lee.y)+wind*lee.x+swell*lee.y)*spotWaves(p);}"), "the drawn waves read a spot's depth and lee too");
   assert.ok(water.includes("r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots)"), "the water gets the heat's wind, and its waves");
   assert.ok(water.includes("new h(O,O,360,360)") && heights.includes("let a=k/360"), "the mesh and the height function share the finer grid");
   assert.ok(heights.includes("return __venueWater(e,t,n,O.reduce(") && heights.includes("world.y=venueWater(world.xz,world.y);"), "the rider's height and the drawn mesh add the same waves");

@@ -124,29 +124,59 @@
       ]
     },
     {
-      "id": "neusiedler-see-podersdorf",
-      "name": "Podersdorf, Neusiedler See",
-      "place": "Podersdorf am See, Burgenland, Austria",
+      "id": "prasonisi-rhodes",
+      "name": "Prasonisi, Rhodes",
+      "place": "Prasonisi, southern tip of Rhodes, Greece",
       "locations": [
-        "Neusiedler See, Podersdorf, Austria"
+        "Prasonisi, Rhodes, Greece"
       ],
       "gameConditions": {
-        "knots": 18,
-        "gustKnots": 6
+        "knots": 22,
+        "gustKnots": 4
       },
-      "character": "A shallow steppe lake: short, steep chop, no swell, and gusty north-westerlies that blow in over land.",
+      "windPatch": {
+        "x": -420,
+        "z": 470,
+        "radius": 320,
+        "length": 1000,
+        "gain": 6,
+        "note": "The meltemi jets between Rhodes and the islet over the sandbar neck and out across the south of the bay (the Kite and Windsurfing Guide: it “jets between the mountain and a small island”). A qualitative mapping: 6 kt more where it leaves the neck, carried about 1 km downwind and fading over 320 m to either side; the course’s south end feels its edge."
+      },
+      "character": "The summer meltemi from the north-west, sped up between Rhodes and the islet, blows across a sandbar: waves on the Aegean side, flat water on the leeward side.",
       "confidence": "qualitative",
-      "profileNote": "No scenery yet: the game's own open water, in Podersdorf's usual wind.",
+      "profileNote": "Prasonisi built from map data, the true way round: the golden sandbar joining Rhodes to the rocky islet with its lighthouse, the bare hills of the south with their low scrub, the windsurf centres at the foot of the hill, and the sea turning from turquoise over sand to deep Aegean blue.",
+      "courseNote": "The meltemi blows across the sandbar and out over the flat-water bay, cross-offshore, as at the real spot. The heat sits in the bay off the leeward beach, about 110 m clear of it, with the Kirschner and Wind4Fun centres on the shore upwind. The wave side lies beyond the sandbar. Nothing is mirrored: the bay, the islet and the hills are where a map puts them.",
+      "landmarks": [
+        "Surfcenter Kirschner and Wind4Fun, with rigs on the sand of the flat-water beach",
+        "The sandbar to Prasonisi islet, with camper vans parked on it",
+        "Prasonisi lighthouse (1890) on the islet’s southern tip"
+      ],
+      "waterZones": [
+        "Turquoise shallows over sand along the leeward beach",
+        "Flat water in the bay, a little choppier further out",
+        "Darker, gustier water where the wind jets past the islet at the bay’s south end",
+        "Waves breaking on the Aegean side beyond the sandbar"
+      ],
       "sources": [
         {
-          "title": "Surf magazin: spot guide to Lake Neusiedl and Lake Zicksee",
-          "accessed": "2026-10-30",
-          "url": "https://www.surf-magazin.de/en/spots-and-areas/lakes/spot-guide-austria-lake-neusiedl-and-lake-zicksee-these-are-the-best-windsurfing-spots/"
+          "title": "Windsurf Magazine: ProCenter Prasonisi, Rhodes",
+          "date": "2024-04-16",
+          "url": "https://www.windsurf.co.uk/procenter-prasonisi-prasonisi-rhodes-greece/"
         },
         {
-          "title": "Windfinder: Podersdorf spot guide",
-          "accessed": "2026-10-30",
-          "url": "https://www.windfinder.com/spotguide/podersdorf_neusiedler_see"
+          "title": "Prasonisi Beach: the surfing area",
+          "accessed": "2026-11-01",
+          "url": "https://prasonisi-beach.com/en/prasonisi/area/"
+        },
+        {
+          "title": "Severne: Prasonisi location feature",
+          "accessed": "2026-11-01",
+          "url": "https://www.severnesails.com/locations-feature-prasonisi/"
+        },
+        {
+          "title": "Wikipedia: Prasonisi",
+          "accessed": "2026-11-01",
+          "url": "https://en.wikipedia.org/wiki/Prasonisi"
         }
       ]
     },

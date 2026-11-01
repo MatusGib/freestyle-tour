@@ -88,8 +88,14 @@ export const takePlannedHeatFor = (soloHeat) => (soloHeat ? takePlannedHeat() : 
 // The wind as the game writes it.
 export const windText = ({ knots, gustKnots }) => (gustKnots ? `${knots} kt, gusts ${knots + 2}–${knots + gustKnots} kt` : `${knots} kt, steady wind`);
 
-// A venue's wind zones, placed on its coast, for a heat in `knots`, or null.
-export const venueZones = (venue, knots) => zonesFor(venue?.windZones, coastFor(venue?.id), knots);
+// A venue's wind zones, placed on its coast, for a heat in `knots`, with its
+// wind patch, or null.
+export function venueZones(venue, knots) {
+  const zones = zonesFor(venue?.windZones, coastFor(venue?.id), knots);
+  if (!venue?.windPatch) return zones;
+  const { x, z, radius, length, gain } = venue.windPatch;
+  return { ...zones, patch: { x, z, radius, length, gain } };
+}
 
 // A heat at a venue: the room's seed, the wind (an event's own, or the
 // venue's usual one), and the venue's wind zones.

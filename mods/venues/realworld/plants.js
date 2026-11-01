@@ -7,8 +7,9 @@
 // - divi-divi (Libidibia coriaria): a short trunk leaning downwind (+x) under
 //   a flat crown streaming the same way, as the trades shape them;
 // - scrub: low, irregular grey-green bushes.
-// buildPlants scatters them over a spot's ground as instanced meshes:
-// thousands of plants for a few draw calls. Vendored three.js r185 geometry.
+// buildPlants scatters them, or a spot's own (plants-aegean.js), over its
+// ground as instanced meshes: thousands of plants for a few draw calls.
+// Vendored three.js r185 geometry.
 import {
   BufferAttribute, BufferGeometry, Color, CylinderGeometry, Euler, Group, IcosahedronGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Quaternion,
   QuadraticBezierCurve3, TubeGeometry, Vector3,
@@ -18,12 +19,12 @@ import { fillPolygons } from "./raster.js";
 import { scatter } from "./scatter.js";
 
 const matrix = new Matrix4(), rotation = new Quaternion(), euler = new Euler(), at = new Vector3(), size = new Vector3();
-const place = (x, y, z, { yaw = 0, pitch = 0, roll = 0, scale = [1, 1, 1] } = {}) =>
+export const place = (x, y, z, { yaw = 0, pitch = 0, roll = 0, scale = [1, 1, 1] } = {}) =>
   new Matrix4().compose(at.set(x, y, z), rotation.setFromEuler(euler.set(pitch, yaw, roll, "YXZ")), size.set(...scale));
 
 // One non-indexed geometry with vertex colours from parts: [geometry,
 // colour, matrix]. Each part's colour varies a little in lightness.
-function merge(parts, random) {
+export function merge(parts, random) {
   const positions = [], normals = [], colours = [], colour = new Color();
   for (const [geometry, hex, transform] of parts) {
     const g = (geometry.index ? geometry.toNonIndexed() : geometry).applyMatrix4(transform);
@@ -47,7 +48,7 @@ const CANOPY = ["#2c5426", "#335f2b", "#284d24"];
 
 // Far off (each kind's `far` shape), a few dozen triangles: open cylinders
 // for trunks and stems, single-facet blobs for crowns.
-const stem = (radius, height, sides = 6) => new CylinderGeometry(radius * 0.9, radius, height, sides, 1, true);
+export const stem = (radius, height, sides = 6) => new CylinderGeometry(radius * 0.9, radius, height, sides, 1, true);
 
 function mangrove(random, far) {
   if (far) return [[stem(0.18, 1.6, 4), "#5b4a3c", place(0, 0.8, 0)], [new IcosahedronGeometry(2.4, 0), CANOPY[0], place(0, 2.8, 0, { scale: [1.25, 0.7, 1.25] })]];
@@ -116,10 +117,11 @@ function scrub(random, far) {
 
 const KINDS = { mangrove, kadushi, diviDivi, scrub };
 
-// The geometry of a plant's variant (0–3); { far } for a mangrove far off.
-export function plantGeometry(kind, variant, { far = false } = {}) {
-  const random = seeded(1 + variant * 97 + Object.keys(KINDS).indexOf(kind) * 13);
-  return merge(KINDS[kind](random, far), random);
+// The geometry of a plant's variant (0–3); { far } for its far shape;
+// kinds: the generators to take it from (Bonaire's by default).
+export function plantGeometry(kind, variant, { far = false, kinds = KINDS } = {}) {
+  const random = seeded(1 + variant * 97 + Object.keys(kinds).indexOf(kind) * 13);
+  return merge(kinds[kind](random, far), random);
 }
 
 // Densities tuned by eye against the satellite colours, and down for the
@@ -127,7 +129,7 @@ export function plantGeometry(kind, variant, { far = false } = {}) {
 const RULES = {
   mangrove: { ground: [6], perHectare: 60 },
   kadushi: { ground: [4, 5], perHectare: 15 },
-  diviDivi: { ground: [4], perHectare: 6 },
+  diviDivi: { ground: [4], perHectare: 6, downwind: true },
   scrub: { ground: [4], perHectare: 25 },
 };
 const NEAR = 600; // metres from the course within which plants show their detail
@@ -135,13 +137,16 @@ const SHORE_CLEAR = 0.3; // metres above the water a land plant needs
 
 // The spot's plants within radius of the course, as instanced meshes in one
 // group. The beaches and buildings stay clear; mangroves grow in their
-// polygons, standing in the water where those reach into it.
-export function buildPlants(spot, { radius = 1500, seed = 2026 } = {}) {
+// polygons, standing in the water where those reach into it. flora: { kinds,
+// rules, fixed } for a spot with plants of its own, Bonaire's by default;
+// fixed(spot) gives { kind: [[x, z], ...] }, plants its site places itself.
+export function buildPlants(spot, { radius = 1500, seed = 2026, flora = { kinds: KINDS, rules: RULES } } = {}) {
   const { half } = spot.manifest.detail, cells = 1250, cell = (2 * half) / cells;
   const clear = fillPolygons([...spot.features.beaches, ...spot.features.buildings.map((b) => b.footprint)], half, cells);
   const { drySand, mangrove: mangroveGround } = spot.manifest.ground;
   const ground = {
     heightAt: spot.heightAt,
+    colourAt: spot.colourAt,
     groundAt: (x, z) => {
       if (spot.isMangrove(x, z)) return mangroveGround;
       const i = Math.floor((x + half) / cell), j = Math.floor((z + half) / cell);
@@ -149,12 +154,16 @@ export function buildPlants(spot, { radius = 1500, seed = 2026 } = {}) {
       return spot.groundAt(x, z);
     },
   };
-  const placed = scatter(ground, RULES, { half: radius, seed });
+  const placed = scatter(ground, flora.rules, { half: radius, seed });
+  for (const [kind, at] of Object.entries(flora.fixed?.(spot) ?? {})) {
+    const random = seeded(seed + kind.length);
+    placed[kind] = [...(placed[kind] ?? []), ...at.map(([x, z]) => ({ x, y: spot.heightAt(x, z), z, scale: 0.85 + 0.3 * random(), yaw: random() * Math.PI * 2, variant: Math.floor(random() * 4) }))];
+  }
   const material = new MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0 });
   const group = new Group();
   group.name = "plants";
   const random = seeded(seed), tint = new Color();
-  const add = (geometry, points) => {
+  const add = (kind, geometry, points) => {
     if (!points.length) return geometry.dispose();
     const mesh = new InstancedMesh(geometry, material, points.length);
     points.forEach((p, k) => {
@@ -163,14 +172,15 @@ export function buildPlants(spot, { radius = 1500, seed = 2026 } = {}) {
     });
     mesh.matrixAutoUpdate = false;
     mesh.computeBoundingSphere();
+    mesh.userData.kind = kind;
     group.add(mesh);
   };
   for (const [kind, all] of Object.entries(placed)) {
-    // Divi-divis keep their lean downwind; the others turn any way.
-    const points = all.filter((p) => Math.hypot(p.x, p.z) <= radius).map((p) => (kind === "diviDivi" ? { ...p, yaw: (p.yaw - Math.PI) * 0.08 } : p));
+    // Plants shaped by the wind keep their lean downwind; the others turn any way.
+    const points = all.filter((p) => Math.hypot(p.x, p.z) <= radius).map((p) => (flora.rules[kind]?.downwind ? { ...p, yaw: (p.yaw - Math.PI) * 0.08 } : p));
     const near = points.filter((p) => Math.hypot(p.x, p.z) <= NEAR);
-    for (let variant = 0; variant < 4; variant++) add(plantGeometry(kind, variant), near.filter((p) => p.variant === variant));
-    add(plantGeometry(kind, 0, { far: true }), points.filter((p) => Math.hypot(p.x, p.z) > NEAR));
+    for (let variant = 0; variant < 4; variant++) add(kind, plantGeometry(kind, variant, { kinds: flora.kinds }), near.filter((p) => p.variant === variant));
+    add(kind, plantGeometry(kind, 0, { far: true, kinds: flora.kinds }), points.filter((p) => Math.hypot(p.x, p.z) > NEAR));
   }
   return group;
 }

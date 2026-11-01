@@ -48,7 +48,7 @@ export function extrudeFootprint(ring, height, heightAt) {
 }
 
 // One 3 m bay of plastered wall with a shuttered window.
-function wallTexture() {
+function wallTexture(shutter) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 128;
   const context = canvas.getContext("2d");
@@ -60,7 +60,7 @@ function wallTexture() {
   }
   context.fillStyle = "#3f4b52";
   context.fillRect(44, 36, 40, 46);
-  context.fillStyle = "#5f8f9a";
+  context.fillStyle = shutter;
   context.fillRect(36, 36, 8, 46);
   context.fillRect(84, 36, 8, 46);
   context.fillStyle = "rgba(0,0,0,.18)";
@@ -95,16 +95,20 @@ function post(x, z, y0, y1, out) {
 
 // Every building within radius of the course, in one mesh: the walls with
 // their windows, and everything plain (roofs, shade roofs, posts) apart, so
-// the far roofs don't take the windows' colour as the texture shrinks.
-export function buildBuildings(spot, { radius = 2500 } = {}) {
+// the far roofs don't take the windows' colour as the texture shrinks. A
+// spot may bring its own walls, roofs (by kind, else "flat") and shutter
+// colours, and leave out the buildings within [x, z, metres] of except, which
+// its site models itself.
+export function buildBuildings(spot, { radius = 2500, walls: wallColours = WALLS, roofs = ROOFS, shutter = "#5f8f9a", except = [] } = {}) {
   const walls = { positions: [], normals: [], uvs: [], colours: [] }, plain = { positions: [], normals: [], uvs: [], colours: [] };
   const wall = new Color(), roofColour = new Color();
   for (const { footprint, height, kind } of spot.features.buildings) {
     if (!footprint.some(([x, z]) => Math.hypot(x, z) <= radius)) continue;
+    if (except.some(([x, z, r]) => footprint.every(([a, b]) => Math.hypot(a - x, b - z) <= r))) continue;
     const shade = kind === "roof", g = extrudeFootprint(footprint, shade ? 0.3 : height, spot.heightAt);
     const hash = Math.abs(Math.round(footprint[0][0] * 7 + footprint[0][1] * 13));
-    wall.set(shade ? ROOFS.roof : WALLS[hash % WALLS.length]);
-    roofColour.set(ROOFS[kind] ?? "#c9c5bc");
+    wall.set(shade ? roofs.roof ?? ROOFS.roof : wallColours[hash % wallColours.length]);
+    roofColour.set(roofs[kind] ?? roofs.flat ?? "#c9c5bc");
     const roofStart = g.positions.length / 3 - g.roofTriangles * 3;
     for (let i = 0; i < g.positions.length / 3; i++) {
       const isRoof = i >= roofStart, c = isRoof ? roofColour : wall, out = isRoof || shade ? plain : walls;
@@ -124,7 +128,7 @@ export function buildBuildings(spot, { radius = 2500 } = {}) {
   geometry.addGroup(0, wallCount, 0);
   geometry.addGroup(wallCount, plain.positions.length / 3, 1);
   const material = (map) => new MeshStandardMaterial({ vertexColors: true, map, roughness: 0.9, metalness: 0, side: DoubleSide });
-  const mesh = new Mesh(geometry, [material(typeof document === "undefined" ? null : wallTexture()), material(null)]);
+  const mesh = new Mesh(geometry, [material(typeof document === "undefined" ? null : wallTexture(shutter)), material(null)]);
   mesh.name = "buildings";
   mesh.matrixAutoUpdate = false;
   return mesh;

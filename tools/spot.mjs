@@ -55,11 +55,17 @@ async function build(part) {
   const decoded = await Promise.all(tiles[part].map(async (t) => ({ ...t, image: decodePng(await fetcher.get(t.url, { source: "Terrain Tiles" })) })));
   const heightAt = terrainSampler(decoded);
   const colour = resampleColour(decodeWms(await fetcher.get(wms[part], { source: "EOX" })), boxes[part], frame, half, size);
+  // beachesAreLand: mapped beaches beyond the coastline are dry too, as
+  // Prasonisi's sandbar is all summer although the coastline leaves it open.
   const land = fillPolygons(features.shoreline, half, size);
+  if (spot.beachesAreLand) fillPolygons(features.beaches, half, size).forEach((v, p) => { land[p] |= v; });
   const water = Uint8Array.from(land, (v) => 1 - v);
   const cell = 2 * half / size, toLand = distanceTransform(land, size, size), toWater = distanceTransform(water, size, size);
   const shore = Float32Array.from(land, (v, p) => (v ? toWater[p] : -toLand[p]) * cell);
-  return { half, size, heightAt, colour, land, shore };
+  // beach.mappedOnly: only the mapped beaches take the beach profile; other
+  // shores keep their cliffs (Rhodes' are tens of metres high).
+  const beaches = spot.beach.mappedOnly ? fillPolygons(features.beaches, half, size) : null;
+  return { half, size, heightAt, colour, land, shore, beaches };
 }
 
 const detail = await build("detail"), horizon = await build("horizon");
@@ -108,7 +114,8 @@ function heights(part, src) {
     const u = (x + src.half) * s - 0.5, v = (z + src.half) * s - 0.5;
     const shoreAt = bilinear(src.shore, src.size, src.size, u, v);
     const metres = (bilinear(depth[part].data, src.size, src.size, u, v) / 255) * DEPTH_MAX;
-    out[j * n + i] = Math.round(beachHeight(shoreAt, src.heightAt(lat, lon), spot.beach, metres) * 10);
+    const onBeach = !src.beaches || src.beaches[Math.min(src.size - 1, Math.max(0, Math.round(v))) * src.size + Math.min(src.size - 1, Math.max(0, Math.round(u)))] === 1;
+    out[j * n + i] = Math.round(beachHeight(shoreAt, src.heightAt(lat, lon), spot.beach, metres, onBeach) * 10);
   }
   return { n, data: out };
 }
@@ -126,7 +133,7 @@ write("features.json", `${JSON.stringify(features)}\n`);
 write("picture.png", encodePng(picture(detail.colour, detail.half)));
 write("CREDITS.md", credits(spot));
 write("spot.json", `${JSON.stringify({
-  version: 1, id, name: spot.name, centre: spot.centre, windFrom: spot.windFrom,
+  version: 1, id, name: spot.name, centre: spot.centre, windFrom: spot.windFrom, ...(spot.beachesAreLand ? { beachesAreLand: true } : {}),
   detail: { half: detail.half, step: STEP.detail, n: terrain.n, image: IMAGE.detail },
   horizon: { half: horizon.half, step: STEP.horizon, n: far.n, image: IMAGE.horizon },
   depth: { max: DEPTH_MAX, slope: depthOf.slope, intercept: depthOf.intercept },

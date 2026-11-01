@@ -13,8 +13,8 @@ import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
 import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, takePlannedHeatFor, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS, applyVenueLook } from "../mods/venues/water.js";
-import { setKnots, setSea, setSpotWater, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
-import { zoneKnots, zonesFor } from "../mods/venues/zones.js";
+import { setKnots, setSea, setSpotWater, shoreOffset, spotLee, venueWater, windSea } from "../mods/venues/waves.js";
+import { patchUniform, zoneKnots, zonesFor } from "../mods/venues/zones.js";
 import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
@@ -22,8 +22,9 @@ const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
 const SOTAVENTO = "sotavento-fuerteventura";
 const SYLT = "westerland-sylt";
 const SOROBON = "sorobon-bonaire";
+const PRASONISI = "prasonisi-rhodes";
 
-test("the tour's events at the five venues find their venue, and no other event does", () => {
+test("the tour's events at Sotavento, Sylt, Pozo and Bonaire find their venue, and no other event does", () => {
   const tour = loadTour(join(ROOT, "tour"));
   const matched = {};
   for (const event of tour.events.values()) {
@@ -33,11 +34,11 @@ test("the tour's events at the five venues find their venue, and no other event 
   assert.deepEqual(matched, {
     "Sotavento, Fuerteventura": SOTAVENTO,
     "Westerland, Sylt, Germany": SYLT,
-    "Neusiedler See, Podersdorf, Austria": "neusiedler-see-podersdorf",
     "Pozo Izquierdo, Gran Canaria": "pozo-izquierdo-gran-canaria",
     "Sorbon Beach, Bonaire, Dutch Netherlands Antilles": "sorobon-bonaire",
   });
   assert.equal(venueForLocation(catalog, "sotavento  FUERTEVENTURA")?.id, SOTAVENTO, "spelling and spacing don't matter");
+  assert.equal(venueForLocation(catalog, "Neusiedler See, Podersdorf, Austria"), null, "Prasonisi took Podersdorf's place; its events sail in their reported wind");
   assert.equal(venueForLocation(catalog, "Las Chucharas, Costa Teguise, Lanzarote, Canary Islands"), null);
 });
 
@@ -83,6 +84,7 @@ test("venues with a coast or a real-world spot's files have scenery, and a pictu
   const venue = (id) => publicVenue({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
   assert.deepEqual([venue(SYLT).scenery, venue(SYLT).spotFiles, venue(SYLT).picture], [true, false, `/__mods/venues/assets/${SYLT}.svg`]);
   assert.deepEqual([venue(SOROBON).scenery, venue(SOROBON).spotFiles, venue(SOROBON).picture], [true, true, `/__mods/venues/spots/${SOROBON}/picture.png`]);
+  assert.deepEqual([venue(PRASONISI).scenery, venue(PRASONISI).spotFiles, venue(PRASONISI).picture], [true, true, `/__mods/venues/spots/${PRASONISI}/picture.png`]);
   const pozo = venue("pozo-izquierdo-gran-canaria");
   assert.deepEqual([pozo.scenery, pozo.spotFiles, pozo.picture], [false, false, null]);
 });
@@ -152,8 +154,8 @@ function setup(t, mods) {
 test("with the venues mod, an event at a venue names it, and its AI heat sails in the venue's wind", async (t) => {
   const { call, calls } = setup(t, ["venues", "challenge"]);
   const venues = call("GET", "/api/local/venues").body;
-  assert.deepEqual(venues.venues.map((v) => v.id), [SOTAVENTO, SYLT, "neusiedler-see-podersdorf", "pozo-izquierdo-gran-canaria", "sorobon-bonaire"]);
-  assert.ok(!JSON.stringify(venues).includes("locations"), "the location spellings stay on the server");
+  assert.deepEqual(venues.venues.map((v) => v.id), [SOTAVENTO, SYLT, PRASONISI, "pozo-izquierdo-gran-canaria", SOROBON]);
+  assert.ok(venues.venues.every((v) => !("locations" in v)), "the location spellings stay on the server");
   const event = call("GET", "/api/local/tour/events/375").body;
   assert.equal(event.venue.id, SOTAVENTO);
   assert.equal(call("GET", "/api/local/tour/events/378").body.venue, null, "an event elsewhere has none");
@@ -175,26 +177,28 @@ test("without the venues mod, events name no venue and AI heats sail this week's
   assert.deepEqual(calls, [fakeGame.weekConditions()]);
 });
 
-test("every venue with a coast, and Sorobon, is in the catalog and has a water look", () => {
+test("every venue with a coast, Sorobon and Prasonisi, is in the catalog and has a water look", () => {
   const ids = catalog.venues.map((v) => v.id);
   for (const id of Object.keys(SITE_LAYOUTS)) assert.ok(ids.includes(id), `${id} isn't in the catalog`);
-  assert.ok(ids.includes(SOROBON));
-  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), [...Object.keys(SITE_LAYOUTS), SOROBON].sort());
+  assert.ok(ids.includes(SOROBON) && ids.includes(PRASONISI));
+  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), [...Object.keys(SITE_LAYOUTS), SOROBON, PRASONISI].sort());
 });
 
 // The water's uniforms and the sky as the patches give them, any name a
 // { value } holder.
 const fakeLookGame = () => ({ water: { uniforms: new Proxy({}, { get: (all, name) => (all[name] ??= { value: null }) }) }, scene: { getObjectByName: () => null } });
 // A spot's water map over ±100 m, 10 px: deep sea (20 m) for x < 0, a 1 m
-// lagoon for x > 0, land in the last column; reef and shore far except there.
-function fakeSpotWater() {
+// lagoon for x > 0, land in the last column; reef and shore far except there;
+// fetch, the A byte: 255 (no land upwind) unless given.
+function fakeSpotWater(fetch = 255) {
   const size = 10, data = new Uint8Array(size * size * 4).fill(255);
   for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
     const k = (j * size + i) * 4;
     data[k] = i < 5 ? 255 : 13;
     data[k + 2] = i === size - 1 ? 0 : i === size - 2 ? 32 : 255;
+    data[k + 3] = fetch;
   }
-  return { texture: { isTexture: true }, colour: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8 };
+  return { texture: { isTexture: true }, colour: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8, fetchMax: 5000 };
 }
 
 test("the water reads a spot's depth map only at a real-world spot", (t) => {
@@ -228,6 +232,27 @@ test("at a spot, waves are much smaller in the lagoon than on the open sea, and 
   assert.ok(Math.abs(sea - range(-60)) < 1e-9, "the open sea keeps all its waves");
   assert.ok(sea > .3);
   assert.equal(land, 0, "on land, none");
+});
+
+test("at a spot, water in the lee of land gets no swell and only the chop of its short fetch", (t) => {
+  t.after(() => { setSpotWater(null); setSea(null); });
+  const venue = catalog.byId.get(PRASONISI), game = fakeLookGame();
+  applyVenueLook(game, venue, fakeSpotWater(10));
+  assert.deepEqual(game.water.uniforms.uSpotFetch.value, [5000, VENUE_LOOKS[PRASONISI].fetch]);
+  setKnots(22);
+  const range = () => {
+    let low = Infinity, high = -Infinity;
+    for (let s = 0; s < 40; s += .25) { const h = venueWater(-60, 0, s, 0); low = Math.min(low, h); high = Math.max(high, h); }
+    return high - low;
+  };
+  const lee = range();
+  applyVenueLook(game, venue, fakeSpotWater(255));
+  const open = range();
+  assert.ok(open > .5, `the open Aegean, ${open}`);
+  assert.ok(lee < open / 5, `about 200 m behind land ${lee}, open ${open}`);
+  assert.deepEqual(spotLee(-60, 0, fakeSpotWater(255)), [1, 1], "no land upwind: the open sea");
+  const [wind, swell] = spotLee(-60, 0, fakeSpotWater(10));
+  assert.ok(wind > 0 && wind < .15 && swell === 0, `${wind}, ${swell}`);
 });
 
 // Where the local AI sailed in six heats (15–19 kt, targets 30–55): x from
@@ -386,4 +411,28 @@ test("a solo heat stores the wind it is sailed in, if the game can sail it, or e
     assert.deepEqual(stored(bad), fakeGame.weekConditions());
   }
   assert.deepEqual(heatConditions({ ...venue, extra: 1, zones: { ...zones, extra: 2 } }), venue, "only the fields the engine reads are kept");
+});
+
+test("Prasonisi's wind patch: stronger wind where the meltemi jets past the islet, felt by the heat and drawn on the water", () => {
+  const venue = catalog.byId.get(PRASONISI), { patch } = venue.windPatch ? { patch: venue.windPatch } : {};
+  assert.ok(patch && patch.gain >= 4 && patch.z > 300, "the jet starts at the sandbar's neck, by the islet");
+  const zones = venueConditions(() => ({ seed: 1 }), venue, "r").zones;
+  assert.ok(zones?.patch, "the heat carries the patch");
+  assert.ok(Math.abs(zoneKnots(zones, patch.x, patch.z) - patch.gain) < 1e-9, "full strength at its start");
+  assert.ok(zoneKnots(zones, patch.x + patch.length * 0.5, patch.z) > patch.gain * 0.5, "carried downwind");
+  assert.equal(zoneKnots(zones, patch.x - patch.radius * 1.2, patch.z), 0, "not upwind of it");
+  assert.equal(zoneKnots(zones, 0, -200), 0, "the north of the course keeps the heat's wind");
+  assert.ok(zoneKnots(zones, 0, 210) > 0 && zoneKnots(zones, 0, 210) < 2, `a breath of it at the course's south end: ${zoneKnots(zones, 0, 210)}`);
+  assert.deepEqual(patchUniform(zones), [patch.x, patch.z, patch.radius, patch.length]);
+  assert.deepEqual(patchUniform(null), [0, 0, 1, 1]);
+  assert.equal(publicVenue(venue).windPatch, venue.windPatch, "the browser gets it to build the heat's zones");
+});
+
+test("a wind patch must sit within the spot and blow within the game's range", () => {
+  const venue = { id: "a", name: "A", locations: ["A"], gameConditions: { knots: 17, gustKnots: 4 }, windPatch: { x: 0, z: 0, radius: 200, length: 600, gain: 5 } };
+  assert.ok(indexVenueCatalog({ version: 2, venues: [venue] }));
+  const refused = (change, path) => assert.throws(() => indexVenueCatalog({ version: 2, venues: [{ ...venue, windPatch: { ...venue.windPatch, ...change } }] }), { path });
+  refused({ gain: 9 }, "venues.a.windPatch.gain");
+  refused({ radius: 10 }, "venues.a.windPatch.radius");
+  refused({ x: 4000 }, "venues.a.windPatch.x");
 });

@@ -148,6 +148,13 @@ export default {
             field("Zone: ramps in over metres", at("windZones.over"), { step: 10 }),
             field("Zone: knots less by the beach", at("windZones.lee")),
           ] : []),
+          ...(venue.windPatch ? [
+            field("Wind patch: knots more", at("windPatch.gain")),
+            field("Wind patch: starts at x (m, downwind +)", at("windPatch.x"), { step: 10 }),
+            field("Wind patch: starts at z (m)", at("windPatch.z"), { step: 10 }),
+            field("Wind patch: reaches across (m)", at("windPatch.radius"), { step: 10 }),
+            field("Wind patch: reaches downwind (m)", at("windPatch.length"), { step: 10 }),
+          ] : []),
         ];
       });
     }

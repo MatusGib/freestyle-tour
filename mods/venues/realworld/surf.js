@@ -41,9 +41,10 @@ float surfPulse=.65+.35*smoothstep(.3,1.,sin(vSurf.x*.06-uTime*.9+surfNoise(vec2
 float surfBody=surfNoise(vec2(vSurf.x*.25,vSurf.y*3.)-vec2(uTime*.6,uTime*.9))*.6+surfNoise(vec2(vSurf.x*.9,vSurf.y*8.)+uTime*1.3)*.4;
 diffuseColor.a*=clamp((1.-smoothstep(.35,1.,vSurf.y+(surfBody-.5)*.5))*surfPulse,0.,1.);`;
 
-// time: the water's uTime uniform, so the surf keeps the water's clock.
-export function buildSurf(spot, time) {
-  const { positions, uvs, indices } = surfRibbon(spot.features.reefs);
+// time: the water's uTime uniform, so the surf keeps the water's clock;
+// lines: where it breaks, the spot's reefs unless its site says otherwise.
+export function buildSurf(spot, time, lines = spot.features.reefs) {
+  const { positions, uvs, indices } = surfRibbon(lines);
   const geometry = new BufferGeometry();
   geometry.setAttribute("position", new BufferAttribute(positions, 3));
   geometry.setAttribute("uv", new BufferAttribute(uvs, 2));

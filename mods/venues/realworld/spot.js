@@ -9,6 +9,7 @@ const LAND_CELL = 2; // metres
 const SHORE = 8; // metres either side of the shoreline that are shaped by it
 const SHORE_SLOPE = 0.2; // rise of the beach and the shallows, m per m
 const DISTANCE_MAX = 80; // metres the water map's distances reach
+const FETCH_MAX = 5000; // metres the water map's fetch reaches
 
 export async function loadSpot(id, { fetchBytes, decodeImage }) {
   const base = `/__mods/venues/spots/${id}/`;
@@ -25,9 +26,11 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
   const pixel = (img, half, x, z) => [((x + half) * img.width) / (2 * half) - 0.5, ((z + half) * img.height) / (2 * half) - 0.5];
   const inDetail = (x, z) => Math.abs(x) <= detail.half && Math.abs(z) <= detail.half;
   // Land at 2 m over the detail area: 1 inside the shoreline rings
-  // (even-odd), 2 in the mangroves, which often stand in the water beyond.
+  // (even-odd) and, where the spot says so, its mapped beaches; 2 in the
+  // mangroves, which often stand in the water beyond.
   const landSize = (2 * detail.half) / LAND_CELL;
   const land = fillPolygons(features.shoreline, detail.half, landSize);
+  if (manifest.beachesAreLand) fillPolygons(features.beaches, detail.half, landSize).forEach((v, k) => { land[k] |= v; });
   const mangroves = fillPolygons(features.mangroves, detail.half, landSize);
   for (let k = 0; k < land.length; k++) land[k] |= mangroves[k] << 1;
   const landAt = (x, z) => {
@@ -67,6 +70,12 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
     isLand,
     isMangrove: (x, z) => (landAt(x, z) & 2) !== 0,
     heightAt,
+    // The satellite's colour, [r, g, b] 0–255, from the detail picture, else the horizon's.
+    colourAt: (x, z) => {
+      const [img, half] = inDetail(x, z) ? [ground, detail.half] : [horizonColour, far.half];
+      const [u, v] = pixel(img, half, x, z);
+      return [0, 1, 2].map((c) => bilinear(img.data, img.width, img.height, u, v, img.channels, c));
+    },
     depthAt: (x, z) => (isLand(x, z) ? 0 : Math.max(rawDepth(x, z), inDetail(x, z) ? LAGOON_FLOOR : 0)),
     groundAt: (x, z) => {
       if (!inDetail(x, z)) return heightAt(x, z) > 0 ? manifest.ground.scrubSoil : manifest.ground.water;
@@ -80,15 +89,17 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
 // (waves.js): RGBA bytes, row 0 at -z. R the depth the colour method
 // measured (0–depth.max m; 0 on land and on dark lagoon floor), G the
 // distance to the reef line and B to the shore (land or mangroves), each
-// 0–DISTANCE_MAX m.
-export function waterMap(spot, size = 1024) {
+// 0–DISTANCE_MAX m; A the fetch, how far the wind (+x) has blown over water
+// since it last crossed land, 0–FETCH_MAX m, or 255 where no land lies
+// upwind in the map: the open sea. reefs: the lines the surf breaks on.
+export function waterMap(spot, size = 1024, reefs = spot.features.reefs) {
   const { half } = spot.manifest.detail, cell = (2 * half) / size, depth = spot.images.depth;
   const land = new Uint8Array(size * size), reef = new Uint8Array(size * size), data = new Uint8Array(size * size * 4);
   for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
     const { x, z } = imagePoint(i, j, half, size);
     land[j * size + i] = spot.isLand(x, z) ? 1 : 0;
   }
-  for (const line of spot.features.reefs) for (let k = 0; k + 1 < line.length; k++) {
+  for (const line of reefs) for (let k = 0; k + 1 < line.length; k++) {
     const [x1, z1] = line[k], [x2, z2] = line[k + 1], steps = Math.ceil(Math.hypot(x2 - x1, z2 - z1) / (cell / 2));
     for (let s = 0; s <= steps; s++) {
       const i = Math.floor((x1 + ((x2 - x1) * s) / steps + half) / cell), j = Math.floor((z1 + ((z2 - z1) * s) / steps + half) / cell);
@@ -103,9 +114,16 @@ export function waterMap(spot, size = 1024) {
     data[p * 4] = Math.round(bilinear(depth.data, depth.width, depth.height, u, v, depth.channels, 0));
     data[p * 4 + 1] = byte(toReef[p]);
     data[p * 4 + 2] = byte(toShore[p]);
-    data[p * 4 + 3] = 255;
   }
-  return { data, size, half, depthMax: spot.manifest.depth.max, distanceMax: DISTANCE_MAX, floor: LAGOON_FLOOR };
+  for (let j = 0; j < size; j++) {
+    let run = Infinity;
+    for (let i = 0; i < size; i++) {
+      const p = j * size + i;
+      run = land[p] ? 0 : run + cell;
+      data[p * 4 + 3] = run === Infinity ? 255 : Math.min(254, Math.round((run / FETCH_MAX) * 255));
+    }
+  }
+  return { data, size, half, depthMax: spot.manifest.depth.max, distanceMax: DISTANCE_MAX, fetchMax: FETCH_MAX, floor: LAGOON_FLOOR };
 }
 
 // The browser's decoder, keeping the files' raw values (no colour management).

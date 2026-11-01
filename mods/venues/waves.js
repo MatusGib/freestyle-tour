@@ -94,13 +94,33 @@ export function spotWaves(x, z, map = state.spot) {
   return (.15 + .85 * smoothstep(2, 8, depth)) * smoothstep(0, 10, shore);
 }
 
+// How much of the wind waves and of the swell reach (x, z) at a spot: all
+// on water open to the wind; in the lee of land, no swell, and wind waves
+// grown over the short fetch since the land (Hs goes as √fetch, waves.js
+// windSea), against the open sea's fetch. Keep in step with SPOT_GLSL.
+export function spotLee(x, z, map = state.spot, seaFetch = state.sea?.fetch ?? Infinity) {
+  if (!map) return [1, 1];
+  const u = ((x + map.half) * map.size) / (2 * map.half) - .5, v = ((z + map.half) * map.size) / (2 * map.half) - .5;
+  if (u < -.5 || v < -.5 || u > map.size - .5 || v > map.size - .5) return [1, 1];
+  const a = bilinear(map.data, map.size, map.size, u, v, 4, 3);
+  if (a > 254.5) return [1, 1];
+  const fetch = (a / 255) * map.fetchMax;
+  return [Math.sqrt(Math.min(1, fetch / seaFetch)), smoothstep(800, 4000, fetch)];
+}
+
 // The game's height at (x, z) at time t, base, with the venue's waves added.
 // Keep in step with WAVE_GLSL.
 export function venueWater(x, z, t, base) {
   const { waves, shore, bar, surf } = state;
-  let h = base;
-  for (let i = 0; i < 16; i += 4) h += Math.sin(x * waves[i] + z * waves[i + 1] + t * waves[i + 2]) * waves[i + 3];
-  if (state.spot) return h * spotWaves(x, z);
+  const crest = (i) => Math.sin(x * waves[i] + z * waves[i + 1] + t * waves[i + 2]) * waves[i + 3];
+  const wind = crest(0) + crest(4) + crest(8), swell = crest(12);
+  // At a spot, the land upwind shelters its lee; the game's own long waves
+  // are a swell too.
+  if (state.spot) {
+    const [lee, through] = spotLee(x, z);
+    return (base * (.25 + .75 * through) + wind * lee + swell * through) * spotWaves(x, z);
+  }
+  const h = base + wind + swell;
   if (shore[2] < 1) return h;
   const off = shoreOffset(x, z);
   // Calm inside a sheltering sandbar; waves rise a little as they reach
@@ -121,6 +141,7 @@ export const SHORE_GLSL = "float shoreOff(vec2 p){float s=dot(p,vec2(-uShore.y,u
 export const SPOT_GLSL = `uniform sampler2D uSpotWater;
 uniform vec4 uSpotBox;
 uniform float uSpotFloor;
+uniform vec2 uSpotFetch;
 vec4 spotWater(vec2 p){
  vec2 uv=(p+uSpotBox.x)/(2.*uSpotBox.x);
  if(uSpotBox.y<.5||uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)return vec4(uSpotBox.z,1e3,1e3,0.);
@@ -131,6 +152,17 @@ float spotWaves(vec2 p){
  vec4 s=spotWater(p);
  if(s.w<.5)return 1.;
  return (.15+.85*smoothstep(2.,8.,max(s.x,uSpotFloor)))*smoothstep(0.,10.,s.z);
+}
+float spotFetch(vec2 p){
+ vec2 uv=(p+uSpotBox.x)/(2.*uSpotBox.x);
+ if(uSpotBox.y<.5||uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)return 1e9;
+ float a=textureLod(uSpotWater,uv,0.).a;
+ return a>.998?1e9:a*uSpotFetch.x;
+}
+vec2 spotLee(vec2 p){
+ float fetch=spotFetch(p);
+ if(fetch>1e8)return vec2(1.);
+ return vec2(sqrt(min(1.,fetch/uSpotFetch.y)),smoothstep(800.,4000.,fetch));
 }`;
 
 export const WAVE_GLSL = `
@@ -142,9 +174,11 @@ uniform float uSurf;
 ${SHORE_GLSL}
 ${SPOT_GLSL}
 float venueWater(vec2 p,float y){
- float h=y;
- for(int i=0;i<4;i++)h+=sin(dot(p,uWave[i].xy)+uTime*uWave[i].z)*uWave[i].w;
- if(uSpotBox.y>.5)return h*spotWaves(p);
+ float wind=0.;
+ for(int i=0;i<3;i++)wind+=sin(dot(p,uWave[i].xy)+uTime*uWave[i].z)*uWave[i].w;
+ float swell=sin(dot(p,uWave[3].xy)+uTime*uWave[3].z)*uWave[3].w;
+ if(uSpotBox.y>.5){vec2 lee=spotLee(p);return (y*(.25+.75*lee.y)+wind*lee.x+swell*lee.y)*spotWaves(p);}
+ float h=y+wind+swell;
  if(uShore.z<1.)return h;
  float off=shoreOff(p);
  float calm=1.-uBar.w*(1.-smoothstep(uBar.x-40.,uBar.x+5.,off));

@@ -22,9 +22,10 @@ then the spec and the plan named below.
    - see-through water over the real seabed, reflections of the shore, bloom and tone mapping;
    - draws on [WaterThreeJS](https://github.com/achrefelouafi/WaterThreeJS) (MIT; credit it if code is reused);
    - follows the game's own quality setting.
-5. **Then Pozo and Podersdorf** on the same tools.
-   - Pozo: a boulder bay, big swell, needs breaking waves.
-   - Podersdorf: a lake, so OpenStreetMap water polygons rather than coastline.
+5. **Then Pozo** on the same tools: a boulder bay, big swell, needs breaking waves.
+   - Prasonisi (Rhodes) was built on 2026-11-01 in Podersdorf's place, which left
+     the venue chooser. See its spot file, `tour/spots/prasonisi-rhodes.json`,
+     and site, `mods/venues/sites/prasonisi-rhodes.js`.
 6. **Later:** flip Sotavento and Sylt to the true orientation (they're mirrored today), possibly rebuilding them from map data.
 
 ## What the user wants (decided, don't re-ask)

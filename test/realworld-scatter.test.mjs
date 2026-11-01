@@ -16,3 +16,11 @@ test("plants go only on their ground, at their density, the same every time", ()
     assert.ok(p.scale >= 0.7 && p.scale <= 1.3 && Number.isInteger(p.variant) && p.variant >= 0 && p.variant <= 3);
   }
 });
+
+test("a kind with a density thins out where the density is low", () => {
+  const spot = { groundAt: () => 4, heightAt: () => 1 };
+  const rules = { juniper: { ground: [4], perHectare: 60, density: (_, x) => (x < 0 ? 1 : 0.1) } };
+  const { juniper } = scatter(spot, rules, { half: 200, seed: 3 });
+  const dense = juniper.filter((p) => p.x < 0).length, sparse = juniper.filter((p) => p.x >= 0).length;
+  assert.ok(dense > sparse * 5 && sparse > 0, `${dense} where dense, ${sparse} where sparse`);
+});

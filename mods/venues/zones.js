@@ -3,7 +3,8 @@
 // game's wind function adds zoneKnots to the wind at the rider's position
 // (patched by patches.mjs, in the browser and in the server's AI worker), so
 // the player, the AI and every replay feel the same wind. The water shows the
-// same zones. Without zones in the conditions nothing changes.
+// same zones. Without zones in the conditions nothing changes. A real-world
+// spot has no analytic coast; it can have a wind patch instead (patch).
 import { shoreOffset } from "./waves.js";
 
 // Bump when the zones change, so cached AI heats are sailed again.
@@ -27,13 +28,27 @@ const smoothstep = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
+// A wind patch (windPatch in tour/venues.json): { x, z, radius, length, gain },
+// gain knots more where the wind is squeezed, as through a gap, at (x, z) in
+// the spot's game frame, carried length metres downwind (+x) and radius
+// metres across and upwind, fading out towards its edge. Keep in step with
+// the water shader's patchKnots in patches.mjs.
+function patchKnots({ x: px, z: pz, radius, length, gain }, x, z) {
+  const d = Math.hypot((x - px) / (x > px ? length : radius), (z - pz) / radius);
+  return gain * (1 - smoothstep(.4, 1, d));
+}
+
 // The knots a venue's zones add at (x, z); keep in step with the water
 // shader's zoneKnots in patches.mjs.
 export function zoneKnots(zones, x, z) {
   if (!zones) return 0;
+  let knots = zones.patch ? patchKnots(zones.patch, x, z) : 0;
+  if (zones.inX === undefined) return knots;
   const off = shoreOffset(x, z, [zones.inX, zones.inZ, zones.shoreline], zones.curve);
-  return zones.gain * smoothstep(zones.from, zones.from + zones.over + 1, off) - zones.lee * (1 - smoothstep(0, 90, off));
+  knots += zones.gain * smoothstep(zones.from, zones.from + zones.over + 1, off) - zones.lee * (1 - smoothstep(0, 90, off));
+  return knots;
 }
 
-// The water shader's uZone for these zones.
-export const zoneUniform = (zones) => (zones ? [zones.gain, zones.from, zones.over, zones.lee] : [0, 0, 0, 0]);
+// The water shader's uZone for these zones, and its uPatch.
+export const zoneUniform = (zones) => (zones?.inX !== undefined ? [zones.gain, zones.from, zones.over, zones.lee] : [0, 0, 0, 0]);
+export const patchUniform = (zones) => (zones?.patch ? [zones.patch.x, zones.patch.z, zones.patch.radius, zones.patch.length] : [0, 0, 1, 1]);
