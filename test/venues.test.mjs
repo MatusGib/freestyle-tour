@@ -22,8 +22,9 @@ const catalog = loadVenueCatalog(join(ROOT, "tour", "venues.json"));
 const SOTAVENTO = "sotavento-fuerteventura";
 const SYLT = "westerland-sylt";
 const SOROBON = "sorobon-bonaire";
+const PRASONISI = "prasonisi-rhodes";
 
-test("the tour's events at the five venues find their venue, and no other event does", () => {
+test("the tour's events at Sotavento, Sylt, Pozo and Bonaire find their venue, and no other event does", () => {
   const tour = loadTour(join(ROOT, "tour"));
   const matched = {};
   for (const event of tour.events.values()) {
@@ -33,11 +34,11 @@ test("the tour's events at the five venues find their venue, and no other event 
   assert.deepEqual(matched, {
     "Sotavento, Fuerteventura": SOTAVENTO,
     "Westerland, Sylt, Germany": SYLT,
-    "Neusiedler See, Podersdorf, Austria": "neusiedler-see-podersdorf",
     "Pozo Izquierdo, Gran Canaria": "pozo-izquierdo-gran-canaria",
     "Sorbon Beach, Bonaire, Dutch Netherlands Antilles": "sorobon-bonaire",
   });
   assert.equal(venueForLocation(catalog, "sotavento  FUERTEVENTURA")?.id, SOTAVENTO, "spelling and spacing don't matter");
+  assert.equal(venueForLocation(catalog, "Neusiedler See, Podersdorf, Austria"), null, "Prasonisi took Podersdorf's place; its events sail in their reported wind");
   assert.equal(venueForLocation(catalog, "Las Chucharas, Costa Teguise, Lanzarote, Canary Islands"), null);
 });
 
@@ -83,6 +84,7 @@ test("venues with a coast or a real-world spot's files have scenery, and a pictu
   const venue = (id) => publicVenue({ id, name: id, locations: [], gameConditions: { knots: 17, gustKnots: 0 } });
   assert.deepEqual([venue(SYLT).scenery, venue(SYLT).spotFiles, venue(SYLT).picture], [true, false, `/__mods/venues/assets/${SYLT}.svg`]);
   assert.deepEqual([venue(SOROBON).scenery, venue(SOROBON).spotFiles, venue(SOROBON).picture], [true, true, `/__mods/venues/spots/${SOROBON}/picture.png`]);
+  assert.deepEqual([venue(PRASONISI).scenery, venue(PRASONISI).spotFiles, venue(PRASONISI).picture], [true, true, `/__mods/venues/spots/${PRASONISI}/picture.png`]);
   const pozo = venue("pozo-izquierdo-gran-canaria");
   assert.deepEqual([pozo.scenery, pozo.spotFiles, pozo.picture], [false, false, null]);
 });
@@ -152,8 +154,8 @@ function setup(t, mods) {
 test("with the venues mod, an event at a venue names it, and its AI heat sails in the venue's wind", async (t) => {
   const { call, calls } = setup(t, ["venues", "challenge"]);
   const venues = call("GET", "/api/local/venues").body;
-  assert.deepEqual(venues.venues.map((v) => v.id), [SOTAVENTO, SYLT, "neusiedler-see-podersdorf", "pozo-izquierdo-gran-canaria", "sorobon-bonaire"]);
-  assert.ok(!JSON.stringify(venues).includes("locations"), "the location spellings stay on the server");
+  assert.deepEqual(venues.venues.map((v) => v.id), [SOTAVENTO, SYLT, PRASONISI, "pozo-izquierdo-gran-canaria", SOROBON]);
+  assert.ok(venues.venues.every((v) => !("locations" in v)), "the location spellings stay on the server");
   const event = call("GET", "/api/local/tour/events/375").body;
   assert.equal(event.venue.id, SOTAVENTO);
   assert.equal(call("GET", "/api/local/tour/events/378").body.venue, null, "an event elsewhere has none");

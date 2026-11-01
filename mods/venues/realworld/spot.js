@@ -25,9 +25,11 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
   const pixel = (img, half, x, z) => [((x + half) * img.width) / (2 * half) - 0.5, ((z + half) * img.height) / (2 * half) - 0.5];
   const inDetail = (x, z) => Math.abs(x) <= detail.half && Math.abs(z) <= detail.half;
   // Land at 2 m over the detail area: 1 inside the shoreline rings
-  // (even-odd), 2 in the mangroves, which often stand in the water beyond.
+  // (even-odd) and, where the spot says so, its mapped beaches; 2 in the
+  // mangroves, which often stand in the water beyond.
   const landSize = (2 * detail.half) / LAND_CELL;
   const land = fillPolygons(features.shoreline, detail.half, landSize);
+  if (manifest.beachesAreLand) fillPolygons(features.beaches, detail.half, landSize).forEach((v, k) => { land[k] |= v; });
   const mangroves = fillPolygons(features.mangroves, detail.half, landSize);
   for (let k = 0; k < land.length; k++) land[k] |= mangroves[k] << 1;
   const landAt = (x, z) => {

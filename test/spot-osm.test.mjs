@@ -30,6 +30,16 @@ test("features come out in game coordinates, with building heights", () => {
   assert.deepEqual(f.buildings[0].footprint[0], [5, 5]);
 });
 
+test("a relation's outer ways are joined into closed rings, whichever way each runs", () => {
+  const frame = { toGame: (lat, lon) => ({ x: lon * 1000, z: lat * 1000 }) };
+  const at = (n) => ({ lat: n / 1000, lon: n / 1000 });
+  const member = (role, nodes) => ({ type: "way", role, geometry: nodes.map(at) });
+  // Prasonisi's isthmus is a beach relation of several open ways like these.
+  const relation = { type: "relation", id: 1, tags: { natural: "beach" }, members: [member("outer", [1, 2, 3]), member("outer", [5, 4, 3]), member("outer", [5, 6, 1]), member("inner", [7, 8, 9, 7])] };
+  const f = featuresFrom([relation], frame);
+  assert.deepEqual(f.beaches.map((r) => r.map(([x]) => x)), [[1, 2, 3, 4, 5, 6, 1]]);
+});
+
 test("the query asks for the island's whole coastline and the detail area's features", () => {
   const q = overpassQuery({ south: 1, west: 2, north: 3, east: 4 }, { south: 0, west: 0, north: 9, east: 9 });
   assert.match(q, /way\["natural"="coastline"\]\(0,0,9,9\)/);

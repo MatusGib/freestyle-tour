@@ -1,0 +1,27 @@
+{
+  "id": "prasonisi-rhodes",
+  "name": "Prasonisi, Rhodes",
+  "centre": { "lat": 35.8856, "lon": 27.7767 },
+  "windFrom": 315,
+  "detail": 2500,
+  "horizon": 12500,
+  "island": { "south": 35.86, "west": 27.68, "north": 36.47, "east": 28.26 },
+  "beach": { "top": 0.6, "slope": 0.03, "width": 80 },
+  "beachesAreLand": true,
+  "layer": "s2cloudless-2024",
+  "calibration": [
+    { "lat": 35.888395, "lon": 27.777014, "depth": 0.3, "note": "the water at the east beach's edge" },
+    { "lat": 35.887823, "lon": 27.777719, "depth": 1.5, "note": "bright sand about 95 m off the east beach, at the course's upwind corner (estimated; no chart)" },
+    { "lat": 35.888141, "lon": 27.777327, "depth": 1.5, "note": "bright sand about 45 m off the east beach (estimated)" },
+    { "lat": 35.887124, "lon": 27.774818, "depth": 2, "note": "sand about 70 m off the east beach, abeam the course centre (estimated)" },
+    { "lat": 35.887124, "lon": 27.770114, "depth": 1, "note": "sand inside the wave side's break, about 60 m off the west beach" },
+    { "lat": 35.8856, "lon": 27.7767, "depth": 6, "note": "the course centre, about 310 m off the east beach (estimated)" },
+    { "lat": 35.882932, "lon": 27.779993, "depth": 18, "note": "the bay where the floor stops showing, about 730 m out (estimated)" },
+    { "lat": 35.874802, "lon": 27.793948, "depth": 20, "note": "open sea, about 2.3 km out" }
+  ],
+  "sources": [
+    { "name": "OpenStreetMap", "licence": "ODbL 1.0", "credit": "© OpenStreetMap contributors", "url": "https://www.openstreetmap.org/copyright" },
+    { "name": "Sentinel-2 cloudless 2024", "licence": "CC BY-NC-SA 4.0", "credit": "Sentinel-2 cloudless - https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024)", "url": "https://s2maps.eu" },
+    { "name": "Terrain Tiles", "licence": "open data, attribution required", "credit": "Terrain Tiles on AWS Open Data (Mapzen and the sources it lists, including SRTM)", "url": "https://registry.opendata.aws/terrain-tiles/" }
+  ]
+}

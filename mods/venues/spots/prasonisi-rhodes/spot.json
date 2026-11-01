@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "prasonisi-rhodes",
+  "name": "Prasonisi, Rhodes",
+  "centre": {
+    "lat": 35.8856,
+    "lon": 27.7767
+  },
+  "windFrom": 315,
+  "beachesAreLand": true,
+  "detail": {
+    "half": 2500,
+    "step": 5,
+    "n": 1001,
+    "image": 512
+  },
+  "horizon": {
+    "half": 12500,
+    "step": 50,
+    "n": 501,
+    "image": 1024
+  },
+  "depth": {
+    "max": 20,
+    "slope": 157.84796653306813,
+    "intercept": -152.65950459298062
+  },
+  "ground": {
+    "water": 0,
+    "drySand": 1,
+    "wetSand": 2,
+    "coralRubble": 3,
+    "scrubSoil": 4,
+    "rock": 5,
+    "mangrove": 6,
+    "builtUp": 7
+  }
+}
