@@ -22,7 +22,7 @@ const NO_WINDS = { version: 1, events: [] };
 // The files' data with a draft laid over it, and the parts of the draft for
 // events or venues no longer in the files. draft: { eventWinds: { <event>:
 // { knots, gustKnots, confidence, reported } }, venues: { <id>: {
-// gameConditions, windZones } }, champion: { wind, target }, tuning: {
+// gameConditions, windZones, windPatch } }, champion: { wind, target }, tuning: {
 // aiTargetOffset } }, holding only changed values. An event without an entry
 // gets one, inferred.
 export function overlay(files, draft, tour) {
@@ -47,6 +47,7 @@ export function overlay(files, draft, tour) {
     }
     if (change.gameConditions) Object.assign(venue.gameConditions, change.gameConditions);
     if (change.windZones) venue.windZones = { ...venue.windZones, ...change.windZones };
+    if (change.windPatch) venue.windPatch = { ...venue.windPatch, ...change.windPatch };
   }
   const champion = { ...structuredClone(files.champion), ...draft.champion, wind: { ...files.champion?.wind, ...draft.champion?.wind } };
   const tuning = { ...(files.tuning ?? NO_TUNING), ...draft.tuning };

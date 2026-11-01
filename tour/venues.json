@@ -134,6 +134,14 @@
         "knots": 22,
         "gustKnots": 4
       },
+      "windPatch": {
+        "x": -420,
+        "z": 470,
+        "radius": 320,
+        "length": 1000,
+        "gain": 6,
+        "note": "The meltemi jets between Rhodes and the islet over the sandbar neck and out across the south of the bay (the Kite and Windsurfing Guide: it “jets between the mountain and a small island”). A qualitative mapping: 6 kt more where it leaves the neck, carried about 1 km downwind and fading over 320 m to either side; the course’s south end feels its edge."
+      },
       "character": "The summer meltemi from the north-west, sped up between Rhodes and the islet, blows across a sandbar: waves on the Aegean side, flat water on the leeward side.",
       "confidence": "qualitative",
       "profileNote": "Prasonisi built from map data, the true way round: the golden sandbar joining Rhodes to the rocky islet with its lighthouse, the bare hills of the south with their low scrub, the windsurf centres at the foot of the hill, and the sea turning from turquoise over sand to deep Aegean blue.",
@@ -146,6 +154,7 @@
       "waterZones": [
         "Turquoise shallows over sand along the leeward beach",
         "Flat water in the bay, a little choppier further out",
+        "Darker, gustier water where the wind jets past the islet at the bay’s south end",
         "Waves breaking on the Aegean side beyond the sandbar"
       ],
       "sources": [

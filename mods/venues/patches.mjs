@@ -59,6 +59,8 @@ uniform float uCaps;
 uniform float uSurf;
 uniform float uFogRate;
 uniform vec4 uZone;
+uniform vec4 uPatch;
+uniform float uPatchGain;
 uniform vec4 uShore;
 uniform vec4 uCurve;
 uniform vec4 uBar;
@@ -105,9 +107,12 @@ const SHALLOWS = `
 // The local wind, gusts included, drives the chop and the whitecaps. uZone is
 // the heat's wind zones (zones.js zoneKnots, which the rider feels): uZone.x
 // knots more from uZone.y m out over uZone.z m, and uZone.w knots less near
-// the beach; stronger zones darken like a gust.
+// the beach; stronger zones darken like a gust. uPatch is a spot's wind patch
+// (zones.js patchKnots): where it starts (xy), how far across and upwind (z)
+// and downwind (w) it reaches; uPatchGain its knots.
 const LOCAL_WIND = `
  float zoneKnots=coast*(uZone.x*smoothstep(uZone.y,uZone.y+uZone.z+1.,off)-uZone.w*(1.-smoothstep(0.,90.,off)));
+ zoneKnots+=uPatchGain*(1.-smoothstep(.4,1.,length(vec2((p.x-uPatch.x)/(p.x>uPatch.x?uPatch.w:uPatch.z),(p.y-uPatch.y)/uPatch.z))));
  gust=clamp(gust+max(0.,zoneKnots)/9.*mottle,0.,1.);
  float localKnots=uKnots+(uGustKnots>0.?shape*extra:0.)+zoneKnots;
  float choppy=uChop*(1.-shelter)*clamp((localKnots-8.)/12.,0.,1.8)*(1.-smoothstep(150.,600.,dist));`;
@@ -155,7 +160,7 @@ const DEFAULTS = [
   `uShallow:{value:${glsl(GAME_COLOURS.light)}}`,
   `uSky:{value:${glsl(GAME_COLOURS.sky)}}`,
   `uHaze:{value:${glsl(GAME_COLOURS.haze)}}`,
-  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}", "uZone:{value:[0,0,0,0]}",
+  "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}", "uZone:{value:[0,0,0,0]}", "uPatch:{value:[0,0,1,1]}", "uPatchGain:{value:0}",
   "uShore:{value:[0,0,0,0]}", "uCurve:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
   `uSeagrass:{value:${glsl(GAME_COLOURS.light)}}`, "uSpotWater:{value:null}", "uSpotBox:{value:[0,0,0,0]}", "uSpotFloor:{value:.8}", "uSpotFetch:{value:[1,1]}",
   "uSpotColour:{value:null}", "uSandFloor:{value:[.3,.75]}", "uMarks:{value:1}", "uCaustics:{value:0}",
@@ -180,8 +185,8 @@ export const patches = [
   { marker: WATER, find: "col=mix(col,vec3(.73,.85,.76),fog);", replace: "col=mix(col,uHaze,fog);", expect: 1 },
   { marker: WATER, find: "float fog=1.-exp(-dist*.0026);", replace: "float fog=1.-exp(-dist*uFogRate);", expect: 1 },
   { marker: WATER, find: "uGustPhase:{value:Array.from({length:e},()=>0)}}", replace: `uGustPhase:{value:Array.from({length:e},()=>0)},${DEFAULTS}}`, expect: 1 },
-  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots),r.uZone.value=__venueZoneUniform(n.zones),r.uGustKnots.value=n.gustKnots", expect: 1 },
-  { marker: WATER, find: "function Z(e,n){", replace: `import{setKnots as __venueSetKnots}${FROM}import{zoneUniform as __venueZoneUniform}${ZONES}function Z(e,n){`, expect: 1 },
+  { marker: WATER, find: "r.uGustKnots.value=n.gustKnots", replace: "r.uKnots.value=n.knots,r.uWave.value=__venueSetKnots(n.knots),r.uZone.value=__venueZoneUniform(n.zones),r.uPatch.value=__venuePatchUniform(n.zones),r.uPatchGain.value=n.zones?.patch?.gain??0,r.uGustKnots.value=n.gustKnots", expect: 1 },
+  { marker: WATER, find: "function Z(e,n){", replace: `import{setKnots as __venueSetKnots}${FROM}import{zoneUniform as __venueZoneUniform,patchUniform as __venuePatchUniform}${ZONES}function Z(e,n){`, expect: 1 },
   { marker: WATER, find: "new h(O,O,180,180)", replace: "new h(O,O,360,360)", expect: 1 },
   {
     marker: HEIGHTS,

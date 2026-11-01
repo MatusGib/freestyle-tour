@@ -13,6 +13,7 @@ const normalize = (value) =>
 
 const between = (value, low, high) => typeof value === "number" && value >= low && value <= high;
 const ZONE_RANGES = { gain: [0, 8], from: [0, 1000], over: [1, 1000], lee: [0, 6] };
+const PATCH_RANGES = { x: [-2500, 2500], z: [-2500, 2500], radius: [50, 1500], length: [50, 3000], gain: [0, 8] };
 
 // Checks a catalog and indexes it by id and by location spelling. Throws a
 // problem() naming the first broken field.
@@ -28,6 +29,9 @@ export function indexVenueCatalog(catalog, name = "tour/venues.json") {
     if (!isGusts(gustKnots)) throw problem(`${path}.gameConditions.gustKnots`, `${name} has unsupported conditions for ${venue.id}: gusts must be 0 or 2\u20136 kt`);
     for (const [field, [low, high]] of Object.entries(ZONE_RANGES)) {
       if (venue.windZones && !between(venue.windZones[field], low, high)) throw problem(`${path}.windZones.${field}`, `${name} has unsupported wind zones for ${venue.id}: ${field} must be from ${low} to ${high}`);
+    }
+    for (const [field, [low, high]] of Object.entries(PATCH_RANGES)) {
+      if (venue.windPatch && !between(venue.windPatch[field], low, high)) throw problem(`${path}.windPatch.${field}`, `${name} has an unsupported wind patch for ${venue.id}: ${field} must be from ${low} to ${high}`);
     }
     if (byId.has(venue.id)) throw problem(path, `${name} repeats venue id ${venue.id}`);
     byId.set(venue.id, venue);
@@ -63,8 +67,8 @@ const hasSpotFiles = (id) => {
 // others sail in the game's own scene.
 export function publicVenue(venue) {
   if (!venue) return null;
-  const { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources } = venue;
+  const { id, name, place, gameConditions, windZones, windPatch, character, confidence, profileNote, courseNote, landmarks, waterZones, sources } = venue;
   const spot = hasSpotFiles(id), coast = Boolean(coastFor(id));
   const picture = spot ? `/__mods/venues/spots/${id}/picture.png` : coast ? `/__mods/venues/assets/${id}.svg` : null;
-  return { id, name, place, gameConditions, windZones, character, confidence, profileNote, courseNote, landmarks, waterZones, sources, scenery: coast || spot, spotFiles: spot, picture };
+  return { id, name, place, gameConditions, windZones, windPatch, character, confidence, profileNote, courseNote, landmarks, waterZones, sources, scenery: coast || spot, spotFiles: spot, picture };
 }

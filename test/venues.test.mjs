@@ -14,7 +14,7 @@ import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, takePlannedHeatFor, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS, applyVenueLook } from "../mods/venues/water.js";
 import { setKnots, setSea, setSpotWater, shoreOffset, spotLee, venueWater, windSea } from "../mods/venues/waves.js";
-import { zoneKnots, zonesFor } from "../mods/venues/zones.js";
+import { patchUniform, zoneKnots, zonesFor } from "../mods/venues/zones.js";
 import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
 
@@ -411,4 +411,28 @@ test("a solo heat stores the wind it is sailed in, if the game can sail it, or e
     assert.deepEqual(stored(bad), fakeGame.weekConditions());
   }
   assert.deepEqual(heatConditions({ ...venue, extra: 1, zones: { ...zones, extra: 2 } }), venue, "only the fields the engine reads are kept");
+});
+
+test("Prasonisi's wind patch: stronger wind where the meltemi jets past the islet, felt by the heat and drawn on the water", () => {
+  const venue = catalog.byId.get(PRASONISI), { patch } = venue.windPatch ? { patch: venue.windPatch } : {};
+  assert.ok(patch && patch.gain >= 4 && patch.z > 300, "the jet starts at the sandbar's neck, by the islet");
+  const zones = venueConditions(() => ({ seed: 1 }), venue, "r").zones;
+  assert.ok(zones?.patch, "the heat carries the patch");
+  assert.ok(Math.abs(zoneKnots(zones, patch.x, patch.z) - patch.gain) < 1e-9, "full strength at its start");
+  assert.ok(zoneKnots(zones, patch.x + patch.length * 0.5, patch.z) > patch.gain * 0.5, "carried downwind");
+  assert.equal(zoneKnots(zones, patch.x - patch.radius * 1.2, patch.z), 0, "not upwind of it");
+  assert.equal(zoneKnots(zones, 0, -200), 0, "the north of the course keeps the heat's wind");
+  assert.ok(zoneKnots(zones, 0, 210) > 0 && zoneKnots(zones, 0, 210) < 2, `a breath of it at the course's south end: ${zoneKnots(zones, 0, 210)}`);
+  assert.deepEqual(patchUniform(zones), [patch.x, patch.z, patch.radius, patch.length]);
+  assert.deepEqual(patchUniform(null), [0, 0, 1, 1]);
+  assert.equal(publicVenue(venue).windPatch, venue.windPatch, "the browser gets it to build the heat's zones");
+});
+
+test("a wind patch must sit within the spot and blow within the game's range", () => {
+  const venue = { id: "a", name: "A", locations: ["A"], gameConditions: { knots: 17, gustKnots: 4 }, windPatch: { x: 0, z: 0, radius: 200, length: 600, gain: 5 } };
+  assert.ok(indexVenueCatalog({ version: 2, venues: [venue] }));
+  const refused = (change, path) => assert.throws(() => indexVenueCatalog({ version: 2, venues: [{ ...venue, windPatch: { ...venue.windPatch, ...change } }] }), { path });
+  refused({ gain: 9 }, "venues.a.windPatch.gain");
+  refused({ radius: 10 }, "venues.a.windPatch.radius");
+  refused({ x: 4000 }, "venues.a.windPatch.x");
 });
