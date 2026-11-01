@@ -15,6 +15,10 @@ export function overpassQuery(detail, island) {
   way["building"]${d};
   way["highway"]${d};
   way["man_made"="pier"]${d};
+  way["amenity"="parking"]${d};
+  relation["amenity"="parking"]${d};
+  node["emergency"~"^lifeguard"]${d};
+  way["emergency"~"^lifeguard"]${d};
 );
 out geom;`;
 }
@@ -80,5 +84,8 @@ export function featuresFrom(elements, frame) {
     buildings: ways.filter((w) => w.tags?.building).map((w) => ({ footprint: toGame(w.geometry), height: levelsHeight(w.tags), kind: w.tags.building })),
     roads: ways.filter((w) => w.tags?.highway).map((w) => ({ kind: w.tags.highway, line: toGame(w.geometry) })),
     piers: ways.filter((w) => w.tags?.man_made === "pier").map((w) => toGame(w.geometry)),
+    parking: polygonsOf((t) => t.amenity === "parking"),
+    // Lifeguard stations, mapped as points or as small buildings: where each stands.
+    lifeguards: elements.filter((e) => /^lifeguard/.test(e.tags?.emergency ?? "")).map((e) => (e.type === "node" ? e : e.geometry?.[0])).filter(Boolean).map((p) => toGame([p])[0]),
   };
 }

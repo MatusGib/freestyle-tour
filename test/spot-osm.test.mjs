@@ -22,12 +22,16 @@ test("features come out in game coordinates, with building heights", () => {
     way(15, [5, 6, 7, 5], { natural: "beach" }),
     way(16, [5, 6], { highway: "track" }),
     way(17, [5, 6], { man_made: "pier" }),
+    way(18, [5, 6, 7, 5], { amenity: "parking" }),
+    { type: "node", id: 19, lat: 0.008, lon: 0.009, tags: { emergency: "lifeguard" } },
   ];
   const f = featuresFrom(elements, frame);
   assert.equal(f.shoreline.length, 1);
   assert.deepEqual(f.buildings.map((b) => b.height), [6, 7.5, 4]);
   assert.deepEqual([f.reefs.length, f.mangroves.length, f.beaches.length, f.roads[0].kind, f.piers.length], [1, 1, 1, "track", 1]);
   assert.deepEqual(f.buildings[0].footprint[0], [5, 5]);
+  assert.equal(f.parking.length, 1, "car parks");
+  assert.deepEqual(f.lifeguards, [[9, 8]], "lifeguard stations, as points");
 });
 
 test("a relation's outer ways are joined into closed rings, whichever way each runs", () => {
@@ -44,5 +48,7 @@ test("the query asks for the island's whole coastline and the detail area's feat
   const q = overpassQuery({ south: 1, west: 2, north: 3, east: 4 }, { south: 0, west: 0, north: 9, east: 9 });
   assert.match(q, /way\["natural"="coastline"\]\(0,0,9,9\)/);
   assert.match(q, /way\["building"\]\(1,2,3,4\)/);
+  assert.match(q, /way\["amenity"="parking"\]\(1,2,3,4\)/);
+  assert.match(q, /node\["emergency"~"\^lifeguard"\]\(1,2,3,4\)/);
   assert.match(q, /out geom;/);
 });
