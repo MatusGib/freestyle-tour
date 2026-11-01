@@ -64,6 +64,7 @@ uniform vec4 uCurve;
 uniform vec4 uBar;
 uniform vec3 uSeagrass;
 uniform sampler2D uSpotColour;
+uniform vec2 uSandFloor;
 uniform float uMarks;
 uniform float uCaustics;
 ${SHORE_GLSL}
@@ -80,8 +81,11 @@ const CHOP = "float chop(vec2 p){vec2 q=p-vec2(uTime*2.4,0.);return (noise(q*vec
 // sheltered. At a real-world spot (spotWater) the depth sets the colour
 // instead: the floor shows through below about 7 m, and the satellite's
 // picture of it (uSpotColour, its raw sRGB) says which floor it is: bright
-// white sand as uShallow, the dark seagrass and channels as uSeagrass. Inside
-// the reef the water is sheltered.
+// white sand as uShallow, the dark seagrass and channels as uSeagrass, by
+// its lightness between uSandFloor's two values. Inside
+// the reef the water is sheltered, and so is water in the lee of land, by
+// how short its fetch is (spotLee); young waves there hardly break near the
+// land and break more as the fetch grows.
 const SHALLOWS = `
  float coast=step(1.,uShore.z);
  float off=shoreOff(p);
@@ -92,9 +96,11 @@ const SHALLOWS = `
  vec4 spot=spotWater(p);
  float spotDepth=max(spot.x,uSpotFloor);
  vec3 seen=texture(uSpotColour,(p+uSpotBox.x)/(2.*uSpotBox.x)).rgb;
- float sand=smoothstep(.3,.75,dot(seen,vec3(.3,.59,.11)));
+ float sand=smoothstep(uSandFloor.x,uSandFloor.y,dot(seen,vec3(.3,.59,.11)));
  col=mix(col,mix(uSeagrass,uShallow,sand)*(.94+.12*n),spot.w*(1.-smoothstep(1.5,7.,spotDepth)));
- shelter=max(shelter,spot.w*uBar.w*(1.-smoothstep(3.,8.,spotDepth)));`;
+ shelter=max(shelter,spot.w*uBar.w*(1.-smoothstep(3.,8.,spotDepth)));
+ shelter=max(shelter,spot.w*(1.-sqrt(spotLee(p).x)));
+ float young=mix(.08,1.,smoothstep(150.,2000.,spotFetch(p)));`;
 
 // The local wind, gusts included, drives the chop and the whitecaps. uZone is
 // the heat's wind zones (zones.js zoneKnots, which the rider feels): uZone.x
@@ -120,7 +126,7 @@ const LOCAL_WIND = `
 // little swash at the shore.
 const WHITECAPS = `
  col+=uCaustics*spot.w*(1.-smoothstep(1.5,5.5,spotDepth))*(1.-smoothstep(12.,60.,dist))*(1.-fresnel)*spotCaustic(p+normal.xz*.8,uTime)*vec3(.85,1.,.95)*.4;
- float cover=uCaps*(1.-shelter*.8)*3.84e-6*pow(localKnots*.5144,3.41);
+ float cover=uCaps*young*(1.-shelter*.8)*3.84e-6*pow(localKnots*.5144,3.41);
  vec2 cq=(p-vec2(uTime*1.8,0.))/vec2(9.,5.);
  vec2 cell=floor(cq);
  float cycle=uTime*.3+hash(cell+3.1);
@@ -151,8 +157,8 @@ const DEFAULTS = [
   `uHaze:{value:${glsl(GAME_COLOURS.haze)}}`,
   "uChop:{value:0}", "uCaps:{value:0}", "uSurf:{value:0}", "uFogRate:{value:.0026}", "uZone:{value:[0,0,0,0]}",
   "uShore:{value:[0,0,0,0]}", "uCurve:{value:[0,0,0,0]}", "uBar:{value:[0,0,0,0]}",
-  `uSeagrass:{value:${glsl(GAME_COLOURS.light)}}`, "uSpotWater:{value:null}", "uSpotBox:{value:[0,0,0,0]}", "uSpotFloor:{value:.8}",
-  "uSpotColour:{value:null}", "uMarks:{value:1}", "uCaustics:{value:0}",
+  `uSeagrass:{value:${glsl(GAME_COLOURS.light)}}`, "uSpotWater:{value:null}", "uSpotBox:{value:[0,0,0,0]}", "uSpotFloor:{value:.8}", "uSpotFetch:{value:[1,1]}",
+  "uSpotColour:{value:null}", "uSandFloor:{value:[.3,.75]}", "uMarks:{value:1}", "uCaustics:{value:0}",
   `uWave:{value:[${new Array(16).fill(0).join(",")}]}`,
 ].join(",");
 

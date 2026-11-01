@@ -33,6 +33,11 @@ select mods. The default set is in `mods/enabled.json`.
 - **Bonaire:** Lac Bay mapped in its true trade-wind orientation, with
   satellite-colour terrain, estimated lagoon depth, reef surf and mapped shore
   features; the 2014 event challenge uses its reported wind.
+- **Prasonisi, Rhodes:** the meltemi spot at Rhodes' southern tip, built from
+  map data the true way round: the sandbar to the islet and its lighthouse,
+  flat water in the sandbar's lee with waves breaking on the Aegean side, the
+  windsurf centres' beach, camper vans, phrygana and junipers on bare hills.
+  It takes Podersdorf's place in the venue chooser.
 - **Wipeout fish:** six colourful fish circle and leap over a fallen rider and
   sail, splash, then dart away and dive as the rider recovers.
 - **Dolphins and a whale:** in practice, sail 10 s without touching anything and
@@ -49,7 +54,7 @@ Heats and settings are stored under ignored `data/`; source pages are cached und
 ignored `cache/`.
 
 **Next:** specify see-through venue water, seabed visibility, shore reflections
-and bloom, then build Pozo and Podersdorf scenes. The full tournament bracket
+and bloom, then build Pozo's scene. The full tournament bracket
 and automatic venue selection are in progress; more tricks and a career mode
 are later proposals. See the [roadmap](docs/roadmap.md).
 

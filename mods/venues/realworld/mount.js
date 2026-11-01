@@ -17,7 +17,10 @@ import { buildTerrain, ringGeometry } from "./terrain.js";
 const FAR = 14000; // metres the camera sees at a spot; the game's is 1800
 // The detail textures (assets/textures/) by the names buildTerrain uses.
 const DETAIL = { sand: "sand", coralRubble: "coral-rubble", scrubSoil: "scrub-soil", rock: "rock", mangroveMud: "mangrove-mud" };
-const SITES = { "sorobon-bonaire": () => import("../sites/sorobon-bonaire.js") };
+// A site may also bring its own look: textures (ground type → file, over
+// DETAIL), ground ({ sand }), flora, buildings and surfLines(spot), where its
+// waves break when it has no reef.
+const SITES = { "sorobon-bonaire": () => import("../sites/sorobon-bonaire.js"), "prasonisi-rhodes": () => import("../sites/prasonisi-rhodes.js") };
 
 const fetchBytes = async (url) => {
   const res = await fetch(url);
@@ -95,12 +98,12 @@ export function mountSpot(game, venue, log) {
 async function build(game, venue, log, loading) {
   let detail = null;
   try {
-    const [spot, site, ...textures] = await Promise.all([
-      loadSpot(venue.id, { fetchBytes, decodeImage: decodeInBrowser }), SITES[venue.id]?.(), ...Object.values(DETAIL).map(detailTexture),
-    ]);
-    detail = Object.fromEntries(Object.keys(DETAIL).map((key, k) => [key, textures[k]]));
+    const site = await SITES[venue.id]?.(), files = { ...DETAIL, ...site?.textures }, names = [...new Set(Object.values(files))];
+    const [spot, ...textures] = await Promise.all([loadSpot(venue.id, { fetchBytes, decodeImage: decodeInBrowser }), ...names.map(detailTexture)]);
+    detail = Object.fromEntries(Object.entries(files).map(([key, name]) => [key, textures[names.indexOf(name)]]));
     if (game.__venueSpotLoading !== loading) return null;
-    const map = waterMap(spot), texture = new DataTexture(map.data, map.size, map.size);
+    const surf = site?.surfLines?.(spot) ?? spot.features.reefs;
+    const map = waterMap(spot, 1024, surf), texture = new DataTexture(map.data, map.size, map.size);
     texture.magFilter = texture.minFilter = LinearFilter;
     texture.needsUpdate = true;
     // The satellite's picture for the water, its raw sRGB values as the
@@ -112,7 +115,7 @@ async function build(game, venue, log, loading) {
     colour.needsUpdate = true;
     const group = new Group();
     group.name = `spot:${venue.id}`;
-    group.add(buildTerrain(spot, detail), buildPlants(spot), buildBuildings(spot), buildSurf(spot, game.water.uniforms.uTime));
+    group.add(buildTerrain(spot, detail, site?.ground), buildPlants(spot, { flora: site?.flora }), buildBuildings(spot, site?.buildings), buildSurf(spot, game.water.uniforms.uTime, surf));
     if (site) {
       const { kit, finish } = landmarkKit();
       site.landmarks(kit, spot);
@@ -132,7 +135,7 @@ async function build(game, venue, log, loading) {
     if (game.__venueSpotLoading === loading) unmountSpot(game);
     return null;
   } finally {
-    if (detail) for (const texture of Object.values(detail)) texture.dispose();
+    if (detail) for (const texture of new Set(Object.values(detail))) texture.dispose();
     if (game.__venueSpotLoading === loading) game.__venueSpotLoading = null;
   }
 }

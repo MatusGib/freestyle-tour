@@ -13,7 +13,7 @@ import { SITE_LAYOUTS, coastFor, shorelineAt } from "../mods/venues/coast.js";
 import { resolveVenueCollision } from "../mods/venues/scenery.js";
 import { rememberPlannedHeat, takePlannedHeat, takePlannedHeatFor, venueConditions } from "../mods/venues/venue.js";
 import { VENUE_LOOKS, applyVenueLook } from "../mods/venues/water.js";
-import { setKnots, setSea, setSpotWater, shoreOffset, venueWater, windSea } from "../mods/venues/waves.js";
+import { setKnots, setSea, setSpotWater, shoreOffset, spotLee, venueWater, windSea } from "../mods/venues/waves.js";
 import { zoneKnots, zonesFor } from "../mods/venues/zones.js";
 import { heatConditions, startHeat } from "../server/api/heats.mjs";
 import { ROOT, fakeGame, tempDir, writeTour } from "./helpers.mjs";
@@ -177,26 +177,28 @@ test("without the venues mod, events name no venue and AI heats sail this week's
   assert.deepEqual(calls, [fakeGame.weekConditions()]);
 });
 
-test("every venue with a coast, and Sorobon, is in the catalog and has a water look", () => {
+test("every venue with a coast, Sorobon and Prasonisi, is in the catalog and has a water look", () => {
   const ids = catalog.venues.map((v) => v.id);
   for (const id of Object.keys(SITE_LAYOUTS)) assert.ok(ids.includes(id), `${id} isn't in the catalog`);
-  assert.ok(ids.includes(SOROBON));
-  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), [...Object.keys(SITE_LAYOUTS), SOROBON].sort());
+  assert.ok(ids.includes(SOROBON) && ids.includes(PRASONISI));
+  assert.deepEqual(Object.keys(VENUE_LOOKS).sort(), [...Object.keys(SITE_LAYOUTS), SOROBON, PRASONISI].sort());
 });
 
 // The water's uniforms and the sky as the patches give them, any name a
 // { value } holder.
 const fakeLookGame = () => ({ water: { uniforms: new Proxy({}, { get: (all, name) => (all[name] ??= { value: null }) }) }, scene: { getObjectByName: () => null } });
 // A spot's water map over ±100 m, 10 px: deep sea (20 m) for x < 0, a 1 m
-// lagoon for x > 0, land in the last column; reef and shore far except there.
-function fakeSpotWater() {
+// lagoon for x > 0, land in the last column; reef and shore far except there;
+// fetch, the A byte: 255 (no land upwind) unless given.
+function fakeSpotWater(fetch = 255) {
   const size = 10, data = new Uint8Array(size * size * 4).fill(255);
   for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
     const k = (j * size + i) * 4;
     data[k] = i < 5 ? 255 : 13;
     data[k + 2] = i === size - 1 ? 0 : i === size - 2 ? 32 : 255;
+    data[k + 3] = fetch;
   }
-  return { texture: { isTexture: true }, colour: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8 };
+  return { texture: { isTexture: true }, colour: { isTexture: true }, data, size, half: 100, depthMax: 20, distanceMax: 80, floor: 0.8, fetchMax: 5000 };
 }
 
 test("the water reads a spot's depth map only at a real-world spot", (t) => {
@@ -230,6 +232,27 @@ test("at a spot, waves are much smaller in the lagoon than on the open sea, and 
   assert.ok(Math.abs(sea - range(-60)) < 1e-9, "the open sea keeps all its waves");
   assert.ok(sea > .3);
   assert.equal(land, 0, "on land, none");
+});
+
+test("at a spot, water in the lee of land gets no swell and only the chop of its short fetch", (t) => {
+  t.after(() => { setSpotWater(null); setSea(null); });
+  const venue = catalog.byId.get(PRASONISI), game = fakeLookGame();
+  applyVenueLook(game, venue, fakeSpotWater(10));
+  assert.deepEqual(game.water.uniforms.uSpotFetch.value, [5000, VENUE_LOOKS[PRASONISI].fetch]);
+  setKnots(22);
+  const range = () => {
+    let low = Infinity, high = -Infinity;
+    for (let s = 0; s < 40; s += .25) { const h = venueWater(-60, 0, s, 0); low = Math.min(low, h); high = Math.max(high, h); }
+    return high - low;
+  };
+  const lee = range();
+  applyVenueLook(game, venue, fakeSpotWater(255));
+  const open = range();
+  assert.ok(open > .5, `the open Aegean, ${open}`);
+  assert.ok(lee < open / 5, `about 200 m behind land ${lee}, open ${open}`);
+  assert.deepEqual(spotLee(-60, 0, fakeSpotWater(255)), [1, 1], "no land upwind: the open sea");
+  const [wind, swell] = spotLee(-60, 0, fakeSpotWater(10));
+  assert.ok(wind > 0 && wind < .15 && swell === 0, `${wind}, ${swell}`);
 });
 
 // Where the local AI sailed in six heats (15–19 kt, targets 30–55): x from

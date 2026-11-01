@@ -3,6 +3,16 @@
 Owner-facing summary of game ideas demonstrated in this private prototype. For
 proposal details and status, see the [roadmap](docs/roadmap.md).
 
+## 2026-11-01
+
+- **Prasonisi, Rhodes:** a new real-world venue in Podersdorf's place, built
+  from map, elevation and satellite data with the meltemi blowing across the
+  sandbar. The course sits in the flat-water bay off the windsurf centres'
+  beach; the bay's water stays flat because the sandbar shelters it, while
+  waves break on the Aegean side. Adds the islet and its 1890 lighthouse,
+  camper vans on the sandbar, sunbeds and parasols, and generated phrygana,
+  junipers and tamarisks. It draws about as many triangles as Sorobon.
+
 ## 2026-10-31
 
 - **Sorobon, Bonaire:** Lac Bay reconstructed from map, elevation and satellite
@@ -40,7 +50,8 @@ proposal details and status, see the [roadmap](docs/roadmap.md).
 ## Next venue work
 
 - Specify water that reveals the seabed, shore reflections and bloom; then build
-  Pozo and Podersdorf scenes. Those venues currently have wind profiles only.
+  Pozo's scene, which has a wind profile only. Podersdorf left the venue
+  chooser for Prasonisi; its events still sail in their reported winds.
 
 ## Planned
 
