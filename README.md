@@ -35,6 +35,9 @@ select mods. The default set is in `mods/enabled.json`.
   features; the 2014 event challenge uses its reported wind.
 - **Wipeout fish:** six colourful fish circle and leap over a fallen rider and
   sail, splash, then dart away and dive as the rider recovers.
+- **Dolphins and a whale:** in practice, sail 10 s without touching anything and
+  dolphins porpoise beside you until you load a jump; 10 s more and a whale
+  belly-flops in front of you. Jump clean over it, or wipe out.
 - **Developer panel:** draft and validate event winds, venue conditions, Champion
   settings and AI score tuning.
 

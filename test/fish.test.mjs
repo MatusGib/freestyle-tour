@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  ARRIVE, FISH, JUMP, LEAVE, SPLASH, droplet, fishPose, fishSpot, isWaterHeight, nextVisit, splashes, wipedOut,
+  ARRIVE, FISH, JUMP, LEAVE, fishPose, fishSpot, nextVisit, splashes, wipedOut,
 } from "../mods/fish/fish.js";
+import { SPLASH } from "../mods/lib/splash.js";
 
 const flat = (spot) => Math.hypot(spot.x, spot.z);
 const jumpers = FISH.filter((fish) => fish.jumps.length);
@@ -137,21 +138,3 @@ test("a jump cut short when the rider gets up makes no landing splash", () => {
   assert.equal(splashes(fish, at + .1, at + JUMP / 2).length, 1);
 });
 
-test("a splash's droplets fly up and out in a ring, fall back and shrink away", () => {
-  const start = droplet(0, 8, 0), mid = droplet(0, 8, SPLASH * .3), end = droplet(0, 8, SPLASH);
-  assert.ok(Math.hypot(start.x, start.y, start.z) < 1e-9);
-  assert.ok(mid.y > .3 && Math.hypot(mid.x, mid.z) > .2);
-  assert.ok(end.y < 0 && end.size === 0);
-  const ring = Array.from({ length: 8 }, (_, i) => droplet(i, 8, SPLASH * .3));
-  assert.ok(Math.abs(ring.reduce((sum, d) => sum + d.x, 0)) < 1e-9 && Math.abs(ring.reduce((sum, d) => sum + d.z, 0)) < 1e-9);
-});
-
-test("isWaterHeight knows the game's water height, with and without the venues mod's waves", () => {
-  const game = "function j(e,t,n){return O.reduce((r,i)=>r+Math.sin(e*i.x+t*i.z+n*i.speed)*i.amplitude,0)}";
-  const venues = "function j(e,t,n){return __venueWater(e,t,n,O.reduce((r,i)=>r+Math.sin(e*i.x+t*i.z+n*i.speed)*i.amplitude,0))}";
-  const rider = "function F(e,t,n,r=0){return j(e,t,n)-N*P+r}";
-  assert.equal(isWaterHeight(new Function(`return ${game}`)()), true);
-  assert.equal(isWaterHeight(new Function(`return ${venues}`)()), true);
-  assert.equal(isWaterHeight(new Function(`return ${rider}`)()), false);
-  assert.equal(isWaterHeight({}), false);
-});

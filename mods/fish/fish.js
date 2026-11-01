@@ -3,6 +3,7 @@
 // the tests; index.js draws them. Places are metres from the middle of the
 // rider and the sail (x, z) and above the water (lift); times are seconds
 // since the wipe-out.
+import { SPLASH } from "../lib/splash.js";
 
 // The game sets crashTime to 4.8 s when the rider wipes out and counts it
 // down to 0 while the rider climbs back on. Behind the game's menu the water
@@ -12,7 +13,6 @@ export const wipedOut = (game) => !!game.active && game.state.crashTime > 0;
 export const ARRIVE = 1; // to swim in
 export const JUMP = 1.2; // a leap over the rider and the sail
 export const LEAVE = 1.4; // to swim off and dive once the rider is up
-export const SPLASH = .7; // a splash's droplets in the air
 const HIGH = 3.2; // a leap's height
 const STEP = .02; // to see which way a fish is going
 
@@ -112,20 +112,3 @@ export function splashes(fish, t, until = Infinity) {
   }
   return out;
 }
-
-// Droplet i of a splash's ring: thrown up and out, falling back and
-// shrinking away as the splash ends.
-export function droplet(i, count, age) {
-  const angle = i / count * Math.PI * 2, out = 1.5 * age;
-  return {
-    x: Math.cos(angle) * out,
-    y: (3.2 + .5 * (i % 2)) * age - 4.9 * age * age,
-    z: Math.sin(angle) * out,
-    size: .09 * Math.max(0, 1 - age / SPLASH),
-  };
-}
-
-// The game's water height, j(x, z, time), with the venues mod's waves when
-// that mod has added them.
-const WATER_HEIGHT = /^function [\w$]+\(e,t,n\)\{return (?:[\w$]+\(e,t,n,)?[\w$]+\.reduce\(\(r,i\)=>r\+Math\.sin\(e\*i\.x\+t\*i\.z\+n\*i\.speed\)\*i\.amplitude,0\)\)?\}$/;
-export const isWaterHeight = (value) => typeof value === "function" && WATER_HEIGHT.test(value.toString());

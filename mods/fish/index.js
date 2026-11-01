@@ -4,24 +4,15 @@
 // builds the models and moves them each frame. Between wipe-outs nothing is
 // drawn.
 import { Box3, Group, Matrix4, Quaternion, Vector3 } from "../venues/lib/three.core.min.js";
-import { FISH, droplet, fishPose, isWaterHeight, nextVisit, splashes, wipedOut } from "./fish.js";
-import { fishMaterial, makeDroplets, makeFish } from "./model.js";
+import { bakedMaterial, makeDroplets } from "../lib/shapes.js";
+import { findWaterHeight } from "../lib/water.js";
+import { droplet } from "../lib/splash.js";
+import { FISH, fishPose, nextVisit, splashes, wipedOut } from "./fish.js";
+import { makeFish } from "./model.js";
 
 const SIZE = 1.3; // like the game's rider, a little larger than life
 const DROPS = 10; // in a splash
 const SPLASHES = 4; // in the air at once, at most
-
-// The game's water height, j(x, z, time) in its rig-model chunk. That chunk
-// isn't one of the mod loader's parts, so it is found among the scripts the
-// page has loaded.
-async function findWaterHeight() {
-  for (const { name } of performance.getEntriesByType("resource")) {
-    if (!/\/rig-model-[\w-]+\.js$/.test(new URL(name).pathname)) continue;
-    const found = Object.values(await import(name)).filter(isWaterHeight);
-    if (found.length === 1) return found[0];
-  }
-  return null;
-}
 
 export default {
   name: "fish",
@@ -36,7 +27,7 @@ export default {
       const school = new Group();
       school.name = "fish";
       school.visible = false;
-      const material = fishMaterial();
+      const material = bakedMaterial();
       const models = FISH.map((fish) => makeFish(fish.colours, material));
       for (const { fish } of models) fish.scale.setScalar(SIZE);
       const drops = makeDroplets(DROPS * SPLASHES);
