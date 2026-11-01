@@ -10,6 +10,8 @@ import {
 } from "./venue.js";
 import { createVenueTextures, mountVenueScenery, resolveVenueCollision } from "./scenery.js";
 import { applyVenueLook } from "./water.js";
+import { resolveSpotCollision } from "./realworld/collision.js";
+import { mountSpot, unmountSpot } from "./realworld/mount.js";
 import { createPopover, el } from "../lib/ui.js";
 
 const getJson = async (url) => {
@@ -18,7 +20,6 @@ const getJson = async (url) => {
   if (!res.ok) throw new Error(body.error ?? `${url} answered ${res.status}`);
   return body;
 };
-const picture = (venue) => `/__mods/venues/assets/${venue.id}.svg`;
 
 export default {
   name: "venues",
@@ -36,6 +37,8 @@ export default {
     let game = null;
     let venues = [];
     let loading = false;
+    let loadingSpot = null; // the venue whose real-world spot is loading
+    let shown = null; // the venue showVenue last showed
     const catalogReady = getJson("/api/local/venues").then((result) => {
       venues = result.venues;
       return venues;
@@ -44,16 +47,30 @@ export default {
       return [];
     });
     const setVenueStatus = (venue) => {
-      thumbnail.hidden = !venue?.scenery;
-      thumbnail.src = venue?.scenery ? picture(venue) : "";
-      current.textContent = venue?.name ?? "Weekly wind";
+      thumbnail.hidden = !venue?.picture;
+      thumbnail.src = venue?.picture ?? "";
+      current.textContent = venue ? (loadingSpot === venue.id ? `Loading ${venue.name}…` : venue.name) : "Weekly wind";
       open.title = venue ? `Venue: ${venue.name}` : "Venue: the game's weekly wind";
     };
     const selected = () => venues.find((venue) => venue.id === selectedVenueId()) ?? null;
-    // The coast, its water and its sky, or the game's own look without a venue.
+    // The coast, its water and its sky, or the game's own look without a
+    // venue. A real-world spot loads its map data first, then its water
+    // reads the depth.
     const showVenue = (found, venue) => {
+      shown = venue;
       mountVenueScenery(found, venue, textures);
-      if (!applyVenueLook(found, venue)) log("the water patch is missing; keeping the game's water");
+      if (!venue?.spotFiles) unmountSpot(found);
+      const spotWater = venue?.spotFiles && found.__venueSpot?.manifest.id === venue.id ? found.__venueSpotWater : null;
+      if (!applyVenueLook(found, venue, spotWater)) log("the water patch is missing; keeping the game's water");
+      if (!venue?.spotFiles || spotWater) return;
+      loadingSpot = venue.id;
+      setVenueStatus(venue);
+      mountSpot(found, venue, log).then((water) => {
+        if (loadingSpot === venue.id) loadingSpot = null;
+        if (shown?.id !== venue.id) return;
+        setVenueStatus(venue);
+        if (water) applyVenueLook(found, venue, water);
+      });
     };
 
     // Each venue is an option: its picture, wind and character, with the
@@ -70,7 +87,7 @@ export default {
           venue.waterZones?.length && el("p", { textContent: `Water: ${venue.waterZones.join(" · ")}` }),
         );
         const button = el("button", { type: "button", className: "ft-option", onclick: () => choose(venue) },
-          venue.scenery && el("img", { src: picture(venue), alt: "", width: 96, height: 64 }),
+          venue.picture && el("img", { src: venue.picture, alt: "", width: 96, height: 64 }),
           el("span", {},
             el("span", { className: "ft-option-name" }, venue.name, chosen && el("span", { className: "ft-check", textContent: "In use" })),
             el("span", { className: "ft-option-meta", textContent: venue.scenery ? windText(venue.gameConditions) : `${windText(venue.gameConditions)} · the game's own scenery` }),
@@ -191,7 +208,10 @@ export default {
       if (CanvasTexture) textures = createVenueTextures(CanvasTexture);
       else log("the scene patch is missing; the beach has no sand texture");
       applyAtHeatStart(found);
-      await onStep((state, input) => resolveVenueCollision(state, input, game?.__venueSceneryVenueId));
+      await onStep((state, input) => {
+        if (game?.__venueSpot) resolveSpotCollision(state, input, game.__venueSpot);
+        else resolveVenueCollision(state, input, game?.__venueSceneryVenueId);
+      });
       const venue = selected();
       showVenue(found, venue);
       setVenueStatus(venue);

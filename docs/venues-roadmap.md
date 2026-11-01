@@ -70,6 +70,37 @@ scenery, and each of the 43 events at the five venues has its reported wind,
 or a note that its reports give none. The scenery outline for the rest is
 `docs/superpowers/plans/2026-10-30-venue-scenery.md`.
 
+### Real-world spots: Sorobon (2026-10-31)
+
+Sorobon is built from map data
+(`docs/superpowers/specs/2026-10-30-real-world-spots-design.md`, plans
+`2026-10-30-spot-data-tool.md` and `2026-10-30-spot-in-game.md`). The spec's
+success criteria:
+
+1. **Met.** The chooser shows Sorobon's satellite picture and builds Lac Bay:
+   the beach with Jibe City and the resort, the mangroves, the reef with its
+   surf, the lagoon's colour pattern, the scrubland behind.
+2. **Met.** The trade wind blows across the course from the reef towards the
+   beach, and nothing is mirrored.
+3. **Met.** `compare.png` shows the built shoreline and reef over the
+   satellite image.
+4. **Met.** Up close the ground shows sand grain, coral rubble and rock from
+   CC0 textures at two scales, without visible tiling.
+5. **Met.** The rider stops at the real shoreline and at the mangroves, which
+   count as land even where they stand in the water; the course is in water
+   at least 0.8 m deep.
+6. **Met.** A 2014 Bonaire World Cup challenge heat sails at Sorobon in that
+   event's wind.
+7. **Not met on the development machine**, whose integrated Radeon 680M takes
+   16.5 ms for the game's own scene at high (1920×1080): Sorobon adds 2.3 ms
+   there, to 18.8 ms. At the game's default auto setting it takes 12.4 ms, and
+   at balanced about 13 ms.
+8. **Met.** Without a venue the game is unchanged, Sotavento and Sylt build
+   exactly as before, and `npm test` passes.
+
+Next: the venue rendering spec (see-through water, reflections, bloom), then
+Pozo and Podersdorf on the same tools.
+
 ## Scope and ground rules
 
 - Cover PWA freestyle events from 2006–2026 first. Add earlier freestyle venues
