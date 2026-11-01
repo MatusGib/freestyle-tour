@@ -97,3 +97,14 @@ test("the windsurfers out on the bay sail open water, well clear of the heat", (
     assert.ok(Math.abs(x) > 110 + 80 || Math.abs(z) > 253 + 40, `${x}, ${z} keeps clear of the course and the AI's overshoot`);
   }
 });
+
+test("from Street View: Prasonisi Center's lookout by its gazebos, Wind4Fun's 150-200 m further south-west, both on the sand by the water", () => {
+  const { prasonisiCenter, wind4fun } = site.lookoutsAt(spot);
+  const nearWater = ([x, z]) => spot.isLand(x, z) && spot.heightAt(x, z) > 0 && [...Array(16)].some((_, k) => !spot.isLand(x + Math.cos(k * 0.39) * 30, z + Math.sin(k * 0.39) * 30));
+  assert.ok(nearWater(prasonisiCenter) && nearWater(wind4fun), "both stand on the sand within 30 m of the water");
+  assert.ok(Math.hypot(prasonisiCenter[0] - site.STATION[0], prasonisiCenter[1] - site.STATION[1]) < 60, "Prasonisi Center's stands by its gazebo station");
+  const apart = Math.hypot(wind4fun[0] - prasonisiCenter[0], wind4fun[1] - prasonisiCenter[1]);
+  assert.ok(apart > 140 && apart < 220 && wind4fun[1] > prasonisiCenter[1], `Wind4Fun's is ${apart} m further south-west`);
+  const [tx, tz] = site.towerAt(spot);
+  assert.ok(Math.hypot(tx - prasonisiCenter[0], tz - prasonisiCenter[1]) > 150, "ProCenter's tower is its own, further north-east");
+});

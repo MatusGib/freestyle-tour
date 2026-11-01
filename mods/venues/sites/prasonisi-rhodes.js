@@ -11,10 +11,12 @@
 //   RIB rides off the beach. The aerial's waterline is another day's and
 //   lies 10-30 m off the map's, so what stands by the water is placed by its
 //   distance from the map's shoreline.
-// - A second station 210 m along the beach, by the water at (-345…-312,
-//   -136…-80): four white gazebos, a long tent, two huts, a crowd of rigs at
-//   the water's edge and a grey RIB. The aerial shows it; whose it is, it
-//   doesn't (Wind4Fun's and Prasonisi Center's houses are up by the road).
+// - Prasonisi Center's beach station 210 m along the beach, by the water at
+//   (-345…-312, -136…-80): four white gazebos, a long tent, a crowd of rigs
+//   at the water's edge, and its lookout of light-blue steel; Wind4Fun's
+//   wooden lookout stands about 160 m further south-west. Both are modelled
+//   from 360-degree photos taken on the beach (Google Street View, August
+//   2017); which is whose, the user told us.
 // - Cars and camper vans only in the mapped car parks, in rows.
 // - Tamarisks by the buildings; the lighthouse (1890) on the islet's southern
 //   cliff, its tower at (-1086, 2206).
@@ -61,6 +63,13 @@ function eastEdge(spot, z, from = -700) {
 }
 // The spotting tower's place: 15 m up the beach from the water at z -231.
 export const towerAt = (spot) => [eastEdge(spot, -231) - 15, -231];
+// Prasonisi Center's and Wind4Fun's lookouts, each about 20 m up the beach.
+export const lookoutsAt = (spot) => ({ prasonisiCenter: [eastEdge(spot, -86) - 18, -86], wind4fun: [eastEdge(spot, 58) - 22, 58] });
+// Along the shore at z, towards -z, so local +z faces the sea.
+function shoreYaw(spot, z) {
+  const dx = eastEdge(spot, z - 4) - eastEdge(spot, z);
+  return yawAlong([dx / Math.hypot(dx, 4), -4 / Math.hypot(dx, 4)]);
+}
 
 // Where the land begins along z, coming from the open sea upwind (-x).
 function westEdge(spot, z, from = -2000) {
@@ -174,10 +183,10 @@ function gableRoof(width, depth, eave, ridge) {
 
 // A flag on its pole, streaming downwind in folds: the cloth starts at the
 // pole and its far edge flutters most.
-function addFlag(kit, x, z, y, height, cloth, emblem, random) {
+function addFlag(kit, x, z, y, height, cloth, emblem, random, { width = 1.9, tall = 1.25 } = {}) {
   addShape(kit, new CylinderGeometry(0.035, 0.05, height, 6), "#b9bcbf", x, z, y + height / 2);
   addShape(kit, new SphereGeometry(0.06, 6, 4), "#d8d8d8", x, z, y + height + 0.03);
-  const width = 1.9, tall = 1.25, g = new PlaneGeometry(width, tall, 10, 1).translate(width / 2, 0, 0), p = g.getAttribute("position"), phase = random() * 6;
+  const g = new PlaneGeometry(width, tall, 10, 1).translate(width / 2, 0, 0), p = g.getAttribute("position"), phase = random() * 6;
   for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 3.1 + phase) * 0.16 * (p.getX(i) / width + 0.2));
   addShape(kit, g, cloth, x, z, y + height - tall / 2 - 0.1, { yaw: WIND });
   if (!emblem) return;
@@ -326,8 +335,10 @@ function addTower(kit, spot, random) {
 
 // A rescue RIB at its mooring, bow into the wind: a collar of tubes bent
 // round the bow, a grey rubbing strake, a white hull and deck, a console with
-// its screen and wheel, the outboard on the transom, a towing post.
-function addRib(kit, x, z, collar) {
+// its screen and wheel, the outboard on the transom, a towing post. base: the
+// height it rests at, 0 afloat, the sand's when pulled up on the beach.
+function addRib(onWater, x, z, collar, base = 0) {
+  const kit = { point: (s, d, y = 0) => onWater.point(s, d, y + base), add: onWater.add };
   const curve = new CatmullRomCurve3([[2.4, 0.95], [0.4, 0.95], [-1.5, 0.92], [-2.45, 0.5], [-2.65, 0], [-2.45, -0.5], [-1.5, -0.92], [0.4, -0.95], [2.4, -0.95]].map(([a, b]) => new Vector3(a, 0, b)));
   addShape(kit, new TubeGeometry(curve, 28, 0.3, 10, false), collar, x, z, 0.3);
   addShape(kit, new TubeGeometry(curve, 28, 0.06, 5, false), "#3a3d42", x, z, 0.12);
@@ -376,12 +387,7 @@ function addStation(kit, spot, random) {
   addShape(kit, new BoxGeometry(7.6, 0.25, 6.6), "#a88f6c", dx, dz, dy + 0.12, { yaw: tent });
   for (const [a, b] of [[-3.6, -3.1], [3.6, -3.1], [-3.6, 3.1], [3.6, 3.1]]) addShape(kit, new CylinderGeometry(0.06, 0.06, 2.6, 6), "#8a6a48", ...local(dx, dz, tent, a, b), dy + 1.4);
   addShape(kit, new BoxGeometry(7.9, 0.06, 6.9), "#f1ebdc", dx, dz, dy + 2.7, { yaw: tent, pitch: -0.07 });
-  for (const [hx, hz, w, d] of [[-327.4, -80.6, 8, 3], [-321.4, -90.2, 6.5, 5.5]]) {
-    const [x, z, y] = at(hx, hz);
-    addShape(kit, new BoxGeometry(w, 2.4, d), "#b89466", x, z, y + 1.2, { yaw: tent });
-    addShape(kit, new BoxGeometry(w + 0.8, 0.12, d + 0.8), "#f4f3ee", x, z, y + 2.5, { yaw: tent });
-  }
-  for (const [fx, fz, colour] of [[-337, -140, "#ff7a1a"], [-333, -106, "#f4f4f1"], [-306, -112, "#ff7a1a"]]) addFlag(kit, fx, fz, spot.heightAt(fx, fz), 6.5, colour, null, random);
+  for (const [fx, fz, colour] of [[-337, -140, "#d23a3a"], [-333, -106, "#f4f4f1"], [-306, -112, "#d23a3a"]]) addFlag(kit, fx, fz, spot.heightAt(fx, fz), 6.5, colour, null, random);
   // The rigs at the water's edge: a crowd on the sand, a few boards afloat.
   for (let k = 0; k < 34; k++) {
     const z = -124 + random() * 28, x = eastEdge(spot, z) - 2 - random() * 16;
@@ -485,6 +491,68 @@ function addRoadCentres(kit, spot, random) {
   }
 }
 
+// Prasonisi Center's lookout, from Street View: two steel platforms painted
+// light blue side by side along the beach. The lookout's deck, 2.4 m up, is
+// walled with white panels under a flat white roof with three red flags
+// above; beside it a landing 2.3 m up, reached by a light-blue staircase,
+// with a white panel to the sea and a tall mast at its corner. Its white
+// rescue RIB lies on the sand in front.
+function addPrasonisiCenterLookout(kit, spot, random) {
+  const [x0, z0] = lookoutsAt(spot).prasonisiCenter, yaw = shoreYaw(spot, z0), y = spot.heightAt(x0, z0) - 0.1;
+  const at = (a, b) => local(x0, z0, yaw, a, b), POST = "#86c6d8", BEAM = "#3b6f93", PANEL = "#f4f4f1";
+  // The lookout: four posts to the roof, the deck, panels on three sides.
+  for (const [a, b] of [[-1.4, -1.4], [1.4, -1.4], [-1.4, 1.4], [1.4, 1.4]]) addShape(kit, new BoxGeometry(0.12, 4.45, 0.12), POST, ...at(-2.2 + a, b), y + 2.22, { yaw });
+  for (const h of [0.8, 2.35]) for (const [a, b, w, d] of [[0, -1.4, 2.9, 0.1], [0, 1.4, 2.9, 0.1], [-1.4, 0, 0.1, 2.9], [1.4, 0, 0.1, 2.9]]) addShape(kit, new BoxGeometry(w, 0.1, d), BEAM, ...at(-2.2 + a, b), y + h, { yaw });
+  addShape(kit, new BoxGeometry(2.9, 0.12, 2.9), "#9aa0a6", ...at(-2.2, 0), y + 2.4, { yaw });
+  for (const [a, b, w, d] of [[0, 1.45, 2.9, 0.04], [-1.45, 0, 0.04, 2.9], [1.45, 0, 0.04, 2.9]]) addShape(kit, new BoxGeometry(w, 1.1, d), PANEL, ...at(-2.2 + a, b), y + 3.0, { yaw });
+  addShape(kit, new BoxGeometry(3.4, 0.08, 3.4), PANEL, ...at(-2.2, 0), y + 4.48, { yaw });
+  [-1.2, 0, 1.2].forEach((a, k) => addFlag(kit, ...at(-2.2 + a, 1.3), y + 4.5, 1.9, k === 1 ? "#e0608a" : "#d23a3a", null, random, { width: 0.55, tall: 0.95 }));
+  // The landing beside it, its staircase down along the beach, the mast.
+  for (const [a, b] of [[-1.2, -1.2], [1.2, -1.2], [-1.2, 1.2], [1.2, 1.2]]) addShape(kit, new BoxGeometry(0.11, 2.3, 0.11), POST, ...at(1.3 + a, b), y + 1.15, { yaw });
+  addShape(kit, new BoxGeometry(2.5, 0.12, 2.5), "#9aa0a6", ...at(1.3, 0), y + 2.3, { yaw });
+  addShape(kit, new BoxGeometry(2.5, 1, 0.04), PANEL, ...at(1.3, 1.25), y + 2.85, { yaw });
+  for (const [a, b, w, d] of [[0, -1.25, 2.5, 0.05], [1.25, -0.6, 0.05, 1.3]]) addShape(kit, new BoxGeometry(w, 0.05, d), POST, ...at(1.3 + a, b), y + 3.3, { yaw });
+  for (let step = 0; step < 8; step++) addShape(kit, new BoxGeometry(0.3, 0.05, 1), "#9aa0a6", ...at(2.75 + step * 0.3, 0.6), y + 2.1 - step * 0.28, { yaw });
+  for (const b of [0.08, 1.12]) addShape(kit, new BoxGeometry(3.2, 0.05, 0.05), POST, ...at(3.8, b), y + 2.05, { yaw, roll: -0.75 });
+  addShape(kit, new CylinderGeometry(0.04, 0.06, 7.2, 6), "#c9cdd1", ...at(2.5, -1.2), y + 3.6);
+  // Its white RIB on the sand in front.
+  const [rx, rz] = at(0, 5.5);
+  addRib(kit, rx, rz, "#ededea", spot.heightAt(rx, rz) + 0.1);
+}
+
+// Wind4Fun's lookout, from Street View: a long deck of weathered grey timber
+// 1.5 m up on stilts, running out towards the sea from a taller watch box
+// on its landward end, railed along one side and at its seaward end; the box
+// stands on its own posts, floored 2.6 m up, half-walled and roofed, a ladder
+// up to it from the deck. Its red RIB lies pulled up at the water's edge,
+// red flags stand along the beach.
+function addWind4FunLookout(kit, spot, random) {
+  // Local +a runs inland, away from the sea; +b along the shore to the north-east.
+  const [x0, z0] = lookoutsAt(spot).wind4fun, yaw = shoreYaw(spot, z0) + Math.PI / 2, y = spot.heightAt(x0, z0) - 0.1;
+  const at = (a, b) => local(x0, z0, yaw, a, b), POST = "#6e6964", TIMBER = "#8b8681", BOARD = "#9a948c";
+  // The deck on its stilts, with its rail and a bench along the back.
+  for (let a = -4; a <= 2; a += 2) for (const b of [-1.15, 1.15]) addShape(kit, new BoxGeometry(0.16, 2.6, 0.16), POST, ...at(a, b), y + 1.3, { yaw });
+  addShape(kit, new BoxGeometry(6.4, 0.1, 2.5), BOARD, ...at(-1, 0), y + 1.5, { yaw });
+  for (const h of [2.05, 2.5]) {
+    addShape(kit, new BoxGeometry(6.4, 0.09, 0.07), TIMBER, ...at(-1, 1.2), y + h, { yaw });
+    addShape(kit, new BoxGeometry(0.07, 0.09, 2.4), TIMBER, ...at(-4.15, 0), y + h, { yaw });
+  }
+  addShape(kit, new BoxGeometry(3, 0.08, 0.4), TIMBER, ...at(-2, -0.9), y + 1.95, { yaw });
+  // The watch box on its own posts, and the ladder up from the deck.
+  for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) addShape(kit, new BoxGeometry(0.16, 4.4, 0.16), POST, ...at(3.3 + a, b), y + 2.2, { yaw });
+  addShape(kit, new BoxGeometry(2.1, 0.1, 2.1), BOARD, ...at(3.3, 0), y + 2.6, { yaw });
+  for (const [a, b, w, d] of [[0, 1.02, 2.1, 0.06], [1.02, 0, 0.06, 2.1], [0, -1.02, 2.1, 0.06]]) addShape(kit, new BoxGeometry(w, 0.95, d), TIMBER, ...at(3.3 + a, b), y + 3.1, { yaw });
+  addShape(kit, new BoxGeometry(2.6, 0.1, 2.6), TIMBER, ...at(3.3, 0), y + 4.45, { yaw, roll: 0.05 });
+  for (let k = 0; k < 4; k++) addShape(kit, new BoxGeometry(0.06, 0.05, 0.7), TIMBER, ...at(2.2, 0), y + 1.75 + k * 0.27, { yaw });
+  // Its red RIB at the water's edge, and red flags along the beach.
+  const ribZ = z0 - 6, ribX = eastEdge(spot, ribZ) - 2;
+  addRib(kit, ribX, ribZ, "#d8352c", spot.heightAt(ribX, ribZ) + 0.1);
+  for (const b of [-8, -11, -14]) {
+    const [fx, fz] = at(3, b);
+    addFlag(kit, fx, fz, spot.heightAt(fx, fz), 6, "#d23a3a", null, random);
+  }
+}
+
 export function landmarks(kit, spot) {
   const random = seeded(1890);
   addProCenter(kit, spot, random);
@@ -511,5 +579,7 @@ export function landmarks(kit, spot) {
     const z = -140 + random() * 60, x = eastEdge(spot, z) - 1 - random() * 30;
     addBather(kit, x, z, spot.heightAt(x, z), random, { wetsuit: random() < 0.6 });
   }
+  addPrasonisiCenterLookout(kit, spot, random);
+  addWind4FunLookout(kit, spot, random);
   addLighthouse(kit, spot);
 }
