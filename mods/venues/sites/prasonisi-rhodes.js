@@ -13,10 +13,14 @@
 //   distance from the map's shoreline.
 // - Prasonisi Center's beach station 210 m along the beach, by the water at
 //   (-345…-312, -136…-80): four white gazebos, a long tent, a crowd of rigs
-//   at the water's edge, and its lookout of light-blue steel; Wind4Fun's
-//   wooden lookout stands about 160 m further south-west. Both are modelled
-//   from 360-degree photos taken on the beach (Google Street View, August
-//   2017); which is whose, the user told us.
+//   at the water's edge, and its white steel lookout with its SURF WITH US
+//   banners, as its webcam showed it in July 2026. About 160 m further
+//   south-west, Wind4Fun's station as an aerial photo shows it: a timber
+//   lookout with an orange board, its tent with the round logo, four wheeled
+//   board racks. Street View (2017) placed both; the user said which is whose
+//   and gave the photos.
+// - Zanetos, the Lighthouse Tavern and Oasis on the road down to the beach
+//   (prasonisi-tavernas.js), and the painted signs of all of them (signs()).
 // - Cars and camper vans only in the mapped car parks, in rows.
 // - Tamarisks by the buildings; the lighthouse (1890) on the islet's southern
 //   cliff, its tower at (-1086, 2206).
@@ -26,9 +30,11 @@ import {
   BoxGeometry, BufferAttribute, BufferGeometry, CapsuleGeometry, CatmullRomCurve3, ConeGeometry, CylinderGeometry, ExtrudeGeometry, PlaneGeometry,
   Shape, ShapeGeometry, SphereGeometry, TorusGeometry, TubeGeometry, Vector3,
 } from "../lib/three.core.min.js";
-import { addShape, seeded } from "../props.js";
+import { addFeatherFlag, addShape, seeded } from "../props.js";
 import { AEGEAN } from "../realworld/plants-aegean.js";
 import { extrudeFootprint } from "../realworld/buildings.js";
+import { fitFont } from "../realworld/signs.js";
+import { TAVERNAS, addTavernas, tavernaSigns } from "./prasonisi-tavernas.js";
 
 const WIND = 0;
 const LIGHTHOUSE = [-1086, 2206];
@@ -40,12 +46,13 @@ export const STATION = [-330, -118];
 export const textures = { coralRubble: "rock", mangroveMud: "scrub-soil" };
 export const ground = { sand: "#e3cfa6" };
 // Whitewashed walls, a few cream and stone; flat concrete roofs; blue
-// shutters. The lighthouse and ProCenter's sheds are modelled here instead.
+// shutters. The lighthouse, ProCenter's sheds and the three tavernas
+// (prasonisi-tavernas.js) are modelled here instead.
 export const buildings = {
   walls: ["#f5f2ea", "#f5f2ea", "#f1ece0", "#ece3cf", "#e4d6b8", "#f5f2ea", "#d9cbb0"],
   roofs: { flat: "#dcd6ca", roof: "#b39463" },
   shutter: "#2c5f9e",
-  except: [[...LIGHTHOUSE, 30], [-337, -330, 28]],
+  except: [[...LIGHTHOUSE, 30], [-337, -330, 28], ...Object.values(TAVERNAS).map((t) => t.replaces)],
 };
 
 const range = (a, b, step) => Array.from({ length: Math.floor((b - a) / step) + 1 }, (_, k) => a + k * step);
@@ -63,8 +70,8 @@ function eastEdge(spot, z, from = -700) {
 }
 // The spotting tower's place: 15 m up the beach from the water at z -231.
 export const towerAt = (spot) => [eastEdge(spot, -231) - 15, -231];
-// Prasonisi Center's and Wind4Fun's lookouts, each about 20 m up the beach.
-export const lookoutsAt = (spot) => ({ prasonisiCenter: [eastEdge(spot, -86) - 18, -86], wind4fun: [eastEdge(spot, 58) - 22, 58] });
+// Prasonisi Center's and Wind4Fun's lookouts, 18 m and 32 m up the beach.
+export const lookoutsAt = (spot) => ({ prasonisiCenter: [eastEdge(spot, -86) - 18, -86], wind4fun: [eastEdge(spot, 58) - 32, 58] });
 // Along the shore at z, towards -z, so local +z faces the sea.
 function shoreYaw(spot, z) {
   const dx = eastEdge(spot, z - 4) - eastEdge(spot, z);
@@ -491,66 +498,192 @@ function addRoadCentres(kit, spot, random) {
   }
 }
 
-// Prasonisi Center's lookout, from Street View: two steel platforms painted
-// light blue side by side along the beach. The lookout's deck, 2.4 m up, is
-// walled with white panels under a flat white roof with three red flags
-// above; beside it a landing 2.3 m up, reached by a light-blue staircase,
-// with a white panel to the sea and a tall mast at its corner. Its white
-// rescue RIB lies on the sand in front.
-function addPrasonisiCenterLookout(kit, spot, random) {
-  const [x0, z0] = lookoutsAt(spot).prasonisiCenter, yaw = shoreYaw(spot, z0), y = spot.heightAt(x0, z0) - 0.1;
-  const at = (a, b) => local(x0, z0, yaw, a, b), POST = "#86c6d8", BEAM = "#3b6f93", PANEL = "#f4f4f1";
-  // The lookout: four posts to the roof, the deck, panels on three sides.
-  for (const [a, b] of [[-1.4, -1.4], [1.4, -1.4], [-1.4, 1.4], [1.4, 1.4]]) addShape(kit, new BoxGeometry(0.12, 4.45, 0.12), POST, ...at(-2.2 + a, b), y + 2.22, { yaw });
-  for (const h of [0.8, 2.35]) for (const [a, b, w, d] of [[0, -1.4, 2.9, 0.1], [0, 1.4, 2.9, 0.1], [-1.4, 0, 0.1, 2.9], [1.4, 0, 0.1, 2.9]]) addShape(kit, new BoxGeometry(w, 0.1, d), BEAM, ...at(-2.2 + a, b), y + h, { yaw });
-  addShape(kit, new BoxGeometry(2.9, 0.12, 2.9), "#9aa0a6", ...at(-2.2, 0), y + 2.4, { yaw });
-  for (const [a, b, w, d] of [[0, 1.45, 2.9, 0.04], [-1.45, 0, 0.04, 2.9], [1.45, 0, 0.04, 2.9]]) addShape(kit, new BoxGeometry(w, 1.1, d), PANEL, ...at(-2.2 + a, b), y + 3.0, { yaw });
-  addShape(kit, new BoxGeometry(3.4, 0.08, 3.4), PANEL, ...at(-2.2, 0), y + 4.48, { yaw });
-  [-1.2, 0, 1.2].forEach((a, k) => addFlag(kit, ...at(-2.2 + a, 1.3), y + 4.5, 1.9, k === 1 ? "#e0608a" : "#d23a3a", null, random, { width: 0.55, tall: 0.95 }));
-  // The landing beside it, its staircase down along the beach, the mast.
-  for (const [a, b] of [[-1.2, -1.2], [1.2, -1.2], [-1.2, 1.2], [1.2, 1.2]]) addShape(kit, new BoxGeometry(0.11, 2.3, 0.11), POST, ...at(1.3 + a, b), y + 1.15, { yaw });
-  addShape(kit, new BoxGeometry(2.5, 0.12, 2.5), "#9aa0a6", ...at(1.3, 0), y + 2.3, { yaw });
-  addShape(kit, new BoxGeometry(2.5, 1, 0.04), PANEL, ...at(1.3, 1.25), y + 2.85, { yaw });
-  for (const [a, b, w, d] of [[0, -1.25, 2.5, 0.05], [1.25, -0.6, 0.05, 1.3]]) addShape(kit, new BoxGeometry(w, 0.05, d), POST, ...at(1.3 + a, b), y + 3.3, { yaw });
-  for (let step = 0; step < 8; step++) addShape(kit, new BoxGeometry(0.3, 0.05, 1), "#9aa0a6", ...at(2.75 + step * 0.3, 0.6), y + 2.1 - step * 0.28, { yaw });
-  for (const b of [0.08, 1.12]) addShape(kit, new BoxGeometry(3.2, 0.05, 0.05), POST, ...at(3.8, b), y + 2.05, { yaw, roll: -0.75 });
-  addShape(kit, new CylinderGeometry(0.04, 0.06, 7.2, 6), "#c9cdd1", ...at(2.5, -1.2), y + 3.6);
-  // Its white RIB on the sand in front.
-  const [rx, rz] = at(0, 5.5);
-  addRib(kit, rx, rz, "#ededea", spot.heightAt(rx, rz) + 0.1);
+// A lookout's own frame: at(a, b) the world point a metres along the shore
+// (north-east) and b out towards the sea from it, y its foot.
+function lookoutFrame(spot, which) {
+  const [x0, z0] = lookoutsAt(spot)[which], yaw = shoreYaw(spot, z0);
+  return { at: (a, b) => local(x0, z0, yaw, a, b), yaw, y: spot.heightAt(x0, z0) - 0.1 };
 }
 
-// Wind4Fun's lookout, from Street View: a long deck of weathered grey timber
-// 1.5 m up on stilts, running out towards the sea from a taller watch box
-// on its landward end, railed along one side and at its seaward end; the box
-// stands on its own posts, floored 2.6 m up, half-walled and roofed, a ladder
-// up to it from the deck. Its red RIB lies pulled up at the water's edge,
-// red flags stand along the beach.
+// Prasonisi Center's lookout, from its webcam (prasonisicenter.com, July
+// 2026): a white steel platform 7 m along the beach, its deck 2.2 m up,
+// railed all round with a navy SURF WITH US banner along its rails, a white
+// sign board at its south-west end, two red flags (one with a black emblem)
+// on tall poles, its gear stored beneath and a staircase down at the
+// north-east end. Its white rescue RIB lies on the sand in front; south-west
+// along the beach stands a rack cube wrapped in a blue SURF WITH US banner,
+// and a wire cage cart.
+function addPrasonisiCenterLookout(kit, spot, random) {
+  const { at, yaw, y } = lookoutFrame(spot, "prasonisiCenter"), STEEL = "#e4e7e9", DECK = "#a3a8ad", NAVY = "#283248";
+  for (const a of [-3.5, -1.2, 1.2, 3.5]) for (const b of [-1.4, 1.4]) addShape(kit, new BoxGeometry(0.12, 3.3, 0.12), STEEL, ...at(a, b), y + 1.65, { yaw });
+  addShape(kit, new BoxGeometry(7.2, 0.14, 3), DECK, ...at(0, 0), y + 2.2, { yaw });
+  for (const h of [1, 2.75, 3.25]) {
+    for (const b of [-1.42, 1.42]) addShape(kit, new BoxGeometry(7.1, 0.07, 0.07), STEEL, ...at(0, b), y + h, { yaw });
+    for (const a of [-3.55, 3.55]) addShape(kit, new BoxGeometry(0.07, 0.07, 2.9), STEEL, ...at(a, 0), y + h, { yaw });
+  }
+  // The banners' backs (their painted faces are signs), the sign board.
+  for (const b of [-1.43, 1.43]) addShape(kit, new BoxGeometry(5.6, 0.75, 0.03), NAVY, ...at(0.4, b), y + 2.75, { yaw });
+  addShape(kit, new BoxGeometry(0.1, 1.6, 1.4), "#f6f6f2", ...at(-3.62, -0.4), y + 3.1, { yaw });
+  for (const [a, emblem, cloth] of [[-2.9, "#1a1a1a", "#c8262c"], [-1.1, null, "#d23a3a"]]) addFlag(kit, ...at(a, -1.3), y + 2.25, 4.6, cloth, emblem, random, { width: 1.8, tall: 1.2 });
+  // Gear under the deck, the staircase down at the north-east end.
+  for (let k = 0; k < 5; k++) addShape(kit, new BoxGeometry(1.1, 0.6, 0.9), pick(["#2b2e33", "#3f4448", "#f2f2ee", "#2f7fd0"], random), ...at(-2.8 + k * 1.3, -0.4 + (k % 2) * 0.8), y + 0.3 + (k % 2) * 0.6, { yaw });
+  for (let k = 0; k < 4; k++) addBoard(kit, ...at(-1, 0.6), y + 0.1 + k * 0.16, yaw + 0.05 * k, pick(BOARDS, random), { fin: false });
+  for (let step = 0; step < 8; step++) addShape(kit, new BoxGeometry(0.3, 0.05, 1), DECK, ...at(3.75 + step * 0.3, 0.6), y + 2.0 - step * 0.26, { yaw });
+  for (const b of [0.08, 1.12]) addShape(kit, new BoxGeometry(3.1, 0.05, 0.05), STEEL, ...at(4.8, b), y + 2.0, { yaw, roll: -0.72 });
+  const [rx, rz] = at(0, 5.5);
+  addRib(kit, rx, rz, "#ededea", spot.heightAt(rx, rz) + 0.1);
+  // The banner-wrapped rack cube and the wire cage cart.
+  const [cx, cz] = at(-15, 1), cy = spot.heightAt(cx, cz);
+  addShape(kit, new BoxGeometry(2.6, 2.4, 2.2), "#244e9a", cx, cz, cy + 1.2, { yaw });
+  for (let k = 0; k < 4; k++) addBoard(kit, ...at(-15, 1.2), cy + 2.45 + k * 0.14, yaw + Math.PI / 2, pick(BOARDS, random), { fin: false });
+  const [gx, gz] = at(-11.5, 1.5), gy = spot.heightAt(gx, gz);
+  for (const [a, b] of [[-0.5, -0.4], [0.5, -0.4], [-0.5, 0.4], [0.5, 0.4]]) addShape(kit, new BoxGeometry(0.04, 0.9, 0.04), "#9aa0a6", ...at(-11.5 + a, 1.5 + b), gy + 0.45, { yaw });
+  for (const h of [0.1, 0.5, 0.9]) addShape(kit, new BoxGeometry(1.04, 0.03, 0.84), "#9aa0a6", gx, gz, gy + h, { yaw });
+}
+
+// Wind4Fun's beach station, from an aerial photo: a timber lookout 30-odd
+// metres up the beach, its deck 1.3 m up and railed, a cabin at its back with
+// an orange WIND4FUN board on top; south-west of it the station's tent, grey
+// mesh walls under a salmon-and-white roof bearing the round logo, an orange
+// panel at its end; inland four wheeled steel board racks with orange end
+// panels; two feather flags, boards on the sand towards the water, a shower
+// post. Its red RIB lies at the water's edge.
 function addWind4FunLookout(kit, spot, random) {
-  // Local +a runs inland, away from the sea; +b along the shore to the north-east.
-  const [x0, z0] = lookoutsAt(spot).wind4fun, yaw = shoreYaw(spot, z0) + Math.PI / 2, y = spot.heightAt(x0, z0) - 0.1;
-  const at = (a, b) => local(x0, z0, yaw, a, b), POST = "#6e6964", TIMBER = "#8b8681", BOARD = "#9a948c";
-  // The deck on its stilts, with its rail and a bench along the back.
-  for (let a = -4; a <= 2; a += 2) for (const b of [-1.15, 1.15]) addShape(kit, new BoxGeometry(0.16, 2.6, 0.16), POST, ...at(a, b), y + 1.3, { yaw });
-  addShape(kit, new BoxGeometry(6.4, 0.1, 2.5), BOARD, ...at(-1, 0), y + 1.5, { yaw });
-  for (const h of [2.05, 2.5]) {
-    addShape(kit, new BoxGeometry(6.4, 0.09, 0.07), TIMBER, ...at(-1, 1.2), y + h, { yaw });
-    addShape(kit, new BoxGeometry(0.07, 0.09, 2.4), TIMBER, ...at(-4.15, 0), y + h, { yaw });
+  const { at, yaw, y } = lookoutFrame(spot, "wind4fun"), TIMBER = "#7a5a3c", DARK = "#5e4630", STEEL = "#8a8f94", ORANGE = "#f08a24";
+  // The lookout: the deck on its posts, its rails, the cabin, the board.
+  for (const a of [-1.6, 0, 1.6]) for (const b of [-1.4, 1.4]) addShape(kit, new BoxGeometry(0.16, 1.3, 0.16), DARK, ...at(a, b), y + 0.65, { yaw });
+  addShape(kit, new BoxGeometry(3.4, 0.12, 3), TIMBER, ...at(0, 0), y + 1.3, { yaw });
+  for (const [a, b, w, d] of [[0, 1.45, 3.4, 0.08], [-1.65, 0.7, 0.08, 1.5], [1.65, 0.7, 0.08, 1.5]]) addShape(kit, new BoxGeometry(w, 0.9, d), TIMBER, ...at(a, b), y + 1.8, { yaw });
+  for (const [a, b] of [[-1.1, -1.4], [1.1, -1.4], [-1.1, -0.1], [1.1, -0.1]]) addShape(kit, new BoxGeometry(0.12, 2.4, 0.12), DARK, ...at(a, b), y + 2.5, { yaw });
+  for (const [a, b, w, d] of [[0, -1.45, 2.3, 0.08], [-1.15, -0.75, 0.08, 1.4], [1.15, -0.75, 0.08, 1.4]]) addShape(kit, new BoxGeometry(w, 1.1, d), TIMBER, ...at(a, b), y + 1.95, { yaw });
+  addShape(kit, new BoxGeometry(2.6, 0.12, 1.8), DARK, ...at(0, -0.75), y + 3.75, { yaw });
+  addShape(kit, new BoxGeometry(2, 0.6, 0.06), ORANGE, ...at(0, -0.02), y + 3.35, { yaw });
+  for (let k = 0; k < 5; k++) addShape(kit, new BoxGeometry(0.6, 0.05, 0.25), DARK, ...at(2.05, 0.5), y + 0.25 + k * 0.25, { yaw });
+  for (let k = 0; k < 4; k++) addShape(kit, new BoxGeometry(0.5, 0.35, 0.4), pick(["#e8412d", ORANGE, "#2f7fd0", "#f2c230"], random), ...at(-1.2 + k * 0.8, 1.9), y + 0.28, { yaw });
+  // The tent: grey mesh walls, a salmon-and-white roof, the orange end panel.
+  const [tx, tz] = at(-22, -10), ty = spot.heightAt(tx, tz) - 0.05;
+  addShape(kit, new BoxGeometry(7.2, 2.3, 6.2), "#8e9399", tx, tz, ty + 1.15, { yaw });
+  addShape(kit, gableRoof(6.8, 7.8, 2.3, 4.3), "#f3c4b6", tx, tz, ty, { yaw: yaw + Math.PI / 2 });
+  addShape(kit, new BoxGeometry(7.9, 0.12, 0.12), "#f6f6f2", ...at(-22, -10), ty + 4.32, { yaw });
+  for (const b of [-13.4, -6.6]) addShape(kit, new BoxGeometry(7.9, 0.1, 0.1), "#f6f6f2", ...at(-22, b), ty + 2.32, { yaw });
+  addShape(kit, new BoxGeometry(0.08, 1.6, 3), ORANGE, ...at(-25.65, -10), ty + 1.3, { yaw });
+  // The four board racks on their wheels, boards on their shelves.
+  for (const [a, b, turn] of W4F_RACKS) {
+    const ry = spot.heightAt(...at(a, b)), r = yaw + turn, on = (da, db) => local(...at(a, b), r, da, db);
+    for (const [da, db] of [[-1.8, -0.75], [1.8, -0.75], [-1.8, 0.75], [1.8, 0.75]]) {
+      addShape(kit, new BoxGeometry(0.06, 1.7, 0.06), STEEL, ...on(da, db), ry + 1.15, { yaw: r });
+      addShape(kit, new CylinderGeometry(0.15, 0.15, 0.1, 10), "#1d1f22", ...on(da, db * 1.08), ry + 0.15, { yaw: r, pitch: Math.PI / 2 });
+    }
+    for (const h of [0.35, 0.9, 1.45]) {
+      addShape(kit, new BoxGeometry(3.7, 0.05, 1.55), STEEL, ...on(0, 0), ry + h, { yaw: r });
+      for (const db of [-0.38, 0.38]) addBoard(kit, ...on(0, db), ry + h + 0.02, r, pick(BOARDS, random), { fin: false });
+    }
+    for (const da of [-1.86, 1.86]) addShape(kit, new BoxGeometry(0.05, 1.2, 1.6), ORANGE, ...on(da, 0), ry + 1.25, { yaw: r });
   }
-  addShape(kit, new BoxGeometry(3, 0.08, 0.4), TIMBER, ...at(-2, -0.9), y + 1.95, { yaw });
-  // The watch box on its own posts, and the ladder up from the deck.
-  for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) addShape(kit, new BoxGeometry(0.16, 4.4, 0.16), POST, ...at(3.3 + a, b), y + 2.2, { yaw });
-  addShape(kit, new BoxGeometry(2.1, 0.1, 2.1), BOARD, ...at(3.3, 0), y + 2.6, { yaw });
-  for (const [a, b, w, d] of [[0, 1.02, 2.1, 0.06], [1.02, 0, 0.06, 2.1], [0, -1.02, 2.1, 0.06]]) addShape(kit, new BoxGeometry(w, 0.95, d), TIMBER, ...at(3.3 + a, b), y + 3.1, { yaw });
-  addShape(kit, new BoxGeometry(2.6, 0.1, 2.6), TIMBER, ...at(3.3, 0), y + 4.45, { yaw, roll: 0.05 });
-  for (let k = 0; k < 4; k++) addShape(kit, new BoxGeometry(0.06, 0.05, 0.7), TIMBER, ...at(2.2, 0), y + 1.75 + k * 0.27, { yaw });
-  // Its red RIB at the water's edge, and red flags along the beach.
-  const ribZ = z0 - 6, ribX = eastEdge(spot, ribZ) - 2;
+  // Feather flags, boards on the sand, the shower post, a box.
+  for (const [a, colour] of [[-9, "#c96f3a"], [-10.6, "#7a4a2a"]]) addFeatherFlag(kit, ...at(a, 2), spot.heightAt(...at(a, 2)), colour, WIND);
+  for (let k = 0; k < 9; k++) {
+    const [bx, bz] = at(-8 + random() * 14, 5 + random() * 12);
+    addBoard(kit, bx, bz, spot.heightAt(bx, bz), yaw + (random() - 0.5) * 0.8, pick(BOARDS, random));
+  }
+  const [sx, sz] = at(-6, -18);
+  addShape(kit, new CylinderGeometry(0.06, 0.08, 2.3, 8), "#c9cdd1", sx, sz, spot.heightAt(sx, sz) + 1.15);
+  addShape(kit, new BoxGeometry(0.3, 0.06, 0.3), "#c9cdd1", sx, sz, spot.heightAt(sx, sz) + 2.3);
+  const [kx, kz] = at(-8, -26);
+  addShape(kit, new BoxGeometry(1, 0.6, 0.8), TIMBER, kx, kz, spot.heightAt(kx, kz) + 0.3, { yaw });
+  // Its red RIB at the water's edge.
+  const ribZ = lookoutsAt(spot).wind4fun[1] - 6, ribX = eastEdge(spot, ribZ) - 2;
   addRib(kit, ribX, ribZ, "#d8352c", spot.heightAt(ribX, ribZ) + 0.1);
-  for (const b of [-8, -11, -14]) {
-    const [fx, fz] = at(3, b);
-    addFlag(kit, fx, fz, spot.heightAt(fx, fz), 6, "#d23a3a", null, random);
+}
+
+// Wind4Fun's board racks: [a, b] in its lookout's frame, and each one's turn.
+const W4F_RACKS = [[9, -16, 0.35], [15, -14, 0.25], [10, -22, 0.3], [17, -21, 0.2]];
+
+function drawSurfWithUs(ctx, w, h) {
+  ctx.fillStyle = "#283248";
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(h * 0.6, h * 0.5, h * 0.34, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#1f7fc4";
+  ctx.lineWidth = h * 0.09;
+  ctx.beginPath();
+  ctx.arc(h * 0.6, h * 0.62, h * 0.2, Math.PI * 1.1, Math.PI * 1.95);
+  ctx.stroke();
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  fitFont(ctx, "SURF WITH US", w - h * 1.3, Math.round(h * 0.5), '"Arial Black", Arial, sans-serif');
+  ctx.fillText("SURF WITH US", h * 1.05 + (w - h * 1.05) / 2, h * 0.53);
+}
+
+function drawWind4Fun(ctx, w, h) {
+  ctx.fillStyle = "#f08a24";
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#1c1c1c";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  fitFont(ctx, "WIND4FUN", w * 0.92, Math.round(h * 0.62), '"Arial Black", Arial, sans-serif', "bold italic");
+  ctx.fillText("WIND4FUN", w / 2, h * 0.55);
+}
+
+function drawWind4FunLogo(ctx, w, h) {
+  ctx.clearRect(0, 0, w, h);
+  const r = Math.min(w, h) / 2;
+  ctx.fillStyle = "#d8352c";
+  ctx.beginPath();
+  ctx.arc(w / 2, h / 2, r * 0.98, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#f6f6f2";
+  ctx.beginPath();
+  ctx.arc(w / 2, h / 2, r * 0.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#1c1c1c";
+  ctx.font = `bold ${Math.round(r * 0.36)}px "Arial Black", Arial, sans-serif`;
+  ctx.fillText("WIND", w / 2, h / 2 - r * 0.38);
+  ctx.fillText("FUN", w / 2, h / 2 + r * 0.42);
+  ctx.fillStyle = "#d8352c";
+  ctx.font = `bold ${Math.round(r * 0.5)}px "Arial Black", Arial, sans-serif`;
+  ctx.fillText("4", w / 2, h / 2 + r * 0.02);
+}
+
+function drawRRD(ctx, w, h) {
+  ctx.fillStyle = "#f08a24";
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#1c1c1c";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  fitFont(ctx, "RRD", w * 0.85, Math.round(h * 0.45), '"Arial Black", Arial, sans-serif', "bold italic");
+  ctx.fillText("RRD", w / 2, h / 2);
+}
+
+// The lookouts' and the tavernas' painted signs (realworld/signs.js).
+export function signs(spot) {
+  const out = [];
+  const pc = lookoutFrame(spot, "prasonisiCenter");
+  for (const [b, turn] of [[1.46, 0], [-1.46, Math.PI]]) {
+    const [bx, bz] = pc.at(0.4, b);
+    out.push({ at: [bx, pc.y + 2.75, bz], yaw: pc.yaw + turn, width: 5.6, height: 0.75, draw: drawSurfWithUs });
   }
+  const [cx, cz] = pc.at(-15, -0.12), cy = spot.heightAt(...pc.at(-15, 1));
+  out.push({ at: [cx, cy + 1.3, cz], yaw: pc.yaw + Math.PI, width: 2.5, height: 1.1, draw: drawSurfWithUs });
+  const w4f = lookoutFrame(spot, "wind4fun"), [wx, wz] = w4f.at(0, 0.02);
+  out.push({ at: [wx, w4f.y + 3.35, wz], yaw: w4f.yaw, width: 1.95, height: 0.56, draw: drawWind4Fun });
+  const [tx, tz] = w4f.at(-22, -10), ty = spot.heightAt(tx, tz) - 0.05, [lx, lz] = w4f.at(-22, -8.3);
+  out.push({ at: [lx, ty + 3.35, lz], yaw: w4f.yaw, pitch: Math.atan2(2, 3.4) - Math.PI / 2, width: 2.8, height: 2.8, draw: drawWind4FunLogo, cutout: true });
+  const [ex, ez] = w4f.at(-25.7, -10);
+  out.push({ at: [ex, ty + 1.3, ez], yaw: w4f.yaw - Math.PI / 2, width: 2.9, height: 1.5, draw: drawWind4Fun });
+  for (const [a, b, turn] of W4F_RACKS) {
+    const r = w4f.yaw + turn, ry = spot.heightAt(...w4f.at(a, b));
+    for (const side of [-1, 1]) {
+      const [px, pz] = local(...w4f.at(a, b), r, side * 1.89, 0);
+      out.push({ at: [px, ry + 1.25, pz], yaw: r + side * Math.PI / 2, width: 1.5, height: 1.1, draw: drawRRD });
+    }
+  }
+  return [...out, ...tavernaSigns(spot)];
 }
 
 export function landmarks(kit, spot) {
@@ -581,5 +714,6 @@ export function landmarks(kit, spot) {
   }
   addPrasonisiCenterLookout(kit, spot, random);
   addWind4FunLookout(kit, spot, random);
+  addTavernas(kit, spot, random);
   addLighthouse(kit, spot);
 }
