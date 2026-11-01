@@ -87,7 +87,8 @@ const CHOP = "float chop(vec2 p){vec2 q=p-vec2(uTime*2.4,0.);return (noise(q*vec
 // its lightness between uSandFloor's two values. Inside
 // the reef the water is sheltered, and so is water in the lee of land, by
 // how short its fetch is (spotLee); young waves there hardly break near the
-// land and break more as the fetch grows.
+// land and break more as the fetch grows. A wind patch's jet (uPatch) ruffles
+// and whitens the water through the lee all the same.
 const SHALLOWS = `
  float coast=step(1.,uShore.z);
  float off=shoreOff(p);
@@ -102,7 +103,10 @@ const SHALLOWS = `
  col=mix(col,mix(uSeagrass,uShallow,sand)*(.94+.12*n),spot.w*(1.-smoothstep(1.5,7.,spotDepth)));
  shelter=max(shelter,spot.w*uBar.w*(1.-smoothstep(3.,8.,spotDepth)));
  shelter=max(shelter,spot.w*(1.-sqrt(spotLee(p).x)));
- float young=mix(.08,1.,smoothstep(150.,2000.,spotFetch(p)));`;
+ float young=mix(.08,1.,smoothstep(150.,2000.,spotFetch(p)));
+ float jet=uPatchGain>0.?1.-smoothstep(.4,1.,length(vec2((p.x-uPatch.x)/(p.x>uPatch.x?uPatch.w:uPatch.z),(p.y-uPatch.y)/uPatch.z))):0.;
+ shelter*=1.-.6*jet;
+ young=max(young,.7*jet);`;
 
 // The local wind, gusts included, drives the chop and the whitecaps. uZone is
 // the heat's wind zones (zones.js zoneKnots, which the rider feels): uZone.x
@@ -112,7 +116,7 @@ const SHALLOWS = `
 // and downwind (w) it reaches; uPatchGain its knots.
 const LOCAL_WIND = `
  float zoneKnots=coast*(uZone.x*smoothstep(uZone.y,uZone.y+uZone.z+1.,off)-uZone.w*(1.-smoothstep(0.,90.,off)));
- zoneKnots+=uPatchGain*(1.-smoothstep(.4,1.,length(vec2((p.x-uPatch.x)/(p.x>uPatch.x?uPatch.w:uPatch.z),(p.y-uPatch.y)/uPatch.z))));
+ zoneKnots+=uPatchGain*jet;
  gust=clamp(gust+max(0.,zoneKnots)/9.*mottle,0.,1.);
  float localKnots=uKnots+(uGustKnots>0.?shape*extra:0.)+zoneKnots;
  float choppy=uChop*(1.-shelter)*clamp((localKnots-8.)/12.,0.,1.8)*(1.-smoothstep(150.,600.,dist));`;

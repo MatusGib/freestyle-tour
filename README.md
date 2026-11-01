@@ -35,8 +35,9 @@ select mods. The default set is in `mods/enabled.json`.
   features; the 2014 event challenge uses its reported wind.
 - **Prasonisi, Rhodes:** the meltemi spot at Rhodes' southern tip, built from
   map data the true way round: the sandbar to the islet and its lighthouse,
-  flat water in the sandbar's lee with waves breaking on the Aegean side, the
-  windsurf centres' beach, camper vans, phrygana and junipers on bare hills.
+  flat water in the sandbar's lee with waves breaking on the Aegean side, a
+  stronger jet by the islet, the windsurf centres' beach as the photos show
+  it, windsurfers out on the bay, phrygana and junipers on bare hills.
   It takes Podersdorf's place in the venue chooser.
 - **Wipeout fish:** six colourful fish circle and leap over a fallen rider and
   sail, splash, then dart away and dive as the rider recovers.

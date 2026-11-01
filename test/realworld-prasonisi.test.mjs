@@ -71,3 +71,29 @@ test("the site's landmarks, plants and buildings build on the real ground", () =
   const before = buildBuildings(spot).geometry.getAttribute("position").count, after = buildBuildings(spot, site.buildings).geometry.getAttribute("position").count;
   assert.ok(after < before, "the lighthouse's footprints are left to the site");
 });
+
+test("from the aerial imagery: cars only in the car parks, the bases 200 m apart, the tower and sunbeds by the water", () => {
+  const inside = (ring, x, z) => {
+    let hit = false;
+    for (let k = 0, j = ring.length - 1; k < ring.length; j = k++) if ((ring[k][1] > z) !== (ring[j][1] > z) && x < ((ring[j][0] - ring[k][0]) * (z - ring[k][1])) / (ring[j][1] - ring[k][1]) + ring[k][0]) hit = !hit;
+    return hit;
+  };
+  const vehicles = site.vehicleSpots(spot);
+  assert.ok(vehicles.length > 30 && vehicles.length < 160, `${vehicles.length} vehicles`);
+  for (const { x, z } of vehicles) assert.ok(spot.features.parking.some((ring) => inside(ring, x, z)), `${x}, ${z} is in a car park`);
+  const [[ax, az], [bx, bz]] = [site.PROCENTER.from, site.PROCENTER.to];
+  const between = Math.hypot((ax + bx) / 2 - site.STATION[0], (az + bz) / 2 - site.STATION[1]);
+  assert.ok(between > 180 && between < 240, `ProCenter to the second station: ${between} m`);
+  const [tx, tz] = site.towerAt(spot);
+  assert.ok(spot.isLand(tx, tz) && !spot.isLand(tx + 25, tz), "the spotting tower stands on the sand, within 25 m of the water");
+});
+
+test("the windsurfers out on the bay sail open water, well clear of the heat", () => {
+  const lanes = site.sailors(spot);
+  assert.ok(lanes.reduce((n, l) => n + l.count, 0) >= 12);
+  for (const { from: [ax, az], to: [bx, bz] } of lanes) for (let t = 0; t <= 1; t += 0.05) {
+    const x = ax + (bx - ax) * t, z = az + (bz - az) * t;
+    for (let k = 0; k < 16; k++) assert.ok(!spot.isLand(x + Math.cos(k * 0.39) * 25, z + Math.sin(k * 0.39) * 25), `${x}, ${z} is 25 m off land`);
+    assert.ok(Math.abs(x) > 110 + 80 || Math.abs(z) > 253 + 40, `${x}, ${z} keeps clear of the course and the AI's overshoot`);
+  }
+});

@@ -9,9 +9,15 @@ proposal details and status, see the [roadmap](docs/roadmap.md).
   from map, elevation and satellite data with the meltemi blowing across the
   sandbar. The course sits in the flat-water bay off the windsurf centres'
   beach; the bay's water stays flat because the sandbar shelters it, while
-  waves break on the Aegean side. Adds the islet and its 1890 lighthouse,
-  camper vans on the sandbar, sunbeds and parasols, and generated phrygana,
-  junipers and tamarisks. It draws about as many triangles as Sorobon.
+  waves break on the Aegean side. The beach is laid out from aerial imagery
+  and the centres' own photos: ProCenter's shed row with its flags, rigs and
+  board shelves, its sunbeds, spotting tower and rescue RIB, a second
+  station 200 m along the beach, cars only in the mapped car parks, and
+  windsurfers sailing the bay clear of the heat. The meltemi blows 6 kt
+  harder where it jets past the islet. The rider now stops with board and
+  rig clear of the sand at any real-world shore. Adds the islet and its 1890
+  lighthouse and generated phrygana, junipers and tamarisks; a frame draws
+  about as many triangles as Sorobon in a quarter of the draw calls.
 
 ## 2026-10-31
 
