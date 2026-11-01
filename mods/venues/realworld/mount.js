@@ -12,6 +12,7 @@ import { buildBuildings } from "./buildings.js";
 import { buildPlants } from "./plants.js";
 import { decodeInBrowser, loadSpot, waterMap } from "./spot.js";
 import { buildSailors } from "./sailors.js";
+import { buildSigns } from "./signs.js";
 import { buildSurf } from "./surf.js";
 import { buildTerrain, ringGeometry } from "./terrain.js";
 
@@ -20,7 +21,8 @@ const FAR = 14000; // metres the camera sees at a spot; the game's is 1800
 const DETAIL = { sand: "sand", coralRubble: "coral-rubble", scrubSoil: "scrub-soil", rock: "rock", mangroveMud: "mangrove-mud" };
 // A site may also bring its own look: textures (ground type → file, over
 // DETAIL), ground ({ sand }), flora, buildings, surfLines(spot), where its
-// waves break when it has no reef, and sailors(spot), windsurfers' lanes.
+// waves break when it has no reef, sailors(spot), windsurfers' lanes, and
+// signs(spot), its painted signs (signs.js).
 const SITES = { "sorobon-bonaire": () => import("../sites/sorobon-bonaire.js"), "prasonisi-rhodes": () => import("../sites/prasonisi-rhodes.js") };
 
 const fetchBytes = async (url) => {
@@ -128,6 +130,7 @@ async function build(game, venue, log, loading) {
     group.name = `spot:${venue.id}`;
     group.add(buildTerrain(spot, detail, site?.ground), buildPlants(spot, { flora: site?.flora }), buildBuildings(spot, site?.buildings), buildSurf(spot, game.water.uniforms.uTime, surf));
     if (site?.sailors) group.add(buildSailors(site.sailors(spot), game.water.uniforms.uTime));
+    if (site?.signs) group.add(buildSigns(site.signs(spot)));
     if (site) {
       const { kit, finish } = landmarkKit();
       site.landmarks(kit, spot);
