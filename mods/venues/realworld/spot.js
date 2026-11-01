@@ -70,6 +70,12 @@ export async function loadSpot(id, { fetchBytes, decodeImage }) {
     isLand,
     isMangrove: (x, z) => (landAt(x, z) & 2) !== 0,
     heightAt,
+    // The satellite's colour, [r, g, b] 0–255, from the detail picture, else the horizon's.
+    colourAt: (x, z) => {
+      const [img, half] = inDetail(x, z) ? [ground, detail.half] : [horizonColour, far.half];
+      const [u, v] = pixel(img, half, x, z);
+      return [0, 1, 2].map((c) => bilinear(img.data, img.width, img.height, u, v, img.channels, c));
+    },
     depthAt: (x, z) => (isLand(x, z) ? 0 : Math.max(rawDepth(x, z), inDetail(x, z) ? LAGOON_FLOOR : 0)),
     groundAt: (x, z) => {
       if (!inDetail(x, z)) return heightAt(x, z) > 0 ? manifest.ground.scrubSoil : manifest.ground.water;

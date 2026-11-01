@@ -79,12 +79,22 @@ function tamarisk(random, far) {
   return parts;
 }
 
-// Densities tuned by eye against the satellite's dotted hills; the kinds'
-// ground codes are spot.json's (3 the rocky shore, 4 scrub soil, 5 rock).
+// How much of the ground is green scrub, 0–1, from the satellite's colour:
+// at 10 m a pixel can't show a bush, but the slopes thick with junipers and
+// lentisk read darker (lightness under about 90) than bare soil and sand
+// (130–150).
+export const scrubCover = (spot, x, z) => {
+  const [r, g, b] = spot.colourAt(x, z);
+  return Math.min(1, Math.max(0, (135 - (0.3 * r + 0.59 * g + 0.11 * b)) / 45));
+};
+
+// Densities tuned by eye against the satellite's dotted hills and photos of
+// the slopes behind the beach; the kinds' ground codes are spot.json's (3 the
+// rocky shore, 4 scrub soil, 5 rock).
 export const AEGEAN = {
   kinds: { phrygana, juniper, tamarisk },
   rules: {
     phrygana: { ground: [3, 4, 5], perHectare: 80 },
-    juniper: { ground: [4], perHectare: 6, downwind: true },
+    juniper: { ground: [4, 5], perHectare: 45, downwind: true, density: scrubCover },
   },
 };

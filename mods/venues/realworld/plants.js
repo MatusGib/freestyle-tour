@@ -146,6 +146,7 @@ export function buildPlants(spot, { radius = 1500, seed = 2026, flora = { kinds:
   const { drySand, mangrove: mangroveGround } = spot.manifest.ground;
   const ground = {
     heightAt: spot.heightAt,
+    colourAt: spot.colourAt,
     groundAt: (x, z) => {
       if (spot.isMangrove(x, z)) return mangroveGround;
       const i = Math.floor((x + half) / cell), j = Math.floor((z + half) / cell);

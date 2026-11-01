@@ -34,13 +34,15 @@ test("a spot's own plants grow by its rules on its ground", () => {
   const spot = {
     manifest: { detail: { half: 200 }, ground: { drySand: 1, mangrove: 6 } },
     features: { beaches: [], buildings: [] },
-    heightAt: () => 5, isMangrove: () => false,
+    heightAt: () => 5, isMangrove: () => false, colourAt: (x) => (x < 0 ? [70, 80, 50] : [150, 135, 100]),
     groundAt: (x) => (x < 0 ? 4 : 5),
   };
   const group = buildPlants(spot, { radius: 150, flora: AEGEAN });
   const counts = Object.fromEntries(Object.keys(HEIGHTS).map((k) => [k, 0]));
   for (const mesh of group.children) counts[mesh.userData.kind] += mesh.count;
   assert.ok(counts.phrygana > 100, `phrygana: ${counts.phrygana}`);
-  assert.ok(counts.juniper > 0 && counts.juniper < counts.phrygana / 5, `juniper: ${counts.juniper}`);
+  assert.ok(counts.juniper > 50 && counts.juniper < counts.phrygana, `juniper: ${counts.juniper}`);
+  const juniperX = group.children.filter((m) => m.userData.kind === "juniper").flatMap((m) => Array.from({ length: m.count }, (_, k) => m.instanceMatrix.array[k * 16 + 12]));
+  assert.ok(juniperX.every((x) => x < 0), "junipers grow where the satellite reads dark scrub, not on the light bare ground");
   assert.equal(counts.tamarisk, 0, "tamarisks are placed by the site, not scattered");
 });
