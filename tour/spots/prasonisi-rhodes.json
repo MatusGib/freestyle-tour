@@ -6,7 +6,7 @@
   "detail": 2500,
   "horizon": 12500,
   "island": { "south": 35.86, "west": 27.68, "north": 36.47, "east": 28.26 },
-  "beach": { "top": 0.6, "slope": 0.03, "width": 80 },
+  "beach": { "top": 0.6, "slope": 0.03, "width": 80, "mappedOnly": true },
   "beachesAreLand": true,
   "layer": "s2cloudless-2024",
   "calibration": [

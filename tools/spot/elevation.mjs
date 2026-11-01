@@ -30,10 +30,12 @@ const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a
 // The height at signed distance `shore` from the shoreline (metres, land
 // positive), given the coarse elevation there and, under water, the depth.
 // beach: { top: height at the water's edge, slope, width: where the profile
-// hands over to the elevation }.
-export function beachHeight(shore, elevation, beach, depth = 0) {
+// hands over to the elevation }. A shore that isn't a beach (onBeach false:
+// rock, cliffs) rises to its elevation within RISE metres instead.
+const RISE = 12;
+export function beachHeight(shore, elevation, beach, depth = 0, onBeach = true) {
   if (shore < 0) return -depth;
   const profile = beach.top + beach.slope * shore;
-  const blend = smooth(beach.width * 0.5, beach.width * 1.5, shore);
+  const blend = onBeach ? smooth(beach.width * 0.5, beach.width * 1.5, shore) : smooth(0, RISE, shore);
   return Math.round(((1 - blend) * profile + blend * Math.max(elevation, profile)) * 10) / 10;
 }
