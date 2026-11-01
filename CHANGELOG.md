@@ -62,4 +62,3 @@ proposal details and status, see the [roadmap](docs/roadmap.md).
 ## Planned
 
 - Additional tricks and a career mode.
-A
