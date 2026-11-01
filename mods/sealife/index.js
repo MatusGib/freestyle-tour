@@ -5,7 +5,7 @@
 // and where; this file builds the models, moves them each frame and makes the
 // rider wipe out. Otherwise nothing is drawn.
 import {
-  CircleGeometry, Group, IcosahedronGeometry, InstancedMesh, Matrix4, Mesh, MeshStandardMaterial, Quaternion, Vector3,
+  Group, IcosahedronGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Quaternion, Vector3,
 } from "../venues/lib/three.core.min.js";
 import { bakedMaterial, makeDroplets } from "../lib/shapes.js";
 import { droplet } from "../lib/splash.js";
@@ -14,7 +14,7 @@ import {
   DOLPHINS, LAND, SPRAY, START, WHALE_BODY, WHITE, aim, crown, dolphinPose, dolphinSplashes, foam, nextSea, sense, sprayDrop,
   touchesWhale, whaleSpot, whiteWater,
 } from "./sealife.js";
-import { makeDolphin, makeSheet, makeWhale } from "./model.js";
+import { makeDolphin, makeFoam, makeSheet, makeWhale } from "./model.js";
 
 const DROPS = 8; // in a dolphin's splash
 const DOLPHIN_SPLASHES = 6; // in the air at once, at most
@@ -49,7 +49,7 @@ export default {
       const heaps = new InstancedMesh(new IcosahedronGeometry(1, 2), water({ opacity: .8, roughness: .7 }), WHITE);
       spray.frustumCulled = heaps.frustumCulled = false;
       const sheet = makeSheet();
-      const foamPatch = new Mesh(new CircleGeometry(1, 48).rotateX(-Math.PI / 2), water({ roughness: .9, polygonOffset: true, polygonOffsetFactor: -2 }));
+      const foamPatch = makeFoam();
       sealife.add(...dolphins.map(({ animal }) => animal), whale.animal, drops, spray, heaps, sheet, foamPatch);
       game.scene.add(sealife);
 

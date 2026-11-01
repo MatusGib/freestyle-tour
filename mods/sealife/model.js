@@ -107,3 +107,30 @@ export function makeSheet() {
   geometry.computeVertexNormals();
   return new Mesh(geometry, new MeshStandardMaterial({ color: "#f1f7f9", vertexColors: true, transparent: true, side: DoubleSide, depthWrite: false, roughness: .3 }));
 }
+
+// The foam a belly flop leaves on the water: a disc 1 across, thick in the
+// middle and patchy, thinning to nothing at a ragged edge.
+export function makeFoam() {
+  const around = 48, rings = 5, positions = [0, 0, 0], colours = [1, 1, 1, .8], index = [];
+  for (let ring = 1; ring <= rings; ring++) {
+    for (let j = 0; j < around; j++) {
+      const angle = j / around * Math.PI * 2, edge = 1 + .12 * Math.sin(7 * angle + 1) * Math.sin(3 * angle);
+      const r = ring / rings * edge, patch = .6 + .4 * Math.abs(Math.sin(9 * angle + ring * 2.3) * Math.cos(4 * angle - ring));
+      positions.push(Math.cos(angle) * r, 0, Math.sin(angle) * r);
+      colours.push(1, 1, 1, ring === rings ? 0 : .8 * (1 - (ring / rings) ** 2) * patch);
+    }
+  }
+  const at = (ring, j) => ring === 0 ? 0 : 1 + (ring - 1) * around + (j % around);
+  for (let j = 0; j < around; j++) {
+    index.push(0, at(1, j + 1), at(1, j));
+    for (let ring = 1; ring < rings; ring++) index.push(at(ring, j), at(ring, j + 1), at(ring + 1, j + 1), at(ring, j), at(ring + 1, j + 1), at(ring + 1, j));
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new Float32BufferAttribute(colours, 4));
+  geometry.setIndex(index);
+  geometry.computeVertexNormals();
+  return new Mesh(geometry, new MeshStandardMaterial({
+    color: "#f4f8f8", vertexColors: true, transparent: true, depthWrite: false, roughness: .9, side: DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
+  }));
+}
