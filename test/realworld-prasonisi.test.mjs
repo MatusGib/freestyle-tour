@@ -8,6 +8,7 @@ import { buildBuildings } from "../mods/venues/realworld/buildings.js";
 import { buildPlants } from "../mods/venues/realworld/plants.js";
 import { loadSpot, waterMap } from "../mods/venues/realworld/spot.js";
 import * as site from "../mods/venues/sites/prasonisi-rhodes.js";
+import { TAVERNAS } from "../mods/venues/sites/prasonisi-tavernas.js";
 import { decodePng } from "../tools/spot/png.mjs";
 import { ROOT } from "./helpers.mjs";
 
@@ -96,4 +97,38 @@ test("the windsurfers out on the bay sail open water, well clear of the heat", (
     for (let k = 0; k < 16; k++) assert.ok(!spot.isLand(x + Math.cos(k * 0.39) * 25, z + Math.sin(k * 0.39) * 25), `${x}, ${z} is 25 m off land`);
     assert.ok(Math.abs(x) > 110 + 80 || Math.abs(z) > 253 + 40, `${x}, ${z} keeps clear of the course and the AI's overshoot`);
   }
+});
+
+test("from Street View: Prasonisi Center's lookout by its gazebos, Wind4Fun's 150-200 m further south-west, both on the sand by the water", () => {
+  const { prasonisiCenter, wind4fun } = site.lookoutsAt(spot);
+  const nearWater = ([x, z]) => spot.isLand(x, z) && spot.heightAt(x, z) > 0 && [...Array(16)].some((_, k) => !spot.isLand(x + Math.cos(k * 0.39) * 40, z + Math.sin(k * 0.39) * 40));
+  assert.ok(nearWater(prasonisiCenter) && nearWater(wind4fun), "both stand on the sand within 40 m of the water");
+  assert.ok(Math.hypot(prasonisiCenter[0] - site.STATION[0], prasonisiCenter[1] - site.STATION[1]) < 60, "Prasonisi Center's stands by its gazebo station");
+  const apart = Math.hypot(wind4fun[0] - prasonisiCenter[0], wind4fun[1] - prasonisiCenter[1]);
+  assert.ok(apart > 140 && apart < 220 && wind4fun[1] > prasonisiCenter[1], `Wind4Fun's is ${apart} m further south-west`);
+  const [tx, tz] = site.towerAt(spot);
+  assert.ok(Math.hypot(tx - prasonisiCenter[0], tz - prasonisiCenter[1]) > 150, "ProCenter's tower is its own, further north-east");
+});
+
+test("the three tavernas stand on land where the aerial shows them, in place of the mapped boxes", () => {
+  const near = (b, [x, z, r]) => b.footprint.every(([a, c]) => Math.hypot(a - x, c - z) <= r);
+  for (const [name, { at: [x, z], replaces }] of Object.entries(TAVERNAS)) {
+    assert.ok(spot.isLand(x, z) && spot.heightAt(x, z) > 1, `${name} stands on land`);
+    assert.equal(spot.features.buildings.filter((b) => near(b, replaces)).length, 1, `${name} replaces exactly one mapped building`);
+  }
+  assert.ok(Math.hypot(TAVERNAS.zanetos.at[0] - TAVERNAS.oasis.at[0], TAVERNAS.zanetos.at[1] - TAVERNAS.oasis.at[1]) < 90, "side by side on the road");
+});
+
+test("every painted sign draws without error and stands by what it names", () => {
+  const ctx = new Proxy({}, { get: (target, key) => (key in target ? target[key] : key === "createLinearGradient" ? () => ({ addColorStop() {} }) : () => {}), set: (target, key, value) => ((target[key] = value), true) });
+  const signs = site.signs(spot);
+  assert.ok(signs.length >= 15, `${signs.length} signs`);
+  for (const sign of signs) {
+    assert.doesNotThrow(() => sign.draw(ctx, 256, 64));
+    assert.ok(sign.width > 0.4 && sign.height > 0.4 && sign.at.every(Number.isFinite));
+  }
+  const nearest = (point) => Math.min(...signs.map(({ at: [x, , z] }) => Math.hypot(x - point[0], z - point[1])));
+  for (const { at } of Object.values(TAVERNAS)) assert.ok(nearest(at) < 25, "a sign at each taverna");
+  const { prasonisiCenter, wind4fun } = site.lookoutsAt(spot);
+  assert.ok(nearest(prasonisiCenter) < 3 && nearest(wind4fun) < 3, "a sign on each lookout");
 });
